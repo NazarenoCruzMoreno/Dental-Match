@@ -1,0 +1,20 @@
+<<<<<<< HEAD
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+const userRoutes = require('./routes/user.routes');
+app.use('/api/users', userRoutes);
+
+=======
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+const userRoutes = require('./routers/user.routes');
+app.use('/api/users', userRoutes);
+
+>>>>>>> main
+module.exports = app;
