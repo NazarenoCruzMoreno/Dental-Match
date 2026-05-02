@@ -2,13 +2,13 @@ import React from "react";
 import imagenInicio from "./assets/Foto-Pagina-Inicio-DentalMatch.jpg";
 
 const IconEstudiante = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="#3B82F6">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff">
     <path d="M12 3L1 9l11 6l9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82Z"/>
   </svg>
 );
 
 const IconPaciente = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="#3B82F6">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="#1e293b">
     <path d="M12 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 12c4.418 0 8 2 8 4.5V21H4v-2.5C4 16 7.582 14 12 14Z"/>
   </svg>
 );
@@ -44,11 +44,17 @@ export default function App() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
+        <div className="blob-animated-slow" style={styles.blobOrange1}></div>
+        <div className="blob-animated-slower" style={styles.blobBlue}></div>
+        <div className="pulse-glow-slow" style={styles.blobOrange2}></div>
+        <div className="blob-animated-slow" style={styles.blobAmber}></div>
 
-        {/* LEFT */}
+        <div style={styles.dotPatternTL}></div>
+        <div style={styles.dotPatternBR}></div>
+
         <div style={styles.left}>
           <h1 style={styles.title}>
-            Dental <span style={{ color: "#3B82F6" }}>Match</span>
+            Dental <span style={styles.titleHighlight}>Match</span>
           </h1>
 
           <div style={styles.line}></div>
@@ -63,67 +69,65 @@ export default function App() {
           </h3>
 
           <div style={styles.buttons}>
-            <button 
+            <button
               style={{
                 ...styles.primaryBtn,
-                transform: hoverEstudiante ? "translateY(-3px) scale(1.02)" : clickEstudiante ? "scale(0.95)" : "scale(1)",
-                boxShadow: hoverEstudiante ? "0 15px 35px rgba(59,130,246,0.45)" : "0 10px 25px rgba(59,130,246,0.35)"
+                transform: hoverEstudiante ? "translateY(-4px) scale(1.03)" : clickEstudiante ? "scale(0.95)" : "scale(1)",
+                boxShadow: hoverEstudiante ? "0 25px 50px rgba(59,130,246,0.5)" : "0 15px 35px rgba(59,130,246,0.35)"
               }}
               onMouseEnter={() => setHoverEstudiante(true)}
               onMouseLeave={() => setHoverEstudiante(false)}
               onClick={handleSelectEstudiante}
             >
-              <div style={{
-                ...styles.iconCircle,
-                background: hoverEstudiante ? "#bae6fd" : "#e0f2fe",
-                transform: hoverEstudiante ? "scale(1.1)" : "scale(1)",
-                transition: "all 0.3s ease"
-              }}>
+              <div style={styles.iconBg}>
                 <IconEstudiante />
               </div>
-              <span style={{ transition: "all 0.3s ease", transform: hoverEstudiante ? "translateX(4px)" : "translateX(0)" }}>Soy Estudiante</span>
-              <span style={{...styles.arrow, transform: hoverEstudiante ? "translateX(-4px) rotate(0deg)" : "rotate(0deg)" }}>→</span>
+              <span style={{
+                transition: "all 0.3s ease",
+                transform: hoverEstudiante ? "translateX(6px)" : "translateX(0)"
+              }}>Soy Estudiante</span>
+              <span style={{
+                ...styles.arrowWhite,
+                transform: hoverEstudiante ? "translateX(8px)" : "translateX(0)"
+              }}>→</span>
             </button>
 
-            <button 
+            <button
               style={{
                 ...styles.secondaryBtn,
-                transform: hoverPaciente ? "translateY(-3px) scale(1.02)" : clickPaciente ? "scale(0.95)" : "scale(1)",
-                background: hoverPaciente ? "#e2e8f0" : "#f1f5f9",
-                borderColor: hoverPaciente ? "#3B82F6" : "#e2e8f0"
+                transform: hoverPaciente ? "translateY(-4px) scale(1.03)" : clickPaciente ? "scale(0.95)" : "scale(1)",
+                boxShadow: hoverPaciente ? "0 25px 50px rgba(253,186,116,0.4)" : "0 15px 35px rgba(253,186,116,0.25)"
               }}
               onMouseEnter={() => setHoverPaciente(true)}
               onMouseLeave={() => setHoverPaciente(false)}
               onClick={handleSelectPaciente}
             >
-              <div style={{
-                ...styles.iconCircle,
-                background: hoverPaciente ? "#bae6fd" : "#e0f2fe",
-                transform: hoverPaciente ? "scale(1.1)" : "scale(1)",
-                transition: "all 0.3s ease"
-              }}>
+              <div style={styles.iconBg}>
                 <IconPaciente />
               </div>
-              <span style={{ transition: "all 0.3s ease", transform: hoverPaciente ? "translateX(4px)" : "translateX(0)" }}>Soy Paciente</span>
-              <span style={{...styles.arrowBlue, transform: hoverPaciente ? "translateX(-4px) rotate(0deg)" : "rotate(0deg)" }}>→</span>
+              <span style={{
+                transition: "all 0.3s ease",
+                transform: hoverPaciente ? "translateX(6px)" : "translateX(0)"
+              }}>Soy Paciente</span>
+              <span style={{
+                ...styles.arrowDark,
+                transform: hoverPaciente ? "translateX(8px)" : "translateX(0)"
+              }}>→</span>
             </button>
           </div>
         </div>
 
-        {/* RIGHT */}
         <div style={styles.right}>
           <div style={styles.badge}>DENTAL MATCH</div>
 
-          {/* blur fondo */}
-          <div style={styles.blur}></div>
+          <div style={styles.heroGlow}></div>
+          <div className="blob-animated-slow" style={styles.blobHero}></div>
 
-          {/* blob */}
-          <div style={styles.blob}>
-            <img src={imagenInicio} style={styles.img}/>
+          <div className="blob-animated-slow" style={styles.heroBlob}>
+            <img src={imagenInicio} style={styles.img} alt="hero"/>
           </div>
 
-          {/* glass */}
-          <div style={styles.glass}>
+          <div className="blob-animated-micro" style={styles.glass}>
             <IconCalendar />
             <div>
               <div style={styles.glassTitle}>Panel Digital</div>
@@ -145,145 +149,280 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: `
-      radial-gradient(circle at 20% 20%, rgba(59,130,246,0.08), transparent),
-      radial-gradient(circle at 80% 80%, rgba(59,130,246,0.1), transparent),
-      #f8fafc
-    `
+    background: "linear-gradient(135deg, #ffffff 0%, #eff6ff 50%, #fff7ed 100%)"
   },
 
   card: {
     width: "1200px",
-    height: "650px",
+    height: "700px",
     display: "flex",
     borderRadius: "30px",
     overflow: "hidden",
-    background: "#fff",
-    boxShadow: "0 30px 80px rgba(0,0,0,0.12)"
+    background: "rgba(255, 255, 255, 0.95)",
+    boxShadow: "0 40px 120px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.5) inset",
+    position: "relative",
+    backdropFilter: "blur(20px)"
+  },
+
+  blobOrange1: {
+    position: "absolute",
+    top: "-100px",
+    left: "100px",
+    width: "500px",
+    height: "500px",
+    background: "linear-gradient(135deg, #fdba74, #fed7aa)",
+    borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
+    filter: "blur(120px)",
+    opacity: 0.35,
+    pointerEvents: "none"
+  },
+
+  blobBlue: {
+    position: "absolute",
+    bottom: "-150px",
+    right: "50px",
+    width: "600px",
+    height: "600px",
+    background: "linear-gradient(135deg, #3b82f6, #60a5fa)",
+    borderRadius: "40% 60% 70% 30% / 40% 70% 30% 60%",
+    filter: "blur(120px)",
+    opacity: 0.35,
+    pointerEvents: "none"
+  },
+
+  blobOrange: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: "400px",
+    height: "400px",
+    background: "linear-gradient(135deg, #fed7aa, #ffedd5)",
+    borderRadius: "50%",
+    filter: "blur(100px)",
+    opacity: 0.25,
+    pointerEvents: "none",
+    transform: "translate(-50%, -50%)"
+  },
+
+  blobAmber: {
+    position: "absolute",
+    top: "30%",
+    right: "200px",
+    width: "350px",
+    height: "350px",
+    background: "linear-gradient(135deg, #fdba74, #fed7aa)",
+    borderRadius: "50% 50% 30% 70% / 40% 60% 40% 60%",
+    filter: "blur(100px)",
+    opacity: 0.3,
+    pointerEvents: "none"
+  },
+
+  dotPatternTL: {
+    position: "absolute",
+    top: "40px",
+    left: "40px",
+    width: "80px",
+    height: "80px",
+    backgroundImage: "radial-gradient(circle, rgba(59,130,246,0.15) 2px, transparent 2px)",
+    backgroundSize: "12px 12px",
+    opacity: 0.6,
+    pointerEvents: "none"
+  },
+
+  dotPatternBR: {
+    position: "absolute",
+    bottom: "40px",
+    right: "40px",
+    width: "80px",
+    height: "80px",
+    backgroundImage: "radial-gradient(circle, rgba(253,186,116,0.15) 2px, transparent 2px)",
+    backgroundSize: "12px 12px",
+    opacity: 0.6,
+    pointerEvents: "none"
   },
 
   left: {
     flex: 1.1,
-    padding: "80px 70px"
+    padding: "90px 80px",
+    position: "relative",
+    zIndex: 2
   },
 
   title: {
-    fontSize: "56px",
-    fontWeight: 800,
+    fontSize: "64px",
+    fontWeight: 900,
     margin: 0,
-    color: "#0f172a"
+    color: "#0f172a",
+    letterSpacing: "-3px",
+    lineHeight: "1.1",
+    fontFamily: "'Inter', sans-serif"
+  },
+
+  titleHighlight: {
+    color: "#2563eb",
+    fontWeight: 900,
+    textShadow: "0 2px 20px rgba(59,130,246,0.15)"
   },
 
   line: {
-    width: "60px",
-    height: "4px",
-    background: "linear-gradient(90deg,#3B82F6,#60A5FA)",
-    margin: "20px 0"
+    width: "80px",
+    height: "5px",
+    background: "linear-gradient(90deg, #3b82f6, #60a5fa, #fdba74)",
+    margin: "28px 0",
+    borderRadius: "3px"
   },
 
   desc: {
-    color: "#64748b",
-    lineHeight: "1.7",
+    color: "#475569",
+    lineHeight: "1.9",
     fontSize: "18px",
-    maxWidth: "420px",
-    marginBottom: "50px"
+    maxWidth: "460px",
+    marginBottom: "55px",
+    fontWeight: 400,
+    fontFamily: "'Inter', sans-serif"
   },
 
   question: {
-    fontWeight: 700,
-    marginBottom: "20px"
+    fontWeight: 800,
+    marginBottom: "28px",
+    fontSize: "22px",
+    color: "#1e293b",
+    fontFamily: "'Inter', sans-serif"
   },
 
   buttons: {
     display: "flex",
     flexDirection: "column",
-    gap: "20px"
+    gap: "24px",
+    maxWidth: "500px"
   },
 
   primaryBtn: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "18px 24px",
-    borderRadius: "16px",
+    padding: "22px 32px",
+    borderRadius: "20px",
     border: "none",
-    background: "linear-gradient(135deg,#3B82F6,#2563EB)",
+    background: "linear-gradient(135deg, #3b82f6, #2563eb)",
     color: "#fff",
-    fontWeight: 600,
-    fontSize: "16px",
-    boxShadow: "0 10px 25px rgba(59,130,246,0.35)",
+    fontWeight: 800,
+    fontSize: "18px",
+    boxShadow: "0 15px 35px rgba(59,130,246,0.35)",
     cursor: "pointer",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+    position: "relative",
+    overflow: "hidden",
+    fontFamily: "'Inter', sans-serif",
+    letterSpacing: "-0.5px"
   },
 
   secondaryBtn: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "18px 24px",
-    borderRadius: "16px",
-    background: "#f1f5f9",
-    border: "1px solid #e2e8f0",
-    color: "#0f172a",
-    fontWeight: 600,
-    fontSize: "16px",
+    padding: "22px 32px",
+    borderRadius: "20px",
+    border: "none",
+    background: "linear-gradient(135deg, #fed7aa, #ffedd5)",
+    color: "#1e293b",
+    fontWeight: 800,
+    fontSize: "18px",
+    boxShadow: "0 15px 35px rgba(253,186,116,0.25)",
     cursor: "pointer",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+    position: "relative",
+    overflow: "hidden",
+    fontFamily: "'Inter', sans-serif",
+    letterSpacing: "-0.5px"
   },
 
-  iconCircle: {
-    width: "36px",
-    height: "36px",
+  iconBg: {
+    width: "44px",
+    height: "44px",
     borderRadius: "50%",
-    background: "#e0f2fe",
+    background: "rgba(255,255,255,0.4)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: "12px"
+    marginRight: "14px",
+    boxShadow: "0 0 15px rgba(255,255,255,0.3)"
   },
 
-  arrow: { color: "#fff" },
-  arrowBlue: { color: "#3B82F6" },
+  arrowWhite: {
+    color: "#fff",
+    fontSize: "22px",
+    transition: "all 0.3s ease",
+    fontWeight: 700
+  },
+
+  arrowDark: {
+    color: "#1e293b",
+    fontSize: "22px",
+    transition: "all 0.3s ease",
+    fontWeight: 700
+  },
+
+  arrowBlue: {
+    color: "#3B82F6",
+    fontSize: "20px",
+    transition: "all 0.3s ease"
+  },
 
   right: {
     flex: 1,
     position: "relative",
-    background: "linear-gradient(135deg,#e0f2fe,#bfdbfe)",
+    background: "linear-gradient(135deg, rgba(219,234,254,0.9), rgba(224,242,254,0.9), rgba(255,237,213,0.7))",
+    backgroundSize: "200% 200%",
+    animation: "gradientShift 8s ease infinite",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    overflow: "visible"
   },
 
   badge: {
     position: "absolute",
-    top: "30px",
-    right: "30px",
-    background: "#0ea5e9",
+    top: "35px",
+    right: "35px",
+    background: "linear-gradient(135deg, #3b82f6, #2563eb)",
     color: "#fff",
-    padding: "8px 18px",
+    padding: "12px 24px",
     borderRadius: "999px",
-    fontSize: "12px",
-    fontWeight: 700
+    fontSize: "13px",
+    fontWeight: 900,
+    letterSpacing: "1.5px",
+    boxShadow: "0 8px 25px rgba(59,130,246,0.3)"
   },
 
-  blur: {
+  heroGlow: {
     position: "absolute",
-    width: "400px",
-    height: "400px",
-    background: "#3B82F6",
-    opacity: 0.25,
-    filter: "blur(100px)",
-    borderRadius: "50%"
+    width: "480px",
+    height: "480px",
+    background: "radial-gradient(circle, rgba(59,130,246,0.3), rgba(147,197,253,0.2), rgba(253,186,116,0.15), transparent)",
+    borderRadius: "50%",
+    pointerEvents: "none"
   },
 
-  blob: {
-    width: "320px",
-    height: "320px",
-    borderRadius: "42% 58% 55% 45% / 45% 45% 55% 55%",
+  blobHero: {
+    position: "absolute",
+    width: "380px",
+    height: "380px",
+    background: "linear-gradient(135deg, rgba(59,130,246,0.2), rgba(147,197,253,0.15))",
+    borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
+    filter: "blur(60px)",
+    pointerEvents: "none"
+  },
+
+  heroBlob: {
+    width: "350px",
+    height: "350px",
+    borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
     overflow: "hidden",
-    border: "8px solid rgba(255,255,255,0.9)",
-    boxShadow: "0 30px 60px rgba(0,0,0,0.2)",
-    zIndex: 2
+    border: "8px solid rgba(255,255,255,0.95)",
+    boxShadow: "0 40px 100px rgba(0,0,0,0.25), 0 0 60px rgba(59,130,246,0.25)",
+    zIndex: 2,
+    position: "relative"
   },
 
   img: {
@@ -294,28 +433,34 @@ const styles = {
 
   glass: {
     position: "absolute",
-    bottom: "40px",
-    left: "40px",
-    right: "40px",
+    bottom: "50px",
+    left: "50px",
+    right: "50px",
     display: "flex",
     alignItems: "center",
-    gap: "15px",
-    padding: "20px",
-    borderRadius: "18px",
-    background: "rgba(255,255,255,0.4)",
-    backdropFilter: "blur(20px)",
-    border: "1px solid rgba(255,255,255,0.6)",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.1)"
+    gap: "18px",
+    padding: "24px 28px",
+    borderRadius: "22px",
+    background: "rgba(255,255,255,0.5)",
+    backdropFilter: "blur(15px)",
+    WebkitBackdropFilter: "blur(15px)",
+    border: "1px solid rgba(255,255,255,0.9)",
+    boxShadow: "0 15px 50px rgba(0,0,0,0.1), inset 0 0 0 1px rgba(255,255,255,0.5)",
+    zIndex: 3
   },
 
   glassTitle: {
-    fontWeight: 700,
-    color: "#0369A1"
+    fontWeight: 900,
+    color: "#0369A1",
+    fontSize: "16px",
+    fontFamily: "'Inter', sans-serif"
   },
 
   glassSub: {
-    fontSize: "13px",
-    color: "#075985"
+    fontSize: "14px",
+    color: "#075985",
+    marginTop: "3px",
+    fontFamily: "'Inter', sans-serif"
   }
 
 };
