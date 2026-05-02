@@ -1,0 +1,6 @@
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const validateEmail = (email) => { if (!email || email.trim() === "") { return { valid: false, error: "El email es requerido" }; } if (!EMAIL_REGEX.test(email)) { return { valid: false, error: "Email inválido" }; } return { valid: true, error: "" }; };
+export const validatePassword = (password) => { if (!password || password === "") { return { valid: false, error: "La contraseña es requerida" }; } if (password.length < 6) { return { valid: false, error: "Mínimo 6 caracteres" }; } return { valid: true, error: "" }; };
+export const validateName = (name) => { if (!name || name.trim() === "") { return { valid: false, error: "El nombre es requerido" }; } if (name.trim().length < 2) { return { valid: false, error: "Mínimo 2 caracteres" }; } return { valid: true, error: "" }; };
+export const validateForm = (fields) => { const errors = {}; let isValid = true; if (fields.name) { const r = validateName(fields.name); if (!r.valid) { errors.name = r.error; isValid = false; } } if (fields.email) { const r = validateEmail(fields.email); if (!r.valid) { errors.email = r.error; isValid = false; } } if (fields.password) { const r = validatePassword(fields.password); if (!r.valid) { errors.password = r.error; isValid = false; } } return { isValid, errors }; };
