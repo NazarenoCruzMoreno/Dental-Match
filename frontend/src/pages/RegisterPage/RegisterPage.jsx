@@ -33,7 +33,7 @@ export default function RegisterPage() {
     setTouched({ name: true, email: true, password: true });
     if (validation.isValid) {
       setSubmitting(true);
-      setTimeout(() => { setRegistration({ name, email, userType }); navigate("/dashboard"); }, 800);
+      setTimeout(() => { setRegistration({ name, email, userType }); navigate("/login"); }, 800);
     }
   };
 
