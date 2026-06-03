@@ -1,11 +1,9 @@
 const multer = require('multer');
-const { bucket } = require('../config/firebase');
+const { supabase } = require('../config/supabase');
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
-  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -19,29 +17,26 @@ const uploadToStorage = async (req, res, next) => {
   if (!req.file) return next();
 
   try {
-    const fileName = `pacientes/${Date.now()}_${req.file.originalname}`;
-    const file = bucket.file(fileName);
+    const ext = req.file.originalname.split('.').pop();
+    const fileName = `pacientes/${Date.now()}.${ext}`;
 
-    const stream = file.createWriteStream({
-      metadata: {
+    const { error } = await supabase.storage
+      .from('dental-match')
+      .upload(fileName, req.file.buffer, {
         contentType: req.file.mimetype,
-      },
-    });
+        upsert: false,
+      });
 
-    stream.on('error', (error) => {
-      console.error('Error uploading:', error);
-      return res.status(500).json({ error: 'Error subiendo imagen' });
-    });
+    if (error) throw error;
 
-    stream.on('finish', async () => {
-      await file.makePublic();
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-      req.imageUrl = publicUrl;
-      next();
-    });
+    const { data } = supabase.storage
+      .from('dental-match')
+      .getPublicUrl(fileName);
 
-    stream.end(req.file.buffer);
+    req.imageUrl = data.publicUrl;
+    next();
   } catch (error) {
+    console.error('Error subiendo imagen:', error.message);
     res.status(500).json({ error: 'Error procesando imagen' });
   }
 };
