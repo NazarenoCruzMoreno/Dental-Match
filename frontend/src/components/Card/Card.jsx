@@ -23,7 +23,7 @@ export default function Card({ title, highlight, description, badge, badgeText, 
 }
 
 const styles = {
-  left: { flex: 1.1, padding: "90px 80px", position: "relative", zIndex: 2 },
+  left: { flex: 1.1, padding: "60px 80px", position: "relative", zIndex: 2, overflowY: "auto", overflowX: "hidden" },
   title: { fontSize: "64px", fontWeight: 900, margin: 0, color: "#0f172a", letterSpacing: "-3px", lineHeight: "1.1", fontFamily: "'Inter', sans-serif" },
   titleHighlight: { color: "#2563eb", fontWeight: 900, textShadow: "0 2px 20px rgba(59,130,246,0.15)" },
   line: { width: "80px", height: "5px", background: "linear-gradient(90deg, #3b82f6, #60a5fa, #fdba74)", margin: "28px 0", borderRadius: "3px" },
