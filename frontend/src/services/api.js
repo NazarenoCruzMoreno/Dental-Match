@@ -1,0 +1,48 @@
+const BASE_URL = '/api';
+
+const handleResponse = async (res) => {
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Error del servidor');
+  return data;
+};
+
+export const authService = {
+  register: (email, password, role) =>
+    fetch(`${BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, role }),
+    }).then(handleResponse),
+
+  login: (email, password) =>
+    fetch(`${BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    }).then(handleResponse),
+};
+
+export const setAuthToken = (token) => localStorage.setItem('token', token);
+export const getAuthToken = () => localStorage.getItem('token');
+export const clearAuth = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('tokenExpiry');
+};
+export const setUser = (user) => localStorage.setItem('user', JSON.stringify(user));
+export const getUser = () => { try { return JSON.parse(localStorage.getItem('user')); } catch { return null; } };
+
+// Guarda token con expiración de 24 horas (sesión del día)
+export const setSessionToken = (token) => {
+  const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24hs
+  localStorage.setItem('token', token);
+  localStorage.setItem('tokenExpiry', expiry.toString());
+};
+
+// Verifica si la sesión sigue vigente (mismo día, dentro de las 24hs)
+export const isSessionValid = () => {
+  const token = localStorage.getItem('token');
+  const expiry = localStorage.getItem('tokenExpiry');
+  if (!token || !expiry) return false;
+  return Date.now() < parseInt(expiry, 10);
+};
