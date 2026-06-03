@@ -3,6 +3,7 @@ const cors = require('cors');
 const errorHandler = require('./middlewares/errorHandler');
 
 const userRoutes = require('./routes/users');
+const profileRoutes = require('./routes/profile');
 const estudianteRoutes = require('./routes/estudiantes');
 const pacienteRoutes = require('./routes/pacientes');
 const asignacionRoutes = require('./routes/asignaciones');
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rutas
 app.use('/api/auth', userRoutes);
+app.use('/api/profile', profileRoutes);
 app.use('/api/estudiantes', estudianteRoutes);
 app.use('/api/pacientes', pacienteRoutes);
 app.use('/api/asignaciones', asignacionRoutes);
