@@ -20,6 +20,13 @@ export const authService = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     }).then(handleResponse),
+
+  resetPassword: (email) =>
+    fetch(`${BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }).then(handleResponse),
 };
 
 export const setAuthToken = (token) => localStorage.setItem('token', token);

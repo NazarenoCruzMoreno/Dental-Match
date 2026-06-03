@@ -73,4 +73,21 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const resetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email requerido' });
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.FRONTEND_URL}/reset-password`,
+    });
+
+    // Siempre respondemos OK por seguridad (no revelamos si el email existe)
+    if (error) console.error('Reset password error:', error.message);
+    res.json({ message: 'Si el email existe, recibirás un link de recuperación.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { register, login, resetPassword };

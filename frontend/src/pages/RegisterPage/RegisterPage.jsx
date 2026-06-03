@@ -13,6 +13,7 @@ const IconCalendar = () => (<svg width="28" height="28" viewBox="0 0 24 24"><pat
 const IconUser = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
 const IconMail = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>);
 const IconLock = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
+const IconCheck = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>);
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -32,10 +35,23 @@ export default function RegisterPage() {
     setServerError("");
 
     const validation = validateForm({ name, email, password });
-    setErrors(validation.errors);
-    setTouched({ name: true, email: true, password: true });
+    const newErrors = { ...validation.errors };
 
-    if (!validation.isValid) return;
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Confirmá tu contraseña";
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
+    }
+
+    if (!acceptTerms) {
+      newErrors.terms = "Debés aceptar los términos para continuar";
+    }
+
+    setErrors(newErrors);
+    setTouched({ name: true, email: true, password: true, confirmPassword: true });
+
+    const isValid = validation.isValid && !newErrors.confirmPassword && !newErrors.terms;
+    if (!isValid) return;
 
     setSubmitting(true);
     try {
@@ -43,7 +59,7 @@ export default function RegisterPage() {
       const data = await authService.register(email, password, role);
       setSessionToken(data.token);
       setUser(data.user);
-      navigate("/home"); // auto-login: no necesita pasar por login
+      navigate("/home");
     } catch (error) {
       setServerError(error.message);
     } finally {
@@ -63,12 +79,42 @@ export default function RegisterPage() {
           <Input label="Nombre completo" value={name} onChange={(e) => setName(e.target.value)} onBlur={() => handleBlur("name")} error={touched.name ? errors.name : ""} placeholder="Juan Pérez" icon={<IconUser />} />
           <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => handleBlur("email")} error={touched.email ? errors.email : ""} placeholder="juan@email.com" icon={<IconMail />} />
           <Input label="Contraseña" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => handleBlur("password")} error={touched.password ? errors.password : ""} placeholder="••••••••" icon={<IconLock />} />
-          <Button variant="primary" fullWidth disabled={submitting} arrow={!submitting}>{submitting ? "Creando cuenta..." : "Crear cuenta"}</Button>
+          <Input label="Confirmar contraseña" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onBlur={() => handleBlur("confirmPassword")} error={touched.confirmPassword ? errors.confirmPassword : ""} placeholder="••••••••" icon={<IconLock />} />
+
+          <div style={styles.termsRow} onClick={() => setAcceptTerms((v) => !v)}>
+            <div style={{ ...styles.checkbox, ...(acceptTerms ? styles.checkboxChecked : {}), ...(errors.terms && !acceptTerms ? styles.checkboxError : {}) }}>
+              {acceptTerms && <IconCheck />}
+            </div>
+            <span style={styles.termsText}>
+              Acepto los <span style={styles.termsLink} onClick={(e) => e.stopPropagation()}>términos y condiciones</span> y la <span style={styles.termsLink} onClick={(e) => e.stopPropagation()}>política de privacidad</span>
+            </span>
+          </div>
+          {errors.terms && <span style={styles.fieldError}>{errors.terms}</span>}
+
+          <Button variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
+            {submitting ? "Creando cuenta..." : "Crear cuenta"}
+          </Button>
         </form>
-        <p style={styles.loginLink}>¿Ya tenés cuenta? <span onClick={() => navigate("/login")}>Iniciar sesión</span></p>
+        <p style={styles.loginLink}>¿Ya tenés cuenta? <span style={styles.link} onClick={() => navigate("/login")}>Iniciar sesión</span></p>
       </Card>
     </Layout>
   );
 }
 
-const styles = { userTypeBadge: { display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 18px", background: "linear-gradient(135deg, #eff6ff, #fff7ed)", borderRadius: "12px", border: "1px solid #bfdbfe", fontSize: "14px", color: "#1e293b", marginBottom: "30px", fontWeight: 500, maxWidth: "fit-content", fontFamily: "'Inter', sans-serif" }, userTypeIcon: { fontSize: "18px" }, form: { display: "flex", flexDirection: "column", gap: "20px", maxWidth: "480px" }, errorBox: { padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", color: "#dc2626", fontSize: "14px", fontWeight: 500, fontFamily: "'Inter', sans-serif", textAlign: "center" }, loginLink: { marginTop: "24px", fontSize: "14px", color: "#64748b", textAlign: "center", fontFamily: "'Inter', sans-serif" }, glassTitle: { fontWeight: 900, color: "#0369A1", fontSize: "16px", fontFamily: "'Inter', sans-serif" }, glassSub: { fontSize: "14px", color: "#075985", marginTop: "3px", fontFamily: "'Inter', sans-serif" } };
+const styles = {
+  userTypeBadge: { display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 18px", background: "linear-gradient(135deg, #eff6ff, #fff7ed)", borderRadius: "12px", border: "1px solid #bfdbfe", fontSize: "14px", color: "#1e293b", marginBottom: "24px", fontWeight: 500, maxWidth: "fit-content", fontFamily: "'Inter', sans-serif" },
+  userTypeIcon: { fontSize: "18px" },
+  form: { display: "flex", flexDirection: "column", gap: "16px", maxWidth: "480px" },
+  errorBox: { padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", color: "#dc2626", fontSize: "14px", fontWeight: 500, fontFamily: "'Inter', sans-serif", textAlign: "center" },
+  termsRow: { display: "flex", alignItems: "flex-start", gap: "12px", cursor: "pointer", userSelect: "none" },
+  checkbox: { width: "20px", height: "20px", minWidth: "20px", borderRadius: "6px", border: "2px solid #e2e8f0", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.2s ease", marginTop: "1px" },
+  checkboxChecked: { background: "linear-gradient(135deg, #3b82f6, #2563eb)", borderColor: "#3b82f6", color: "#fff" },
+  checkboxError: { borderColor: "#ef4444" },
+  termsText: { fontSize: "13px", color: "#64748b", lineHeight: "1.5", fontFamily: "'Inter', sans-serif" },
+  termsLink: { color: "#3b82f6", fontWeight: 600, cursor: "pointer" },
+  fieldError: { fontSize: "12px", color: "#ef4444", fontWeight: 500, marginTop: "-8px" },
+  loginLink: { marginTop: "20px", fontSize: "14px", color: "#64748b", textAlign: "center", fontFamily: "'Inter', sans-serif" },
+  link: { color: "#3b82f6", fontWeight: 600, cursor: "pointer" },
+  glassTitle: { fontWeight: 900, color: "#0369A1", fontSize: "16px", fontFamily: "'Inter', sans-serif" },
+  glassSub: { fontSize: "14px", color: "#075985", marginTop: "3px", fontFamily: "'Inter', sans-serif" },
+};
