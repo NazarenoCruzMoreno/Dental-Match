@@ -1,28 +1,29 @@
-const { db } = require('../config/firebase');
+const { supabase } = require('../config/supabase');
 const { pacienteSchema } = require('../models/validaciones');
 
 const crearPerfil = async (req, res) => {
   try {
     const data = pacienteSchema.parse(req.body);
-    const { email } = req.user;
-    const imagenUrl = req.imageUrl;
+    const { id: userId, email, role } = req.user;
+    const imagenUrl = req.imageUrl || null;
 
-    // Verificar que es paciente
-    const userRef = db.collection('users').doc(email);
-    const userDoc = await userRef.get();
-    if (userDoc.data().role !== 'paciente') {
-      return res.status(403).json({ error: 'Solo pacientes' });
+    if (role !== 'paciente') {
+      return res.status(403).json({ error: 'Solo pacientes pueden crear este perfil' });
     }
 
-    // Crear perfil paciente
-    const pacienteRef = db.collection('pacientes').doc(email);
-    await pacienteRef.set({
-      ...data,
-      userId: email,
-      imagenUrl,
-      estado: 'pendiente',
-      createdAt: new Date(),
-    });
+    const { error } = await supabase
+      .from('pacientes')
+      .insert({
+        user_id: userId,
+        email,
+        nombre: data.nombre,
+        edad: data.edad,
+        problema_dental: data.problemaDental,
+        imagen_url: imagenUrl,
+        estado: 'pendiente',
+      });
+
+    if (error) throw error;
 
     res.status(201).json({ message: 'Perfil creado exitosamente' });
   } catch (error) {

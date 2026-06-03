@@ -1,44 +1,42 @@
 const bcrypt = require('bcryptjs');
-const { db } = require('../config/firebase');
+const { supabase } = require('../config/supabase');
 const { generarToken } = require('../config/jwt');
-const { authSchema } = require('../models/validaciones');
+const { registerSchema, loginSchema } = require('../models/validaciones');
 
 const register = async (req, res) => {
   try {
-    const { email, password, role } = authSchema.parse(req.body);
+    const { email, password, role } = registerSchema.parse(req.body);
 
-    // Verificar si existe
-    const userRef = db.collection('users').doc(email);
-    const userDoc = await userRef.get();
+    const { data: existing } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
 
-    if (userDoc.exists) {
-      return res.status(400).json({ error: 'Usuario ya existe' });
+    if (existing) {
+      return res.status(400).json({ error: 'El usuario ya existe' });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear usuario
-    await userRef.set({
-      email,
-      password: hashedPassword,
-      role,
-      createdAt: new Date(),
-    });
+    const { data: user, error } = await supabase
+      .from('users')
+      .insert({ email, password: hashedPassword, role })
+      .select('id, email, role')
+      .single();
 
-    const token = generarToken({ email, role });
+    if (error) throw error;
+
+    const token = generarToken({ id: user.id, email: user.email, role: user.role });
 
     res.status(201).json({
       message: 'Usuario creado',
       token,
-      user: { email, role },
+      user: { email: user.email, role: user.role },
     });
   } catch (error) {
     if (error.name === 'ZodError') {
-      return res.status(400).json({
-        error: 'Datos inválidos',
-        details: error.errors,
-      });
+      return res.status(400).json({ error: 'Datos inválidos', details: error.errors });
     }
     res.status(500).json({ error: error.message });
   }
@@ -46,23 +44,24 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = authSchema.parse(req.body);
+    const { email, password } = loginSchema.parse(req.body);
 
-    const userRef = db.collection('users').doc(email);
-    const userDoc = await userRef.get();
+    const { data: user } = await supabase
+      .from('users')
+      .select('id, email, password, role')
+      .eq('email', email)
+      .single();
 
-    if (!userDoc.exists) {
+    if (!user) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    const user = userDoc.data();
     const validPassword = await bcrypt.compare(password, user.password);
-
     if (!validPassword) {
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    const token = generarToken({ email: user.email, role: user.role });
+    const token = generarToken({ id: user.id, email: user.email, role: user.role });
 
     res.json({
       message: 'Login exitoso',

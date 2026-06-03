@@ -1,12 +1,14 @@
 const { z } = require('zod');
 
-// Registro/Login
-const authSchema = z.object({
+const loginSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Mínimo 6 caracteres'),
 });
 
-// Estudiante
+const registerSchema = loginSchema.extend({
+  role: z.enum(['estudiante', 'paciente'], { errorMap: () => ({ message: 'Rol debe ser estudiante o paciente' }) }),
+});
+
 const estudianteSchema = z.object({
   nombre: z.string().min(2, 'Nombre muy corto'),
   universidad: z.string().min(2),
@@ -15,15 +17,10 @@ const estudianteSchema = z.object({
   descripcion: z.string().min(10),
 });
 
-// Paciente
 const pacienteSchema = z.object({
   nombre: z.string().min(2),
   edad: z.number().min(1).max(120),
   problemaDental: z.string().min(10),
 });
 
-module.exports = {
-  authSchema,
-  estudianteSchema,
-  pacienteSchema,
-};
+module.exports = { loginSchema, registerSchema, estudianteSchema, pacienteSchema };

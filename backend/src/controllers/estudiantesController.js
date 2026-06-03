@@ -1,27 +1,30 @@
-const { db } = require('../config/firebase');
+const { supabase } = require('../config/supabase');
 const { estudianteSchema } = require('../models/validaciones');
 
 const crearPerfil = async (req, res) => {
   try {
     const data = estudianteSchema.parse(req.body);
-    const { email } = req.user;
+    const { id: userId, email, role } = req.user;
 
-    // Verificar que es estudiante
-    const userRef = db.collection('users').doc(email);
-    const userDoc = await userRef.get();
-    if (userDoc.data().role !== 'estudiante') {
-      return res.status(403).json({ error: 'Solo estudiantes' });
+    if (role !== 'estudiante') {
+      return res.status(403).json({ error: 'Solo estudiantes pueden crear este perfil' });
     }
 
-    // Crear perfil estudiante
-    const estudianteRef = db.collection('estudiantes').doc(email);
-    await estudianteRef.set({
-      ...data,
-      userId: email,
-      rating: 0,
-      pacientesAtendidos: 0,
-      createdAt: new Date(),
-    });
+    const { error } = await supabase
+      .from('estudiantes')
+      .insert({
+        user_id: userId,
+        email,
+        nombre: data.nombre,
+        universidad: data.universidad,
+        materias: data.materias,
+        disponibilidad: data.disponibilidad,
+        descripcion: data.descripcion,
+        rating: 0,
+        pacientes_atendidos: 0,
+      });
+
+    if (error) throw error;
 
     res.status(201).json({ message: 'Perfil creado exitosamente' });
   } catch (error) {
@@ -31,11 +34,12 @@ const crearPerfil = async (req, res) => {
 
 const obtenerEstudiantes = async (req, res) => {
   try {
-    const snapshot = await db.collection('estudiantes').get();
-    const estudiantes = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const { data: estudiantes, error } = await supabase
+      .from('estudiantes')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
 
     res.json(estudiantes);
   } catch (error) {
