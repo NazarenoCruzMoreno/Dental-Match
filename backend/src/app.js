@@ -2,11 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const errorHandler = require('./middlewares/errorHandler');
 
-const userRoutes = require('./routes/users');
-const profileRoutes = require('./routes/profile');
+const userRoutes       = require('./routes/users');
+const profileRoutes    = require('./routes/profile');
 const estudianteRoutes = require('./routes/estudiantes');
-const pacienteRoutes = require('./routes/pacientes');
+const pacienteRoutes   = require('./routes/pacientes');
 const asignacionRoutes = require('./routes/asignaciones');
+const notifRoutes      = require('./routes/notifications');
+const reviewRoutes     = require('./routes/reviews');
 
 const app = express();
 
@@ -21,11 +23,48 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Rutas
-app.use('/api/auth', userRoutes);
-app.use('/api/profile', profileRoutes);
+app.use('/api/auth',          userRoutes);
+app.use('/api/profile',       profileRoutes);
+app.use('/api/notifications', notifRoutes);
+app.use('/api/reviews',       reviewRoutes);
 app.use('/api/estudiantes', estudianteRoutes);
 app.use('/api/pacientes', pacienteRoutes);
 app.use('/api/asignaciones', asignacionRoutes);
+
+// Actividad del usuario — últimos 6 meses de asignaciones
+app.get('/api/activity', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.json([]);
+    const { verificarToken } = require('./config/jwt');
+    const { id, role } = verificarToken(token);
+    const { supabase } = require('./config/supabase');
+
+    let query = supabase.from('asignaciones').select('fecha_asignacion');
+    if (role === 'estudiante') {
+      const { data: est } = await supabase.from('estudiantes').select('id').eq('user_id', id).maybeSingle();
+      if (est) query = query.eq('estudiante_id', est.id);
+      else return res.json([]);
+    } else {
+      const { data: pac } = await supabase.from('pacientes').select('id').eq('user_id', id).maybeSingle();
+      if (pac) query = query.eq('paciente_id', pac.id);
+      else return res.json([]);
+    }
+
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const { data } = await query.gte('fecha_asignacion', sixMonthsAgo.toISOString());
+
+    // Agrupar por mes
+    const counts = {};
+    (data || []).forEach(({ fecha_asignacion }) => {
+      const d   = new Date(fecha_asignacion);
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    res.json(Object.entries(counts).map(([month, count]) => ({ month, count })));
+  } catch (e) { res.json([]); }
+});
 
 // Salud
 app.get('/api/health', (req, res) => {
