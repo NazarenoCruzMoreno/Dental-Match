@@ -94,7 +94,7 @@ const styles = {
   wrapper:     { position: "relative" },
   bell:        { position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "40px", height: "40px", background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "10px", cursor: "pointer", color: "#fff" },
   badge:       { position: "absolute", top: "-6px", right: "-6px", background: "#ef4444", color: "#fff", borderRadius: "999px", fontSize: "10px", fontWeight: 900, minWidth: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", border: "2px solid white" },
-  dropdown:    { position: "absolute", top: "50px", right: 0, width: "320px", background: "#fff", borderRadius: "16px", boxShadow: "0 20px 60px rgba(0,0,0,0.15)", border: "1px solid #e2e8f0", zIndex: 1000, overflow: "hidden" },
+  dropdown:    { position: "fixed", top: "80px", right: "20px", width: "320px", background: "#fff", borderRadius: "16px", boxShadow: "0 20px 60px rgba(0,0,0,0.18)", border: "1px solid #e2e8f0", zIndex: 9000, overflow: "hidden" },
   dropHeader:  { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid #f1f5f9" },
   dropTitle:   { fontSize: "15px", fontWeight: 800, color: "#0f172a", fontFamily: "'Inter', sans-serif" },
   unreadLabel: { fontSize: "12px", fontWeight: 700, color: "#3b82f6", background: "#eff6ff", padding: "2px 8px", borderRadius: "999px" },
