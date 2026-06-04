@@ -13,79 +13,77 @@ const IconEdit    = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill=
 const IconMoon    = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>);
 const IconSun     = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>);
 
-// ── 🪥 Cepillo flat cartoon — inspirado en la referencia ─────────────────────
+// ── 🪥 Cepillo horizontal — cerdas mirando a la izquierda (como la foto) ──────
 const ToothbrushDecoration = ({ isDark }) => {
-  const body  = isDark ? "#3b82f6" : "#60a5fa";
+  const body  = isDark ? "#2563eb" : "#60a5fa";
   const light = isDark ? "#60a5fa" : "#93c5fd";
-  const dark2 = isDark ? "#1d4ed8" : "#3b82f6";
-  const shine = "rgba(255,255,255,0.55)";
+  const dark2 = isDark ? "#1d4ed8" : "#2563eb";
+  const shine = "rgba(255,255,255,0.6)";
+  const op    = isDark ? 0.6 : 0.78;
+
   return (
-    <div style={{ position: "fixed", right: "10px", top: "50%", transform: "translateY(-52%) rotate(18deg)", width: "95px", height: "320px", pointerEvents: "none", zIndex: 0, animation: "toothFloat 6s ease-in-out infinite" }} aria-hidden="true">
-      <svg viewBox="0 0 60 300" style={{ width: "100%", height: "100%", opacity: isDark ? 0.65 : 0.82 }}>
+    <div style={{
+      position: "fixed", right: "-30px", top: "42%",
+      transform: "translateY(-50%) rotate(-28deg)",
+      width: "200px", height: "70px",
+      pointerEvents: "none", zIndex: 0,
+      animation: "toothFloat 6s ease-in-out infinite",
+    }} aria-hidden="true">
+
+      {/* viewBox horizontal: 280 ancho × 80 alto
+          Cabeza con cerdas a la IZQUIERDA, mango a la DERECHA */}
+      <svg viewBox="0 0 280 80" style={{ width: "100%", height: "100%", opacity: op }}>
         <defs>
-          <linearGradient id="tb_body" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%"   stopColor={light}/>
-            <stop offset="40%"  stopColor={body}/>
-            <stop offset="100%" stopColor={dark2}/>
-          </linearGradient>
-          <linearGradient id="tb_head" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id="tb_h" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%"   stopColor={light}/>
             <stop offset="50%"  stopColor={body}/>
             <stop offset="100%" stopColor={dark2}/>
           </linearGradient>
+          <linearGradient id="tb_head_h" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%"   stopColor={light}/>
+            <stop offset="100%" stopColor={body}/>
+          </linearGradient>
         </defs>
 
-        {/* ── MANGO: forma ergonómica con curva suave ── */}
-        {/* Más ancho abajo, se estrecha en el cuello */}
-        <path d="
-          M18 295 Q10 292 10 280 L10 190
-          Q8  175 10 160 L11 140
-          Q12 128 16 122
-          L16 90 Q16 82 20 78
-          L20 68
-          Q20 60 24 58
-          L36 58
-          Q40 60 40 68
-          L40 78 Q44 82 44 90
-          L44 122 Q48 128 49 140
-          L50 160 Q52 175 50 190
-          L50 280 Q50 292 42 295 Z"
-          fill="url(#tb_body)" rx="8"/>
+        {/* ── MANGO — parte derecha, forma ergonómica ── */}
+        {/* Rectángulo principal redondeado */}
+        <rect x="90" y="25" width="175" height="30" rx="15" fill="url(#tb_h)"/>
+        {/* Brillo superior */}
+        <path d="M100 29 Q200 27 258 31" stroke={shine} strokeWidth="2" strokeLinecap="round"/>
+        {/* Zona grip en el centro del mango */}
+        <rect x="160" y="25" width="50" height="30" rx="4" fill={dark2} opacity="0.2"/>
+        {[168, 176, 184, 192, 200].map((x, i) => (
+          <line key={i} x1={x} y1="27" x2={x} y2="53" stroke="white" strokeWidth="1.2" opacity="0.25"/>
+        ))}
+        {/* Extremo redondeado del mango */}
+        <circle cx="265" cy="40" r="8" fill={body}/>
+        <circle cx="265" cy="40" r="8" fill={dark2} opacity="0.25"/>
 
-        {/* Brillo izquierdo del mango */}
-        <path d="M14 100 Q13 180 13 265" stroke={shine} strokeWidth="2.5" strokeLinecap="round"/>
+        {/* ── CUELLO — se estrecha entre cabeza y mango ── */}
+        <path d="M86 30 Q72 32 65 28 L65 52 Q72 48 86 50 Z" fill="url(#tb_h)"/>
 
-        {/* Pequeña zona diferenciada en la parte baja del mango */}
-        <rect x="14" y="230" width="32" height="38" rx="8" fill={dark2} opacity="0.25"/>
-        <path d="M16 238 Q30 235 44 238" stroke={shine} strokeWidth="1" opacity="0.4"/>
+        {/* ── CABEZA — rectángulo más alto que el mango ── */}
+        <rect x="30" y="15" width="50" height="50" rx="10" fill="url(#tb_head_h)"/>
+        {/* Brillo */}
+        <path d="M34 19 Q55 17 76 20" stroke={shine} strokeWidth="2" strokeLinecap="round"/>
 
-        {/* ── CUELLO: se estrecha suavemente ── */}
-        {/* Ya incluido en el path del mango — transición natural */}
+        {/* ── CERDAS — apuntan hacia la IZQUIERDA ── */}
+        {/* Base de cerdas (plataforma) */}
+        <rect x="24" y="22" width="10" height="36" rx="3" fill={dark2} opacity="0.3"/>
 
-        {/* ── CABEZA: rectángulo redondeado más ancho ── */}
-        <rect x="8" y="8" width="44" height="54" rx="10" fill="url(#tb_head)"/>
-        {/* Brillo cabeza */}
-        <path d="M12 13 Q30 9 48 13" stroke={shine} strokeWidth="2" strokeLinecap="round"/>
-        {/* Borde inferior de la cabeza (sombra) */}
-        <rect x="8" y="50" width="44" height="12" rx="0" fill={dark2} opacity="0.2"
-          style={{ borderBottomLeftRadius: "0", borderBottomRightRadius: "0" }}/>
-
-        {/* ── CERDAS: 7 grupos de líneas verticales azul oscuro ── */}
-        {[13, 18, 23, 28, 33, 38, 43].map((x, i) => (
+        {/* Grupos de cerdas - líneas horizontales apuntando IZQUIERDA */}
+        {[27, 33, 39, 45, 51].map((y, i) => (
           <g key={i}>
             {/* cerda larga */}
-            <rect x={x-1.5} y={2} width="3" height="22" rx="1.5" fill={dark2} opacity="0.9"/>
-            {/* cerda corta (alternada) */}
-            <rect x={x-1.5} y={i%2===0 ? 4 : 6} width="3" height={i%2===0 ? 18 : 16} rx="1.5" fill={dark2} opacity="0.5"/>
+            <rect x="2"  y={y-2} width={i%2===0 ? 22 : 18} height="4" rx="2" fill={dark2} opacity="0.9"/>
+            {/* cerda corta (segunda fila) */}
+            <rect x="2"  y={y+4} width={i%2===0 ? 18 : 22} height="4" rx="2" fill={dark2} opacity="0.55"/>
           </g>
         ))}
 
-        {/* Base de las cerdas (plataforma) */}
-        <rect x="9" y="22" width="42" height="8" rx="2" fill={dark2} opacity="0.3"/>
-
-        {/* Pequeño reflejo en la punta de las cerdas */}
-        {[13, 23, 33, 43].map((x, i) => (
-          <circle key={i} cx={x} cy="3" r="1.5" fill="white" opacity="0.6"/>
+        {/* Puntitas redondeadas de las cerdas */}
+        {[27, 33, 39, 45, 51].map((y, i) => (
+          <circle key={i} cx="3" cy={y} r="2.5" fill="white" opacity="0.5"/>
         ))}
       </svg>
     </div>
@@ -262,7 +260,7 @@ export default function HomePage() {
           {perfil !== null && <ProfileProgress perfil={perfil} role={role} onEdit={() => navigate("/profile/edit")} isDark={isDark} />}
 
           {/* 📊 Actividad */}
-          <ActivityGraph role={role} />
+          <ActivityGraph role={role} isDark={isDark} />
 
           {/* Cards */}
           <div style={{ fontSize: "17px", fontWeight: 800, color: isDark ? "#f1f5f9" : "#0f172a" }}>¿Qué querés hacer hoy?</div>
