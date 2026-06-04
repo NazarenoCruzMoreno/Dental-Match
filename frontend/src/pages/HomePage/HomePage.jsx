@@ -13,82 +13,6 @@ const IconEdit    = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill=
 const IconMoon    = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>);
 const IconSun     = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>);
 
-// ── 🪥 Cepillo horizontal — cerdas mirando a la izquierda (como la foto) ──────
-const ToothbrushDecoration = ({ isDark }) => {
-  const body  = isDark ? "#2563eb" : "#60a5fa";
-  const light = isDark ? "#60a5fa" : "#93c5fd";
-  const dark2 = isDark ? "#1d4ed8" : "#2563eb";
-  const shine = "rgba(255,255,255,0.6)";
-  const op    = isDark ? 0.6 : 0.78;
-
-  return (
-    <div style={{
-      position: "fixed", right: "-30px", top: "42%",
-      transform: "translateY(-50%) rotate(-28deg)",
-      width: "200px", height: "70px",
-      pointerEvents: "none", zIndex: 0,
-      animation: "toothFloat 6s ease-in-out infinite",
-    }} aria-hidden="true">
-
-      {/* viewBox horizontal: 280 ancho × 80 alto
-          Cabeza con cerdas a la IZQUIERDA, mango a la DERECHA */}
-      <svg viewBox="0 0 280 80" style={{ width: "100%", height: "100%", opacity: op }}>
-        <defs>
-          <linearGradient id="tb_h" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%"   stopColor={light}/>
-            <stop offset="50%"  stopColor={body}/>
-            <stop offset="100%" stopColor={dark2}/>
-          </linearGradient>
-          <linearGradient id="tb_head_h" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%"   stopColor={light}/>
-            <stop offset="100%" stopColor={body}/>
-          </linearGradient>
-        </defs>
-
-        {/* ── MANGO — parte derecha, forma ergonómica ── */}
-        {/* Rectángulo principal redondeado */}
-        <rect x="90" y="25" width="175" height="30" rx="15" fill="url(#tb_h)"/>
-        {/* Brillo superior */}
-        <path d="M100 29 Q200 27 258 31" stroke={shine} strokeWidth="2" strokeLinecap="round"/>
-        {/* Zona grip en el centro del mango */}
-        <rect x="160" y="25" width="50" height="30" rx="4" fill={dark2} opacity="0.2"/>
-        {[168, 176, 184, 192, 200].map((x, i) => (
-          <line key={i} x1={x} y1="27" x2={x} y2="53" stroke="white" strokeWidth="1.2" opacity="0.25"/>
-        ))}
-        {/* Extremo redondeado del mango */}
-        <circle cx="265" cy="40" r="8" fill={body}/>
-        <circle cx="265" cy="40" r="8" fill={dark2} opacity="0.25"/>
-
-        {/* ── CUELLO — se estrecha entre cabeza y mango ── */}
-        <path d="M86 30 Q72 32 65 28 L65 52 Q72 48 86 50 Z" fill="url(#tb_h)"/>
-
-        {/* ── CABEZA — rectángulo más alto que el mango ── */}
-        <rect x="30" y="15" width="50" height="50" rx="10" fill="url(#tb_head_h)"/>
-        {/* Brillo */}
-        <path d="M34 19 Q55 17 76 20" stroke={shine} strokeWidth="2" strokeLinecap="round"/>
-
-        {/* ── CERDAS — apuntan hacia la IZQUIERDA ── */}
-        {/* Base de cerdas (plataforma) */}
-        <rect x="24" y="22" width="10" height="36" rx="3" fill={dark2} opacity="0.3"/>
-
-        {/* Grupos de cerdas - líneas horizontales apuntando IZQUIERDA */}
-        {[27, 33, 39, 45, 51].map((y, i) => (
-          <g key={i}>
-            {/* cerda larga */}
-            <rect x="2"  y={y-2} width={i%2===0 ? 22 : 18} height="4" rx="2" fill={dark2} opacity="0.9"/>
-            {/* cerda corta (segunda fila) */}
-            <rect x="2"  y={y+4} width={i%2===0 ? 18 : 22} height="4" rx="2" fill={dark2} opacity="0.55"/>
-          </g>
-        ))}
-
-        {/* Puntitas redondeadas de las cerdas */}
-        {[27, 33, 39, 45, 51].map((y, i) => (
-          <circle key={i} cx="3" cy={y} r="2.5" fill="white" opacity="0.5"/>
-        ))}
-      </svg>
-    </div>
-  );
-};
 
 // ── 🌊 Olas fijas — más altas y prominentes, cambian con dark mode ────────────
 const WaveBackground = ({ isDark }) => {
@@ -220,9 +144,6 @@ export default function HomePage() {
 
       {/* 🌍 Onboarding — primera vez */}
       <OnboardingTour />
-
-      {/* 🪥 Cepillo flotante — fixed, siempre visible */}
-      <ToothbrushDecoration isDark={isDark} />
 
       {/* 🌊 Olas — fixed al fondo, siempre visibles */}
       <WaveBackground isDark={isDark} />
