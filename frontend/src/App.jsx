@@ -9,6 +9,8 @@ import ProfilePage     from "./pages/ProfilePage/ProfilePage";
 import EditProfilePage from "./pages/ProfilePage/EditProfilePage";
 import CasosPage       from "./pages/CasosPage/CasosPage";
 import CreateCasoPage  from "./pages/CasosPage/CreateCasoPage";
+import MarketplacePage from "./pages/CasosPage/MarketplacePage";
+import MatchPage       from "./pages/MatchPage/MatchPage";
 import { isSessionValid, profileService } from "./services/api";
 
 // Rutas públicas — si ya tiene sesión redirige al home
@@ -53,6 +55,8 @@ export default function App() {
         <Route path="/profile/edit" element={<PrivateRoute><EditProfilePage /></PrivateRoute>} />
         <Route path="/casos"        element={<PrivateRoute><CasosPage /></PrivateRoute>} />
         <Route path="/casos/nuevo"  element={<PrivateRoute><CreateCasoPage /></PrivateRoute>} />
+        <Route path="/marketplace"  element={<PrivateRoute><MarketplacePage /></PrivateRoute>} />
+        <Route path="/match"        element={<PrivateRoute><MatchPage /></PrivateRoute>} />
 
         {/* Privada — sesión + perfil completo */}
         <Route path="/home" element={<RequireProfile><HomePage /></RequireProfile>} />
