@@ -29,6 +29,24 @@ export const authService = {
     }).then(handleResponse),
 };
 
+// Helper para requests autenticados
+const authHeaders = () => ({
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${localStorage.getItem('token')}`,
+});
+
+export const profileService = {
+  get: () =>
+    fetch(`${BASE_URL}/profile`, { headers: authHeaders() }).then(handleResponse),
+
+  update: (data) =>
+    fetch(`${BASE_URL}/profile`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+};
+
 export const setAuthToken = (token) => localStorage.setItem('token', token);
 export const getAuthToken = () => localStorage.getItem('token');
 export const clearAuth = () => {
