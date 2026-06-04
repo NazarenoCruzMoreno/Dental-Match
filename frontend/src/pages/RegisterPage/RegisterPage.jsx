@@ -59,7 +59,7 @@ export default function RegisterPage() {
       const data = await authService.register(email, password, role);
       setSessionToken(data.token);
       setUser(data.user);
-      navigate("/home");
+      navigate("/profile/edit?new=1"); // perfil obligatorio al registrarse
     } catch (error) {
       setServerError(error.message);
     } finally {

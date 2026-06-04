@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { profileService, getUser } from "../../services/api";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
@@ -114,6 +114,8 @@ function PacienteForm({ data, onChange }) {
 // ── Página principal ──────────────────────────────────────────────────────────
 export default function EditProfilePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isNewUser = searchParams.get("new") === "1";
   const user = getUser();
   const role = user?.role;
 
@@ -162,7 +164,7 @@ export default function EditProfilePage() {
     try {
       await profileService.update(formData);
       setSuccess(true);
-      setTimeout(() => navigate("/profile"), 1200);
+      setTimeout(() => navigate(isNewUser ? "/home" : "/profile"), 1200);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -190,7 +192,18 @@ export default function EditProfilePage() {
         </div>
 
         <div style={styles.card}>
-          <h1 style={styles.title}>Editar <span style={styles.highlight}>perfil</span></h1>
+          {isNewUser && (
+            <div style={styles.welcomeBox}>
+              <span style={styles.welcomeIcon}>🎉</span>
+              <div>
+                <div style={styles.welcomeTitle}>¡Cuenta creada con éxito!</div>
+                <div style={styles.welcomeText}>Completá tu perfil para que podamos encontrarte el match perfecto.</div>
+              </div>
+            </div>
+          )}
+          <h1 style={styles.title}>
+            {isNewUser ? <>Completá tu <span style={styles.highlight}>perfil</span></> : <>Editar <span style={styles.highlight}>perfil</span></>}
+          </h1>
           <div style={styles.line} />
 
           <form onSubmit={handleSubmit} style={styles.form}>
@@ -226,6 +239,10 @@ const styles = {
   form:         { display: "flex", flexDirection: "column", gap: "18px" },
   textareaLabel:{ fontSize: "14px", fontWeight: 600, color: "#1e293b", display: "block", marginBottom: "6px" },
   textarea:     { width: "100%", border: "2px solid #e2e8f0", borderRadius: "12px", padding: "14px 16px", fontSize: "15px", fontFamily: "'Inter', sans-serif", color: "#0f172a", outline: "none", resize: "vertical", boxSizing: "border-box", lineHeight: "1.6" },
+  welcomeBox:   { display: "flex", alignItems: "center", gap: "14px", padding: "16px 20px", background: "linear-gradient(135deg,#f0fdf4,#dcfce7)", border: "1px solid #bbf7d0", borderRadius: "14px", marginBottom: "8px" },
+  welcomeIcon:  { fontSize: "28px" },
+  welcomeTitle: { fontSize: "15px", fontWeight: 800, color: "#15803d", fontFamily: "'Inter', sans-serif" },
+  welcomeText:  { fontSize: "13px", color: "#166534", marginTop: "2px", fontFamily: "'Inter', sans-serif" },
   errorBox:     { padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", color: "#dc2626", fontSize: "14px", fontWeight: 500, textAlign: "center" },
   successBox:   { padding: "12px 16px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", color: "#16a34a", fontSize: "14px", fontWeight: 600, textAlign: "center" },
 };
