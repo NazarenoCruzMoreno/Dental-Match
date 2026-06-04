@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { casosService, getUser } from "../../services/api";
+import { getUser } from "../../services/api";
 import Button from "../../components/Button/Button";
 import Input from "../../components/Input/Input";
 
@@ -9,19 +9,22 @@ const TIPOS = [
   "Odontopediatría", "Prótesis", "Estética dental", "Otro",
 ];
 
-const IconBack  = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>);
-const IconTooth = () => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2C8 2 5 5 5 9c0 2.5.8 4.5 1.5 6.5L7 20c.3 1.2 1 2 2 2s1.5-.8 2-2l1-3 1 3c.5 1.2 1 2 2 2s1.7-.8 2-2l.5-4.5C18.2 13.5 19 11.5 19 9c0-4-3-7-7-7z"/></svg>);
+const IconBack   = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>);
+const IconTooth  = () => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2C8 2 5 5 5 9c0 2.5.8 4.5 1.5 6.5L7 20c.3 1.2 1 2 2 2s1.5-.8 2-2l1-3 1 3c.5 1.2 1 2 2 2s1.7-.8 2-2l.5-4.5C18.2 13.5 19 11.5 19 9c0-4-3-7-7-7z"/></svg>);
+const IconCamera = () => (<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>);
 
 export default function CreateCasoPage() {
   const navigate = useNavigate();
-  const user     = getUser();
+  const fileRef  = useRef(null);
 
   const [form, setForm] = useState({
     titulo: "", descripcion: "", tipo_tratamiento: "", notas: "",
   });
-  const [errors,     setErrors]     = useState({});
-  const [submitting, setSubmitting] = useState(false);
-  const [serverErr,  setServerErr]  = useState("");
+  const [imageFile,    setImageFile]    = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [errors,       setErrors]       = useState({});
+  const [submitting,   setSubmitting]   = useState(false);
+  const [serverErr,    setServerErr]    = useState("");
 
   const set = (field, val) => setForm(p => ({ ...p, [field]: val }));
 
@@ -34,6 +37,24 @@ export default function CreateCasoPage() {
     return e;
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Validar tipo
+    if (!file.type.startsWith("image/")) {
+      setServerErr("Solo se aceptan imágenes (JPG, PNG, WEBP)");
+      return;
+    }
+    // Validar tamaño (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setServerErr("La imagen no puede superar 5MB");
+      return;
+    }
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setServerErr("");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerErr("");
@@ -43,12 +64,37 @@ export default function CreateCasoPage() {
 
     setSubmitting(true);
     try {
-      await casosService.crear({
-        titulo:           form.titulo.trim(),
-        descripcion:      form.descripcion.trim(),
-        tipo_tratamiento: form.tipo_tratamiento || undefined,
-        notas:            form.notas || undefined,
-      });
+      // Si hay imagen, usar multipart/form-data
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append("imagen",          imageFile);
+        fd.append("titulo",          form.titulo.trim());
+        fd.append("descripcion",     form.descripcion.trim());
+        if (form.tipo_tratamiento) fd.append("tipo_tratamiento", form.tipo_tratamiento);
+        if (form.notas)            fd.append("notas",            form.notas.trim());
+
+        const res = await fetch("/api/casos", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          body: fd,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+      } else {
+        // Sin imagen — JSON normal
+        const res = await fetch("/api/casos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
+          body: JSON.stringify({
+            titulo:           form.titulo.trim(),
+            descripcion:      form.descripcion.trim(),
+            tipo_tratamiento: form.tipo_tratamiento || undefined,
+            notas:            form.notas || undefined,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+      }
       navigate("/casos");
     } catch (err) {
       setServerErr(err.message);
@@ -61,7 +107,6 @@ export default function CreateCasoPage() {
     <div style={s.page}>
       <div style={s.container}>
 
-        {/* Header */}
         <div style={s.topBar}>
           <button style={s.backBtn} onClick={() => navigate("/casos")}>
             <IconBack /> Mis casos
@@ -81,6 +126,37 @@ export default function CreateCasoPage() {
           <form onSubmit={handleSubmit} style={s.form}>
             {serverErr && <div style={s.errorBox}>{serverErr}</div>}
 
+            {/* ── Imagen del caso (FE-9) ── */}
+            <div style={s.fieldGroup}>
+              <label style={s.label}>Foto del problema dental (opcional)</label>
+              <div
+                style={{ ...s.dropZone, ...(imagePreview ? s.dropZoneActive : {}) }}
+                onClick={() => fileRef.current?.click()}
+              >
+                {imagePreview ? (
+                  <div style={s.previewWrap}>
+                    <img src={imagePreview} alt="Preview" style={s.preview} />
+                    <div style={s.previewOverlay}>
+                      <span style={s.previewText}>Click para cambiar</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={s.dropContent}>
+                    <div style={s.cameraIcon}><IconCamera /></div>
+                    <div style={s.dropTitle}>Subir foto</div>
+                    <div style={s.dropSub}>JPG, PNG o WEBP · Máx. 5MB</div>
+                  </div>
+                )}
+              </div>
+              {imageFile && (
+                <button type="button" style={s.removeImgBtn}
+                  onClick={() => { setImageFile(null); setImagePreview(null); }}>
+                  ✕ Quitar imagen
+                </button>
+              )}
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageChange} />
+            </div>
+
             {/* Título */}
             <Input
               label="Título del caso"
@@ -91,14 +167,10 @@ export default function CreateCasoPage() {
               icon={<span style={{ fontSize: "16px" }}>📋</span>}
             />
 
-            {/* Tipo de tratamiento */}
+            {/* Tipo */}
             <div style={s.fieldGroup}>
               <label style={s.label}>Tipo de tratamiento (opcional)</label>
-              <select
-                value={form.tipo_tratamiento}
-                onChange={e => set("tipo_tratamiento", e.target.value)}
-                style={s.select}
-              >
+              <select value={form.tipo_tratamiento} onChange={e => set("tipo_tratamiento", e.target.value)} style={s.select}>
                 <option value="">Seleccioná una categoría...</option>
                 {TIPOS.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -106,13 +178,11 @@ export default function CreateCasoPage() {
 
             {/* Descripción */}
             <div style={s.fieldGroup}>
-              <label style={s.label}>
-                Descripción del caso <span style={s.required}>*</span>
-              </label>
+              <label style={s.label}>Descripción del caso <span style={s.required}>*</span></label>
               <textarea
                 value={form.descripcion}
                 onChange={e => set("descripcion", e.target.value)}
-                placeholder="Contá con detalle qué te pasa, hace cuánto tiempo, si tenés dolor, si ya fuiste a otro dentista, etc."
+                placeholder="Contá con detalle qué te pasa, hace cuánto tiempo, si tenés dolor, etc."
                 rows={5}
                 style={{ ...s.textarea, ...(errors.descripcion ? s.textareaError : {}) }}
               />
@@ -120,26 +190,24 @@ export default function CreateCasoPage() {
                 <span style={{ color: form.descripcion.length < 20 ? "#ef4444" : "#94a3b8" }}>
                   {form.descripcion.length}
                 </span> / mínimo 20 caracteres
-                {errors.descripcion && <span style={s.fieldErr}>{errors.descripcion}</span>}
+                {errors.descripcion && <span style={s.fieldErr}> · {errors.descripcion}</span>}
               </div>
             </div>
 
-            {/* Notas adicionales */}
+            {/* Notas */}
             <div style={s.fieldGroup}>
               <label style={s.label}>Notas adicionales (opcional)</label>
               <textarea
                 value={form.notas}
                 onChange={e => set("notas", e.target.value)}
-                placeholder="Alergias a medicamentos, horarios disponibles, preferencias, etc."
+                placeholder="Alergias, horarios disponibles, preferencias..."
                 rows={3}
                 style={s.textarea}
               />
             </div>
 
             <div style={s.actions}>
-              <button type="button" style={s.cancelBtn} onClick={() => navigate("/casos")}>
-                Cancelar
-              </button>
+              <button type="button" style={s.cancelBtn} onClick={() => navigate("/casos")}>Cancelar</button>
               <Button variant="primary" disabled={submitting} arrow={!submitting}>
                 {submitting ? "Publicando..." : "Publicar caso"}
               </Button>
@@ -153,27 +221,39 @@ export default function CreateCasoPage() {
 }
 
 const s = {
-  page:        { minHeight: "100vh", background: "linear-gradient(135deg,#f8fafc 0%,#eff6ff 55%,#fff7ed 100%)", padding: "36px 20px", fontFamily: "'Inter',sans-serif" },
-  container:   { maxWidth: "680px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
-  topBar:      { display: "flex", alignItems: "center" },
-  backBtn:     { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "#3b82f6", fontWeight: 600, fontSize: "14px", cursor: "pointer", fontFamily: "'Inter',sans-serif" },
-  card:        { background: "#fff", borderRadius: "24px", padding: "36px 40px", boxShadow: "0 4px 30px rgba(0,0,0,0.08)" },
-  cardHeader:  { display: "flex", alignItems: "flex-start", gap: "16px", marginBottom: "4px" },
-  iconCircle:  { width: "48px", height: "48px", minWidth: "48px", borderRadius: "14px", background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", color: "#3b82f6" },
-  title:       { fontSize: "28px", fontWeight: 900, color: "#0f172a", margin: 0, letterSpacing: "-0.5px" },
-  highlight:   { color: "#2563eb" },
-  subtitle:    { fontSize: "14px", color: "#64748b", margin: "4px 0 0" },
-  divider:     { height: "1px", background: "#f1f5f9", margin: "24px 0" },
-  form:        { display: "flex", flexDirection: "column", gap: "20px" },
-  label:       { fontSize: "14px", fontWeight: 600, color: "#1e293b", display: "block", marginBottom: "6px" },
-  required:    { color: "#ef4444" },
-  fieldGroup:  { display: "flex", flexDirection: "column" },
-  select:      { height: "52px", border: "2px solid #e2e8f0", borderRadius: "12px", padding: "0 16px", fontSize: "15px", fontFamily: "'Inter',sans-serif", color: "#0f172a", background: "#fff", outline: "none", cursor: "pointer" },
-  textarea:    { border: "2px solid #e2e8f0", borderRadius: "12px", padding: "14px 16px", fontSize: "15px", fontFamily: "'Inter',sans-serif", color: "#0f172a", outline: "none", resize: "vertical", lineHeight: "1.6", width: "100%", boxSizing: "border-box" },
-  textareaError:{ borderColor: "#ef4444", boxShadow: "0 0 0 3px rgba(239,68,68,0.1)" },
-  charCount:   { fontSize: "12px", color: "#94a3b8", marginTop: "6px", display: "flex", gap: "8px", flexWrap: "wrap" },
-  fieldErr:    { color: "#ef4444", fontWeight: 500 },
-  errorBox:    { padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", color: "#dc2626", fontSize: "14px", fontWeight: 500 },
-  actions:     { display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "8px" },
-  cancelBtn:   { padding: "12px 24px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" },
+  page:          { minHeight: "100vh", background: "linear-gradient(135deg,#f8fafc 0%,#eff6ff 55%,#fff7ed 100%)", padding: "36px 20px", fontFamily: "'Inter',sans-serif" },
+  container:     { maxWidth: "680px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
+  topBar:        { display: "flex" },
+  backBtn:       { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "#3b82f6", fontWeight: 600, fontSize: "14px", cursor: "pointer", fontFamily: "'Inter',sans-serif" },
+  card:          { background: "#fff", borderRadius: "24px", padding: "36px 40px", boxShadow: "0 4px 30px rgba(0,0,0,0.08)" },
+  cardHeader:    { display: "flex", alignItems: "flex-start", gap: "16px", marginBottom: "4px" },
+  iconCircle:    { width: "48px", height: "48px", minWidth: "48px", borderRadius: "14px", background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", color: "#3b82f6" },
+  title:         { fontSize: "28px", fontWeight: 900, color: "#0f172a", margin: 0, letterSpacing: "-0.5px" },
+  highlight:     { color: "#2563eb" },
+  subtitle:      { fontSize: "14px", color: "#64748b", margin: "4px 0 0" },
+  divider:       { height: "1px", background: "#f1f5f9", margin: "24px 0" },
+  form:          { display: "flex", flexDirection: "column", gap: "20px" },
+  label:         { fontSize: "14px", fontWeight: 600, color: "#1e293b", display: "block", marginBottom: "6px" },
+  required:      { color: "#ef4444" },
+  fieldGroup:    { display: "flex", flexDirection: "column" },
+  // Dropzone imagen
+  dropZone:      { border: "2px dashed #e2e8f0", borderRadius: "16px", cursor: "pointer", overflow: "hidden", minHeight: "140px", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .2s", background: "#fafafa" },
+  dropZoneActive:{ border: "2px solid #bfdbfe", background: "#f0f8ff" },
+  dropContent:   { display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", padding: "32px" },
+  cameraIcon:    { width: "48px", height: "48px", borderRadius: "14px", background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", color: "#3b82f6" },
+  dropTitle:     { fontSize: "15px", fontWeight: 700, color: "#0f172a" },
+  dropSub:       { fontSize: "13px", color: "#94a3b8" },
+  previewWrap:   { position: "relative", width: "100%", height: "200px" },
+  preview:       { width: "100%", height: "100%", objectFit: "cover" },
+  previewOverlay:{ position: "absolute", inset: 0, background: "rgba(0,0,0,0)", display: "flex", alignItems: "center", justifyContent: "center", transition: "background .2s" },
+  previewText:   { color: "#fff", fontWeight: 700, fontSize: "14px", opacity: 0, transition: "opacity .2s" },
+  removeImgBtn:  { background: "none", border: "none", color: "#ef4444", fontSize: "13px", fontWeight: 600, cursor: "pointer", padding: "4px 0", fontFamily: "'Inter',sans-serif", marginTop: "6px", textAlign: "left", width: "fit-content" },
+  select:        { height: "52px", border: "2px solid #e2e8f0", borderRadius: "12px", padding: "0 16px", fontSize: "15px", fontFamily: "'Inter',sans-serif", color: "#0f172a", background: "#fff", outline: "none" },
+  textarea:      { border: "2px solid #e2e8f0", borderRadius: "12px", padding: "14px 16px", fontSize: "15px", fontFamily: "'Inter',sans-serif", color: "#0f172a", outline: "none", resize: "vertical", lineHeight: "1.6", width: "100%", boxSizing: "border-box" },
+  textareaError: { borderColor: "#ef4444" },
+  charCount:     { fontSize: "12px", color: "#94a3b8", marginTop: "6px" },
+  fieldErr:      { color: "#ef4444", fontWeight: 500 },
+  errorBox:      { padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", color: "#dc2626", fontSize: "14px", fontWeight: 500 },
+  actions:       { display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "8px" },
+  cancelBtn:     { padding: "12px 24px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" },
 };
