@@ -32,6 +32,21 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Stats públicas de la plataforma
+app.get('/api/stats', async (req, res) => {
+  try {
+    const { supabase } = require('./config/supabase');
+    const [{ count: estudiantes }, { count: pacientes }, { count: matches }] = await Promise.all([
+      supabase.from('estudiantes').select('*', { count: 'exact', head: true }),
+      supabase.from('pacientes').select('*', { count: 'exact', head: true }),
+      supabase.from('asignaciones').select('*', { count: 'exact', head: true }),
+    ]);
+    res.json({ estudiantes: estudiantes ?? 0, pacientes: pacientes ?? 0, matches: matches ?? 0 });
+  } catch (e) {
+    res.json({ estudiantes: 0, pacientes: 0, matches: 0 });
+  }
+});
+
 // Manejo global de errores
 app.use(errorHandler);
 
