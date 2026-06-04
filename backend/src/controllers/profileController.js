@@ -128,7 +128,8 @@ const updateProfile = async (req, res) => {
     res.status(400).json({ error: 'Rol no válido para esta operación' });
   } catch (error) {
     if (error.name === 'ZodError') {
-      return res.status(400).json({ error: 'Datos inválidos', details: error.errors });
+      const messages = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(' | ');
+      return res.status(400).json({ error: messages });
     }
     res.status(500).json({ error: error.message });
   }

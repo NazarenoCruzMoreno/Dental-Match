@@ -16,7 +16,10 @@ const registerSchema = loginSchema.extend({
 const estudianteSchema = z.object({
   nombre: z.string().min(2, 'Nombre muy corto'),
   universidad: z.string().min(2, 'Universidad requerida'),
-  anio_carrera: z.number().int().min(1).max(6).optional(),
+  anio_carrera: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+    z.number().int().min(1).max(6).optional()
+  ),
   materias: z.array(z.string()).min(1, 'Agregá al menos una materia'),
   disponibilidad: z.array(z.string()).min(1, 'Indicá tu disponibilidad'),
   descripcion: z.string().min(10, 'Descripción muy corta'),
@@ -27,9 +30,16 @@ const estudianteUpdateSchema = estudianteSchema.partial();
 // ── Perfil Paciente ───────────────────────────────────────────────────────────
 const pacienteSchema = z.object({
   nombre: z.string().min(2, 'Nombre muy corto'),
-  edad: z.number().int().min(1).max(120, 'Edad inválida'),
-  telefono: z.string().min(7, 'Teléfono inválido').optional(),
-  problemaDental: z.string().min(10, 'Describí el problema con más detalle'),
+  edad: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+    z.number({ required_error: 'La edad es requerida' }).int().min(1).max(120, 'Edad inválida')
+  ),
+  // Teléfono: acepta string con mínimo 7 chars O string vacío (campo omitido)
+  telefono: z.union([
+    z.string().min(7, 'Teléfono inválido'),
+    z.literal(''),
+  ]).optional().transform((v) => (v === '' ? undefined : v)),
+  problemaDental: z.string().min(10, 'Describí el problema con más detalle (mínimo 10 caracteres)'),
 });
 
 const pacienteUpdateSchema = pacienteSchema.partial();
