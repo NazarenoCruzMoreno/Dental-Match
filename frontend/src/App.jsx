@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { ThemeProvider } from "./context/ThemeContext";
 import SelectionPage   from "./pages/SelectionPage/SelectionPage";
 import RegisterPage    from "./pages/RegisterPage/RegisterPage";
 import LoginPage       from "./pages/LoginPage/LoginPage";
@@ -37,6 +38,7 @@ function RequireProfile({ children }) {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <BrowserRouter>
       <Routes>
         {/* Públicas */}
@@ -55,5 +57,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }

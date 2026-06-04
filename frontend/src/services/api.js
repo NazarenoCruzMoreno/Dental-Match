@@ -47,6 +47,24 @@ export const profileService = {
     }).then(handleResponse),
 };
 
+export const notificationService = {
+  getAll: () =>
+    fetch(`${BASE_URL}/notifications`, { headers: authHeaders() }).then(handleResponse),
+  markRead: () =>
+    fetch(`${BASE_URL}/notifications/read`, { method: 'PUT', headers: authHeaders() }).then(handleResponse),
+};
+
+export const reviewService = {
+  getByEstudiante: (id) =>
+    fetch(`${BASE_URL}/reviews/${id}`).then(handleResponse),
+  create: (data) =>
+    fetch(`${BASE_URL}/reviews`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+};
+
 export const setAuthToken = (token) => localStorage.setItem('token', token);
 export const getAuthToken = () => localStorage.getItem('token');
 export const clearAuth = () => {

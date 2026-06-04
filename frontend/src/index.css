@@ -1,12 +1,44 @@
-/* Global styles */
+/* ── Variables de tema ──────────────────────────────────────────────── */
+:root {
+  --bg-page:      linear-gradient(135deg, #f8fafc 0%, #eff6ff 60%, #fff7ed 100%);
+  --bg-card:      #ffffff;
+  --bg-input:     #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary:#64748b;
+  --border:       #e2e8f0;
+  --shadow:       0 4px 20px rgba(0,0,0,0.06);
+  --stat-bg-blue: #eff6ff;
+  --stat-bg-amber:#fff7ed;
+  --stat-bg-green:#f0fdf4;
+}
 
+[data-theme="dark"] {
+  --bg-page:      linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #1c1917 100%);
+  --bg-card:      #1e293b;
+  --bg-input:     #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary:#94a3b8;
+  --border:       #334155;
+  --shadow:       0 4px 20px rgba(0,0,0,0.3);
+  --stat-bg-blue: #1e3a5f;
+  --stat-bg-amber:#2d1f0e;
+  --stat-bg-green:#0f2d1f;
+}
+
+/* ── Animaciones globales ─────────────────────────────────────────── */
 @keyframes spin {
   0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
 @keyframes toothFloat {
-  0%, 100% { transform: translateY(-50%) rotate(-4deg); }
-  33%       { transform: translateY(calc(-50% - 18px)) rotate(2deg); }
-  66%       { transform: translateY(calc(-50% + 10px)) rotate(-2deg); }
+  0%, 100% { transform: translateY(0) rotate(-8deg); }
+  33%       { transform: translateY(-22px) rotate(-4deg); }
+  66%       { transform: translateY(10px) rotate(-10deg); }
+}
+
+/* ── Dark mode overrides para elementos que usan CSS ─────────────── */
+[data-theme="dark"] body {
+  background-color: #0f172a;
+  color: #f1f5f9;
 }
