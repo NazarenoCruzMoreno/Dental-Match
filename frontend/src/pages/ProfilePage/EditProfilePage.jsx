@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { profileService, getUser } from "../../services/api";
 import Input from "../../components/Input/Input";
@@ -122,17 +122,22 @@ export default function EditProfilePage() {
   const defaultEstudiante = { nombre: "", universidad: "", anio_carrera: "", descripcion: "", materias: [], disponibilidad: [] };
   const defaultPaciente   = { nombre: "", edad: "", telefono: "", problemaDental: "" };
 
-  const [formData, setFormData] = useState(role === "estudiante" ? defaultEstudiante : defaultPaciente);
+  const [formData,   setFormData]   = useState(role === "estudiante" ? defaultEstudiante : defaultPaciente);
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [success,    setSuccess]    = useState(false);
+  const [error,      setError]      = useState("");
+  const [loading,    setLoading]    = useState(true);
+  const [photoFile,  setPhotoFile]  = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [currentPhoto, setCurrentPhoto] = useState(null);
+  const fileRef = useRef(null);
 
   // Pre-cargar datos existentes
   useEffect(() => {
     profileService.get()
       .then(({ perfil }) => {
         if (!perfil) return;
+        if (perfil?.imagen_url) setCurrentPhoto(perfil.imagen_url);
         if (role === "estudiante") {
           setFormData({
             nombre:        perfil.nombre        ?? "",
@@ -162,7 +167,22 @@ export default function EditProfilePage() {
     setError("");
     setSubmitting(true);
     try {
-      await profileService.update(formData);
+      // Si hay foto nueva, enviar como multipart/form-data
+      if (photoFile) {
+        const fd = new FormData();
+        fd.append("imagen", photoFile);
+        Object.entries(formData).forEach(([k, v]) => {
+          if (Array.isArray(v)) v.forEach(i => fd.append(k, i));
+          else if (v !== "" && v !== null && v !== undefined) fd.append(k, v);
+        });
+        await fetch("/api/profile", {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          body: fd,
+        });
+      } else {
+        await profileService.update(formData);
+      }
       setSuccess(true);
       setTimeout(() => navigate(isNewUser ? "/home" : "/profile"), 1200);
     } catch (err) {
@@ -210,6 +230,37 @@ export default function EditProfilePage() {
             {error   && <div style={styles.errorBox}>{error}</div>}
             {success && <div style={styles.successBox}>✅ Perfil guardado correctamente</div>}
 
+            {/* 📸 Foto de perfil */}
+            <div style={photoStyles.section}>
+              <label style={photoStyles.label}>Foto de perfil</label>
+              <div style={photoStyles.row}>
+                <div style={photoStyles.preview}>
+                  {(photoPreview || currentPhoto)
+                    ? <img src={photoPreview || currentPhoto} alt="preview" style={photoStyles.img} />
+                    : <span style={photoStyles.placeholder}>📸</span>}
+                </div>
+                <div style={photoStyles.actions}>
+                  <button type="button" style={photoStyles.selectBtn} onClick={() => fileRef.current?.click()}>
+                    {photoPreview ? "Cambiar foto" : "Subir foto"}
+                  </button>
+                  {photoPreview && (
+                    <button type="button" style={photoStyles.removeBtn}
+                      onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}>
+                      Quitar
+                    </button>
+                  )}
+                  <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setPhotoFile(file);
+                      setPhotoPreview(URL.createObjectURL(file));
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
             {role === "estudiante" && <EstudianteForm data={formData} onChange={handleChange} />}
             {role === "paciente"   && <PacienteForm   data={formData} onChange={handleChange} />}
 
@@ -245,4 +296,16 @@ const styles = {
   welcomeText:  { fontSize: "13px", color: "#166534", marginTop: "2px", fontFamily: "'Inter', sans-serif" },
   errorBox:     { padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", color: "#dc2626", fontSize: "14px", fontWeight: 500, textAlign: "center" },
   successBox:   { padding: "12px 16px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", color: "#16a34a", fontSize: "14px", fontWeight: 600, textAlign: "center" },
+};
+
+const photoStyles = {
+  section:     { display: "flex", flexDirection: "column", gap: "8px" },
+  label:       { fontSize: "14px", fontWeight: 600, color: "#1e293b", fontFamily: "'Inter', sans-serif" },
+  row:         { display: "flex", alignItems: "center", gap: "16px" },
+  preview:     { width: "72px", height: "72px", minWidth: "72px", borderRadius: "50%", border: "2px solid #bfdbfe", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#eff6ff" },
+  img:         { width: "100%", height: "100%", objectFit: "cover" },
+  placeholder: { fontSize: "28px" },
+  actions:     { display: "flex", flexDirection: "column", gap: "8px" },
+  selectBtn:   { padding: "8px 16px", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter', sans-serif" },
+  removeBtn:   { padding: "6px 14px", background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", borderRadius: "8px", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif" },
 };
