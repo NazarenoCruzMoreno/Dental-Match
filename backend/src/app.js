@@ -9,6 +9,7 @@ const pacienteRoutes   = require('./routes/pacientes');
 const asignacionRoutes = require('./routes/asignaciones');
 const notifRoutes      = require('./routes/notifications');
 const reviewRoutes     = require('./routes/reviews');
+const casosRoutes      = require('./routes/casos');
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/api/auth',          userRoutes);
 app.use('/api/profile',       profileRoutes);
 app.use('/api/notifications', notifRoutes);
 app.use('/api/reviews',       reviewRoutes);
+app.use('/api/casos',         casosRoutes);
 app.use('/api/estudiantes', estudianteRoutes);
 app.use('/api/pacientes', pacienteRoutes);
 app.use('/api/asignaciones', asignacionRoutes);
