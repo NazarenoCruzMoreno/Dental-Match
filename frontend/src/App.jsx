@@ -7,6 +7,8 @@ import LoginPage       from "./pages/LoginPage/LoginPage";
 import HomePage        from "./pages/HomePage/HomePage";
 import ProfilePage     from "./pages/ProfilePage/ProfilePage";
 import EditProfilePage from "./pages/ProfilePage/EditProfilePage";
+import CasosPage       from "./pages/CasosPage/CasosPage";
+import CreateCasoPage  from "./pages/CasosPage/CreateCasoPage";
 import { isSessionValid, profileService } from "./services/api";
 
 // Rutas públicas — si ya tiene sesión redirige al home
@@ -49,6 +51,8 @@ export default function App() {
         {/* Privadas — solo sesión */}
         <Route path="/profile"      element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
         <Route path="/profile/edit" element={<PrivateRoute><EditProfilePage /></PrivateRoute>} />
+        <Route path="/casos"        element={<PrivateRoute><CasosPage /></PrivateRoute>} />
+        <Route path="/casos/nuevo"  element={<PrivateRoute><CreateCasoPage /></PrivateRoute>} />
 
         {/* Privada — sesión + perfil completo */}
         <Route path="/home" element={<RequireProfile><HomePage /></RequireProfile>} />

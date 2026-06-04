@@ -47,6 +47,28 @@ export const profileService = {
     }).then(handleResponse),
 };
 
+export const casosService = {
+  listar: () =>
+    fetch(`${BASE_URL}/casos`, { headers: authHeaders() }).then(handleResponse),
+
+  obtener: (id) =>
+    fetch(`${BASE_URL}/casos/${id}`, { headers: authHeaders() }).then(handleResponse),
+
+  crear: (data) =>
+    fetch(`${BASE_URL}/casos`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+
+  actualizar: (id, data) =>
+    fetch(`${BASE_URL}/casos/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+};
+
 export const notificationService = {
   getAll: () =>
     fetch(`${BASE_URL}/notifications`, { headers: authHeaders() }).then(handleResponse),

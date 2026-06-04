@@ -124,14 +124,14 @@ export default function HomePage() {
     : "El estudiante ideal para tu tratamiento está a un click.";
   const cards = role === "estudiante"
     ? [
-        { icon: "👤", title: "Mi perfil",      desc: "Tu universidad, materias y disponibilidad.",   action: () => navigate("/profile"), label: "Ver perfil",   primary: true },
-        { icon: "🦷", title: "Casos clínicos",  desc: "Próximamente: explorá pacientes disponibles.", action: null, label: "Próximamente", primary: false },
-        { icon: "📅", title: "Mis turnos",      desc: "Próximamente: gestioná tus turnos.",           action: null, label: "Próximamente", primary: false },
+        { icon: "👤", title: "Mi perfil",      desc: "Tu universidad, materias y disponibilidad.",   action: () => navigate("/profile"),  label: "Ver perfil",    primary: true },
+        { icon: "🦷", title: "Casos clínicos", desc: "Explorá casos abiertos de pacientes.",          action: () => navigate("/casos"),    label: "Ver casos",     primary: true },
+        { icon: "📅", title: "Mis turnos",     desc: "Próximamente: gestioná tus turnos asignados.",  action: null,                        label: "Próximamente",  primary: false },
       ]
     : [
-        { icon: "👤", title: "Mi perfil",        desc: "Tus datos personales y problema dental.",     action: () => navigate("/profile"), label: "Ver perfil",   primary: true },
-        { icon: "🔍", title: "Buscar estudiante", desc: "Próximamente: encontrá tu match ideal.",      action: null, label: "Próximamente", primary: false },
-        { icon: "📅", title: "Mis turnos",        desc: "Próximamente: seguí el estado de tus turnos.",action: null, label: "Próximamente", primary: false },
+        { icon: "👤", title: "Mi perfil",      desc: "Tus datos personales y problema dental.",       action: () => navigate("/profile"),  label: "Ver perfil",    primary: true },
+        { icon: "🦷", title: "Mis casos",      desc: "Publicá un caso para encontrar un estudiante.", action: () => navigate("/casos"),    label: "Ver mis casos", primary: true },
+        { icon: "📅", title: "Mis turnos",     desc: "Próximamente: seguí el estado de tus turnos.",  action: null,                        label: "Próximamente",  primary: false },
       ];
 
   const pageBg = isDark
