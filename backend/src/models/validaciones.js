@@ -14,35 +14,45 @@ const registerSchema = loginSchema.extend({
 
 // ── Perfil Estudiante ─────────────────────────────────────────────────────────
 const estudianteSchema = z.object({
-  nombre: z.string().min(2, 'Nombre muy corto'),
-  universidad: z.string().min(2, 'Universidad requerida'),
-  anio_carrera: z.preprocess(
-    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+  nombre:        z.string().min(2, 'Nombre muy corto'),
+  universidad:   z.string().min(2, 'Universidad requerida'),
+  anio_carrera:  z.preprocess(
+    v => (v === '' || v === null || v === undefined ? undefined : Number(v)),
     z.number().int().min(1).max(6).optional()
   ),
-  materias: z.array(z.string()).min(1, 'Agregá al menos una materia'),
-  disponibilidad: z.array(z.string()).min(1, 'Indicá tu disponibilidad'),
-  descripcion: z.string().min(10, 'Descripción muy corta'),
+  materias:      z.array(z.string()).min(1, 'Agregá al menos una materia'),
+  disponibilidad:z.array(z.string()).min(1, 'Indicá tu disponibilidad'),
+  descripcion:   z.string().min(10, 'Descripción muy corta'),
 });
 
 const estudianteUpdateSchema = estudianteSchema.partial();
 
 // ── Perfil Paciente ───────────────────────────────────────────────────────────
 const pacienteSchema = z.object({
-  nombre: z.string().min(2, 'Nombre muy corto'),
-  edad: z.preprocess(
-    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
-    z.number({ required_error: 'La edad es requerida' }).int().min(1).max(120, 'Edad inválida')
+  nombre:        z.string().min(2, 'Nombre muy corto'),
+  edad:          z.preprocess(
+    v => (v === '' || v === null || v === undefined ? undefined : Number(v)),
+    z.number({ required_error: 'La edad es requerida' }).int().min(1).max(120)
   ),
-  // Teléfono: acepta string con mínimo 7 chars O string vacío (campo omitido)
-  telefono: z.union([
-    z.string().min(7, 'Teléfono inválido'),
-    z.literal(''),
-  ]).optional().transform((v) => (v === '' ? undefined : v)),
-  problemaDental: z.string().min(10, 'Describí el problema con más detalle (mínimo 10 caracteres)'),
+  telefono:      z.union([z.string().min(7), z.literal('')])
+    .optional()
+    .transform(v => (v === '' ? undefined : v)),
+  problemaDental:z.string().min(10, 'Describí el problema con más detalle'),
 });
 
 const pacienteUpdateSchema = pacienteSchema.partial();
+
+// ── Caso clínico ──────────────────────────────────────────────────────────────
+const casoSchema = z.object({
+  titulo:           z.string().min(5, 'El título debe tener al menos 5 caracteres'),
+  descripcion:      z.string().min(20, 'Describí el caso con más detalle (mínimo 20 caracteres)'),
+  tipo_tratamiento: z.string().optional(),
+  notas:            z.string().optional(),
+});
+
+const casoUpdateSchema = casoSchema.partial().extend({
+  estado: z.enum(['abierto', 'en_progreso', 'completado', 'cancelado']).optional(),
+});
 
 module.exports = {
   loginSchema,
@@ -51,4 +61,6 @@ module.exports = {
   estudianteUpdateSchema,
   pacienteSchema,
   pacienteUpdateSchema,
+  casoSchema,
+  casoUpdateSchema,
 };
