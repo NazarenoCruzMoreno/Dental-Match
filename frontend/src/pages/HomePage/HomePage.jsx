@@ -13,137 +13,101 @@ const IconEdit    = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill=
 const IconMoon    = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>);
 const IconSun     = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>);
 
-// ── 🪥 Cepillo de dientes — diseño reconocible con contexto ──────────────────
-const ToothbrushDecoration = ({ isDark }) => (
-  <div style={{ position: "fixed", right: "30px", top: "50%", transform: "translateY(-50%) rotate(-15deg)", width: "90px", pointerEvents: "none", zIndex: 0, animation: "toothFloat 6s ease-in-out infinite" }} aria-hidden="true">
+// ── 🪥 Cepillo flat cartoon — inspirado en la referencia ─────────────────────
+const ToothbrushDecoration = ({ isDark }) => {
+  const body  = isDark ? "#3b82f6" : "#60a5fa";
+  const light = isDark ? "#60a5fa" : "#93c5fd";
+  const dark2 = isDark ? "#1d4ed8" : "#3b82f6";
+  const shine = "rgba(255,255,255,0.55)";
+  return (
+    <div style={{ position: "fixed", right: "10px", top: "50%", transform: "translateY(-52%) rotate(18deg)", width: "95px", height: "320px", pointerEvents: "none", zIndex: 0, animation: "toothFloat 6s ease-in-out infinite" }} aria-hidden="true">
+      <svg viewBox="0 0 60 300" style={{ width: "100%", height: "100%", opacity: isDark ? 0.65 : 0.82 }}>
+        <defs>
+          <linearGradient id="tb_body" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor={light}/>
+            <stop offset="40%"  stopColor={body}/>
+            <stop offset="100%" stopColor={dark2}/>
+          </linearGradient>
+          <linearGradient id="tb_head" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stopColor={light}/>
+            <stop offset="50%"  stopColor={body}/>
+            <stop offset="100%" stopColor={dark2}/>
+          </linearGradient>
+        </defs>
 
-    {/* Burbujas de pasta decorativas */}
-    {[
-      { cx: 75, cy: 20, r: 8,  op: 0.25 },
-      { cx: 20, cy: 40, r: 5,  op: 0.18 },
-      { cx: 85, cy: 60, r: 6,  op: 0.2  },
-      { cx: 10, cy: 90, r: 4,  op: 0.15 },
-      { cx: 80, cy: 110,r: 7,  op: 0.2  },
-    ].map((b, i) => (
-      <div key={i} style={{
-        position: "absolute", borderRadius: "50%",
-        width: b.r * 2, height: b.r * 2,
-        left: b.cx - b.r, top: b.cy - b.r,
-        background: isDark ? `rgba(147,197,253,${b.op})` : `rgba(59,130,246,${b.op})`,
-        border: `1px solid rgba(147,197,253,${b.op * 1.5})`,
-      }} />
-    ))}
+        {/* ── MANGO: forma ergonómica con curva suave ── */}
+        {/* Más ancho abajo, se estrecha en el cuello */}
+        <path d="
+          M18 295 Q10 292 10 280 L10 190
+          Q8  175 10 160 L11 140
+          Q12 128 16 122
+          L16 90 Q16 82 20 78
+          L20 68
+          Q20 60 24 58
+          L36 58
+          Q40 60 40 68
+          L40 78 Q44 82 44 90
+          L44 122 Q48 128 49 140
+          L50 160 Q52 175 50 190
+          L50 280 Q50 292 42 295 Z"
+          fill="url(#tb_body)" rx="8"/>
 
-    <svg viewBox="0 0 80 320" style={{ width: "100%", opacity: isDark ? 0.7 : 0.85 }}>
-      <defs>
-        <linearGradient id="bHandle" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor={isDark ? "#1e3a5f" : "#bfdbfe"}/>
-          <stop offset="45%"  stopColor={isDark ? "#2563eb" : "#93c5fd"}/>
-          <stop offset="100%" stopColor={isDark ? "#1d4ed8" : "#60a5fa"}/>
-        </linearGradient>
-        <linearGradient id="bSide" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor="#1d4ed8" stopOpacity="0.5"/>
-          <stop offset="100%" stopColor="#1e40af" stopOpacity="0.3"/>
-        </linearGradient>
-        <linearGradient id="bRubber" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor="#fb923c"/>
-          <stop offset="50%"  stopColor="#fed7aa"/>
-          <stop offset="100%" stopColor="#f97316"/>
-        </linearGradient>
-        <linearGradient id="bHead" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stopColor={isDark ? "#1e3a5f" : "#dbeafe"}/>
-          <stop offset="50%"  stopColor={isDark ? "#2563eb" : "#eff6ff"}/>
-          <stop offset="100%" stopColor={isDark ? "#1d4ed8" : "#bfdbfe"}/>
-        </linearGradient>
-        <filter id="bShadow">
-          <feDropShadow dx="2" dy="3" stdDeviation="3" floodColor="#3b82f6" floodOpacity="0.25"/>
-        </filter>
-      </defs>
+        {/* Brillo izquierdo del mango */}
+        <path d="M14 100 Q13 180 13 265" stroke={shine} strokeWidth="2.5" strokeLinecap="round"/>
 
-      {/* Sombra suave debajo */}
-      <ellipse cx="43" cy="314" rx="20" ry="5" fill="#3b82f6" opacity="0.1"/>
+        {/* Pequeña zona diferenciada en la parte baja del mango */}
+        <rect x="14" y="230" width="32" height="38" rx="8" fill={dark2} opacity="0.25"/>
+        <path d="M16 238 Q30 235 44 238" stroke={shine} strokeWidth="1" opacity="0.4"/>
 
-      {/* ── MANGO — cuerpo principal ── */}
-      {/* Cara lateral derecha (oscura, 3D) */}
-      <path d="M52 305 Q56 290 56 160 L60 150 L60 145 L56 140 L56 95 L52 88 L52 85 L60 85 L65 90 L65 145 L68 150 L68 160 Q68 290 64 305 Z"
-        fill="url(#bSide)"/>
-      {/* Cara frontal del mango */}
-      <path d="M28 305 Q24 290 24 160 L28 150 L28 145 L24 140 L24 95 L28 88 L28 85 L52 85 L52 88 L56 95 L56 140 L52 145 L52 150 L56 160 Q56 290 52 305 Z"
-        fill="url(#bHandle)" filter="url(#bShadow)"/>
-      {/* Brillo lateral izquierdo */}
-      <path d="M30 100 Q28 180 28 280" stroke="white" strokeWidth="2" strokeLinecap="round" opacity="0.4"/>
-      {/* Borde redondeado inferior */}
-      <path d="M28 305 Q40 315 52 305" fill="none" stroke="#2563eb" strokeWidth="1" opacity="0.4"/>
+        {/* ── CUELLO: se estrecha suavemente ── */}
+        {/* Ya incluido en el path del mango — transición natural */}
 
-      {/* ── GRIP DE GOMA (banda naranja) ── */}
-      <path d="M24 195 L56 195 L56 235 L24 235 Z" fill="url(#bRubber)" opacity="0.9" rx="3"/>
-      <path d="M56 195 L64 200 L64 240 L56 235 Z" fill="#ea580c" opacity="0.35"/>
-      {[202, 210, 218, 226].map((y, i) => (
-        <line key={i} x1="26" y1={y} x2="54" y2={y} stroke="white" strokeWidth="1.5" opacity="0.35"/>
-      ))}
+        {/* ── CABEZA: rectángulo redondeado más ancho ── */}
+        <rect x="8" y="8" width="44" height="54" rx="10" fill="url(#tb_head)"/>
+        {/* Brillo cabeza */}
+        <path d="M12 13 Q30 9 48 13" stroke={shine} strokeWidth="2" strokeLinecap="round"/>
+        {/* Borde inferior de la cabeza (sombra) */}
+        <rect x="8" y="50" width="44" height="12" rx="0" fill={dark2} opacity="0.2"
+          style={{ borderBottomLeftRadius: "0", borderBottomRightRadius: "0" }}/>
 
-      {/* ── CUELLO (transición mango → cabeza) ── */}
-      <path d="M24 88 L28 50 L52 50 L56 88 Z" fill="url(#bHandle)"/>
-      <path d="M56 88 L60 90 L64 52 L60 50 L56 50 Z" fill="url(#bSide)"/>
+        {/* ── CERDAS: 7 grupos de líneas verticales azul oscuro ── */}
+        {[13, 18, 23, 28, 33, 38, 43].map((x, i) => (
+          <g key={i}>
+            {/* cerda larga */}
+            <rect x={x-1.5} y={2} width="3" height="22" rx="1.5" fill={dark2} opacity="0.9"/>
+            {/* cerda corta (alternada) */}
+            <rect x={x-1.5} y={i%2===0 ? 4 : 6} width="3" height={i%2===0 ? 18 : 16} rx="1.5" fill={dark2} opacity="0.5"/>
+          </g>
+        ))}
 
-      {/* ── CABEZA del cepillo ── */}
-      {/* Cara lateral derecha */}
-      <path d="M52 52 L60 50 L64 8 L56 6 Z" fill="url(#bSide)"/>
-      {/* Cara frontal */}
-      <path d="M12 52 Q10 50 12 8 L56 6 Q58 8 56 52 Z" fill="url(#bHead)" filter="url(#bShadow)"/>
-      {/* Borde superior redondeado */}
-      <path d="M12 8 Q34 2 56 6" fill="none" stroke="#93c5fd" strokeWidth="1.5" opacity="0.6"/>
+        {/* Base de las cerdas (plataforma) */}
+        <rect x="9" y="22" width="42" height="8" rx="2" fill={dark2} opacity="0.3"/>
 
-      {/* ── BASE de cerdas (plataforma blanca) ── */}
-      <rect x="14" y="10" width="40" height="36" rx="4" fill="white" opacity="0.65"/>
-      <rect x="56" y="10" width="6" height="36" rx="1" fill="#bfdbfe" opacity="0.4"/>
+        {/* Pequeño reflejo en la punta de las cerdas */}
+        {[13, 23, 33, 43].map((x, i) => (
+          <circle key={i} cx={x} cy="3" r="1.5" fill="white" opacity="0.6"/>
+        ))}
+      </svg>
+    </div>
+  );
+};
 
-      {/* ── CERDAS en 4 columnas × 3 filas ── */}
-      {/* Columnas: x = 20, 27, 34, 41, 48 */}
-      {/* Filas: base y = 46 (crecen hacia arriba) */}
-      {[20, 27, 34, 41, 48].map((x, ci) =>
-        [0, 1, 2].map((ri) => {
-          const colors = ["#2563eb", "#60a5fa", "#ffffff"];
-          const h = 14 - ri * 1;
-          const y = 45 - h;
-          return (
-            <g key={`${ci}-${ri}`}>
-              <rect x={x-2} y={y} width="4" height={h} rx="2"
-                fill={colors[ri]} opacity={ri === 2 ? 0.9 : 0.85}/>
-              <circle cx={x} cy={y} r="2.2"
-                fill={ri === 0 ? "#1d4ed8" : ri === 1 ? "#3b82f6" : "#dbeafe"}
-                opacity="0.95"/>
-            </g>
-          );
-        })
-      )}
-
-      {/* ── Detalle de marca en el mango ── */}
-      <rect x="30" y="130" width="20" height="4" rx="2" fill="white" opacity="0.2"/>
-      <rect x="30" y="140" width="14" height="3" rx="1.5" fill="white" opacity="0.15"/>
-
-      {/* ── Reflejo superior en la cabeza ── */}
-      <path d="M15 12 Q34 8 54 10" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-    </svg>
-  </div>
-);
-
-// ── E: Olas fijas en fondo — 3 tonos de azul, cambian con dark mode ──────────
+// ── 🌊 Olas fijas — más altas y prominentes, cambian con dark mode ────────────
 const WaveBackground = ({ isDark }) => {
   const c = isDark
-    ? { w1: "#1e3a5f", w2: "#1d4ed8", w3: "#1e40af", o1: 0.5, o2: 0.4, o3: 0.35 }
-    : { w1: "#bfdbfe", w2: "#93c5fd", w3: "#60a5fa", o1: 0.7, o2: 0.55, o3: 0.45 };
+    ? { w1: "#1e3a5f", w2: "#1d4ed8", w3: "#1e40af", o1: 0.6, o2: 0.5, o3: 0.4 }
+    : { w1: "#93c5fd", w2: "#60a5fa", w3: "#3b82f6", o1: 0.55, o2: 0.45, o3: 0.38 };
   return (
     <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, pointerEvents: "none", zIndex: 0, lineHeight: 0 }} aria-hidden="true">
-      <svg viewBox="0 0 1440 130" preserveAspectRatio="none" style={{ width: "100%", height: "130px", display: "block" }}>
-        {/* Ola 1 — más suave, atrás */}
-        <path d="M0,70 C180,30 360,100 540,65 C720,30 900,95 1080,60 C1260,25 1380,75 1440,55 L1440,130 L0,130 Z"
+      <svg viewBox="0 0 1440 180" preserveAspectRatio="none" style={{ width: "100%", height: "180px", display: "block" }}>
+        {/* Ola trasera — más clara y alta */}
+        <path d="M0,90 C180,45 360,130 540,85 C720,40 900,120 1080,78 C1260,36 1380,100 1440,72 L1440,180 L0,180 Z"
           fill={c.w1} fillOpacity={c.o1}/>
-        {/* Ola 2 — media */}
-        <path d="M0,90 C200,55 400,110 600,80 C800,50 1000,105 1200,75 C1320,58 1390,82 1440,72 L1440,130 L0,130 Z"
+        {/* Ola media */}
+        <path d="M0,115 C200,75 400,145 600,108 C800,71 1000,138 1200,100 C1320,80 1390,112 1440,98 L1440,180 L0,180 Z"
           fill={c.w2} fillOpacity={c.o2}/>
-        {/* Ola 3 — más oscura, adelante */}
-        <path d="M0,108 C240,78 480,125 720,100 C960,75 1200,120 1440,105 L1440,130 L0,130 Z"
+        {/* Ola delantera — más oscura y cercana */}
+        <path d="M0,138 C240,105 480,160 720,132 C960,104 1200,155 1440,138 L1440,180 L0,180 Z"
           fill={c.w3} fillOpacity={c.o3}/>
       </svg>
     </div>
@@ -334,8 +298,8 @@ export default function HomePage() {
 
 // ── Estilos ────────────────────────────────────────────────────────────────────
 const s = {
-  /* Wrapper: scroll vertical libre, sin overflow que corte */
-  pageWrapper:    { minHeight: "100vh", position: "relative", fontFamily: "'Inter',sans-serif", overflowX: "clip" },
+  /* Wrapper: sin overflow — el scroll lo maneja html/body via index.css */
+  pageWrapper:    { minHeight: "100vh", position: "relative", fontFamily: "'Inter',sans-serif" },
   page:           { position: "relative", zIndex: 1, padding: "36px 20px 20px" },
   container:      { maxWidth: "820px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
 

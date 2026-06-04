@@ -1,3 +1,12 @@
+/* ── Scroll global — nunca bloquear scroll vertical ─────────────────── */
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  margin: 0;
+}
+#root { min-height: 100vh; }
+
 /* ── Variables de tema ──────────────────────────────────────────────── */
 :root {
   --bg-page:      linear-gradient(135deg, #f8fafc 0%, #eff6ff 60%, #fff7ed 100%);
