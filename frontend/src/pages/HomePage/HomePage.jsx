@@ -201,9 +201,9 @@ export default function HomePage() {
                 <h3 style={{ ...s.cardTitle, color: isDark ? "#f1f5f9" : "#0f172a" }}>{card.title}</h3>
                 <p style={{ ...s.cardDesc, color: isDark ? "#94a3b8" : "#64748b" }}>{card.desc}</p>
                 <button
-                  style={{ ...s.cardBtn, ...(card.primary ? s.cardBtnPrimary : { ...s.cardBtnDisabled, background: isDark ? "#334155" : "#f1f5f9", color: isDark ? "#64748b" : "#94a3b8" }) }}
+                  style={{ ...s.cardBtn, ...(card.action ? s.cardBtnPrimary : { ...s.cardBtnDisabled, background: isDark ? "#334155" : "#f1f5f9", color: isDark ? "#64748b" : "#94a3b8" }) }}
                   onClick={card.action ?? undefined} disabled={!card.action}>
-                  {card.primary && <IconProfile />}{card.label}
+                  {card.action && <IconProfile />}{card.label}
                 </button>
               </div>
             ))}
