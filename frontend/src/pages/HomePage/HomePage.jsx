@@ -127,11 +127,13 @@ export default function HomePage() {
         { icon: "👤", title: "Mi perfil",    desc: "Tu universidad, materias y disponibilidad.",   action: () => navigate("/profile"),      label: "Ver perfil",    primary: true },
         { icon: "🦷", title: "Pacientes",   desc: "Explorá el marketplace de casos disponibles.", action: () => navigate("/marketplace"),  label: "Ver pacientes", primary: true },
         { icon: "📋", title: "Mis casos",   desc: "Casos clínicos que estás atendiendo.",          action: () => navigate("/asignaciones"), label: "Ver mis casos", primary: false },
+        { icon: "📅", title: "Mis turnos",  desc: "Confirmá y gestioná tus citas con pacientes.",  action: () => navigate("/turnos"),       label: "Ver turnos",    primary: false },
       ]
     : [
         { icon: "👤", title: "Mi perfil",      desc: "Tus datos personales y problema dental.",       action: () => navigate("/profile"),     label: "Ver perfil",    primary: true },
         { icon: "💚", title: "Dental Match",   desc: "Swipeá estudiantes que quieren atenderte.",     action: () => navigate("/match"),       label: "¡Buscar match!",primary: true },
         { icon: "🦷", title: "Mis casos",      desc: "Publicá un caso para encontrar un estudiante.", action: () => navigate("/casos"),       label: "Ver mis casos", primary: false },
+        { icon: "📅", title: "Mis turnos",     desc: "Reservá y seguí tus citas con estudiantes.",    action: () => navigate("/turnos"),      label: "Ver turnos",    primary: false },
       ];
 
   const pageBg = isDark
