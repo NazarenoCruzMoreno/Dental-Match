@@ -13,6 +13,7 @@ import MarketplacePage   from "./pages/CasosPage/MarketplacePage";
 import MatchPage         from "./pages/MatchPage/MatchPage";
 import AsignacionesPage  from "./pages/AsignacionesPage/AsignacionesPage";
 import TurnosPage        from "./pages/TurnosPage/TurnosPage";
+import UserMenu          from "./components/UserMenu/UserMenu";
 import { isSessionValid, profileService } from "./services/api";
 
 // Rutas públicas — si ya tiene sesión redirige al home
@@ -46,6 +47,8 @@ export default function App() {
   return (
     <ThemeProvider>
     <BrowserRouter>
+      {/* Menú de cuenta flotante — visible en todas las páginas autenticadas */}
+      <UserMenu />
       <Routes>
         {/* Públicas */}
         <Route path="/"         element={<PublicRoute><SelectionPage /></PublicRoute>} />
