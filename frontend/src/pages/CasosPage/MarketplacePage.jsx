@@ -1,11 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser, casosService } from "../../services/api";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const authFetch = (url, opts = {}) =>
-  fetch(url, { ...opts, headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}`, ...opts.headers } })
-    .then(r => r.json());
+import { getUser, casosService, matchService } from "../../services/api";
 
 const timeAgo = (date) => {
   const d = Math.floor((Date.now() - new Date(date)) / 86400000);
@@ -260,12 +255,7 @@ export default function MarketplacePage() {
   });
 
   const handleAplicar = async (casoId) => {
-    const res = await fetch(`/api/casos/${casoId}/aplicar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    const data = await matchService.aplicar(casoId);
     setApplied(prev => new Set([...prev, casoId]));
     return data;
   };

@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../../services/api";
+import { getUser, casosService } from "../../services/api";
 import Button from "../../components/Button/Button";
 import Input from "../../components/Input/Input";
 
@@ -72,28 +72,14 @@ export default function CreateCasoPage() {
         fd.append("descripcion",     form.descripcion.trim());
         if (form.tipo_tratamiento) fd.append("tipo_tratamiento", form.tipo_tratamiento);
         if (form.notas)            fd.append("notas",            form.notas.trim());
-
-        const res = await fetch("/api/casos", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          body: fd,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        await casosService.crearMultipart(fd);
       } else {
-        // Sin imagen — JSON normal
-        const res = await fetch("/api/casos", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
-          body: JSON.stringify({
-            titulo:           form.titulo.trim(),
-            descripcion:      form.descripcion.trim(),
-            tipo_tratamiento: form.tipo_tratamiento || undefined,
-            notas:            form.notas || undefined,
-          }),
+        await casosService.crear({
+          titulo:           form.titulo.trim(),
+          descripcion:      form.descripcion.trim(),
+          tipo_tratamiento: form.tipo_tratamiento || undefined,
+          notas:            form.notas || undefined,
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
       }
       navigate("/casos");
     } catch (err) {

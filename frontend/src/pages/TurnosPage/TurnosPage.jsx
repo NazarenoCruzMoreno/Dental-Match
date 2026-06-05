@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../../services/api";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const auth = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
-const jsonHeaders = () => ({ "Content-Type": "application/json", ...auth() });
+import { getUser, turnosService, casosService } from "../../services/api";
 
 const DIAS   = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MESES  = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -42,9 +38,8 @@ function ReservarModal({ caso, onClose, onCreated }) {
     if (!f || !caso.estudiante_id) return;
     setLoading(true);
     try {
-      const r = await fetch(`/api/turnos/disponibilidad?estudiante_id=${caso.estudiante_id}&fecha=${f}`, { headers: auth() });
-      const d = await r.json();
-      setSlots(Array.isArray(d) ? d : []);
+      const data = await turnosService.disponibilidad(caso.estudiante_id, f);
+      setSlots(Array.isArray(data) ? data : []);
     } catch { setSlots([]); }
     finally { setLoading(false); }
   };
@@ -55,12 +50,7 @@ function ReservarModal({ caso, onClose, onCreated }) {
     if (!fecha || !hora) { setErr("Elegí fecha y horario"); return; }
     setSaving(true); setErr("");
     try {
-      const r = await fetch("/api/turnos", {
-        method: "POST", headers: jsonHeaders(),
-        body: JSON.stringify({ caso_id: caso.id, fecha, hora, notas: notas || undefined }),
-      });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error);
+      await turnosService.reservar({ caso_id: caso.id, fecha, hora, notas: notas || undefined });
       onCreated();
     } catch (e) { setErr(e.message); setSaving(false); }
   };
@@ -246,12 +236,8 @@ export default function TurnosPage() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      // Turnos del usuario
-      fetch("/api/turnos", { headers: auth() }).then(r => r.json()),
-      // Si es paciente, también cargamos sus casos asignados para poder agendar
-      role === "paciente"
-        ? fetch("/api/casos", { headers: auth() }).then(r => r.json())
-        : Promise.resolve([]),
+      turnosService.listar(),
+      role === "paciente" ? casosService.listar() : Promise.resolve([]),
     ])
       .then(([t, c]) => {
         setTurnos(Array.isArray(t) ? t : []);
@@ -262,10 +248,8 @@ export default function TurnosPage() {
   }, [refresh, role]);
 
   const handleAccion = async (turnoId, estado) => {
-    await fetch(`/api/turnos/${turnoId}`, {
-      method: "PUT", headers: jsonHeaders(),
-      body: JSON.stringify({ estado }),
-    });
+    try { await turnosService.actualizar(turnoId, { estado }); }
+    catch {}
     setRefresh(r => r + 1);
   };
 

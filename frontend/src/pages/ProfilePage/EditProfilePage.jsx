@@ -175,11 +175,7 @@ export default function EditProfilePage() {
           if (Array.isArray(v)) v.forEach(i => fd.append(k, i));
           else if (v !== "" && v !== null && v !== undefined) fd.append(k, v);
         });
-        await fetch("/api/profile", {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          body: fd,
-        });
+        await profileService.updateMultipart(fd);
       } else {
         await profileService.update(formData);
       }

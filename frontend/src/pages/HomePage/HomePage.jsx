@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { getUser, clearAuth, profileService } from "../../services/api";
+import { getUser, clearAuth, profileService, statsService } from "../../services/api";
 import { useTheme } from "../../context/ThemeContext";
 import NotificationsBell from "../../components/Notifications/NotificationsBell";
 import OnboardingTour from "../../components/OnboardingTour/OnboardingTour";
@@ -115,7 +115,7 @@ export default function HomePage() {
 
   useEffect(() => {
     profileService.get().then(({ perfil }) => setPerfil(perfil)).catch(() => {});
-    fetch("/api/stats").then(r => r.json()).then(setStats).catch(() => {});
+    statsService.publicas().then(setStats).catch(() => {});
   }, []);
 
   const nombre    = perfil?.nombre ?? user?.email?.split("@")[0] ?? "usuario";

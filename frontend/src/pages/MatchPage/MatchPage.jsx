@@ -1,13 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser } from "../../services/api";
-
-// ── Fetch autenticado ─────────────────────────────────────────────────────────
-const authFetch = (url, opts = {}) =>
-  fetch(url, {
-    ...opts,
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}`, ...opts.headers },
-  }).then(r => r.json());
+import { getUser, casosService, matchService } from "../../services/api";
 
 // ── Estrellas de rating ───────────────────────────────────────────────────────
 const Stars = ({ rating }) => {
@@ -211,17 +204,12 @@ export default function MatchPage() {
   const [done,         setDone]         = useState(false);
 
   useEffect(() => {
-    // Cargar casos del paciente
-    fetch("/api/casos", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
-      .then(r => r.json())
+    casosService.listar()
       .then(async (casosData) => {
         const abiertos = (casosData || []).filter(c => c.estado === "abierto" || c.estado === "en_progreso");
         setCasos(abiertos);
         if (abiertos.length > 0) {
-          // Cargar aplicantes del primer caso
-          const apls = await fetch(`/api/casos/${abiertos[0].id}/aplicantes`, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }).then(r => r.json());
+          const apls = await matchService.aplicantes(abiertos[0].id);
           setAplicaciones(Array.isArray(apls) ? apls : []);
         }
         setLoading(false);
@@ -234,24 +222,14 @@ export default function MatchPage() {
   const remaining   = aplicaciones.length - cardIdx;
 
   const handleSwipe = async (dir, aplicacion) => {
-    if (dir === "right") {
-      // Match!
-      try {
-        await fetch(`/api/casos/${currentCaso.id}/match/${aplicacion.estudiantes.id}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
+    try {
+      if (dir === "right") {
+        await matchService.hacerMatch(currentCaso.id, aplicacion.estudiantes.id);
         setMatchedEst(aplicacion.estudiantes);
-      } catch {}
-    } else {
-      // Rechazar
-      try {
-        await fetch(`/api/casos/${currentCaso.id}/rechazar/${aplicacion.estudiantes.id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-      } catch {}
-    }
+      } else {
+        await matchService.rechazar(currentCaso.id, aplicacion.estudiantes.id);
+      }
+    } catch {}
     setCardIdx(i => i + 1);
   };
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { statsService } from "../../services/api";
 
 const MONTHS = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 
@@ -7,10 +8,7 @@ export default function ActivityGraph({ userId, role, isDark = false }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/activity", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    })
-      .then(r => r.json())
+    statsService.activity()
       .then(d => setData(Array.isArray(d) ? d : []))
       .catch(() => setData([]))
       .finally(() => setLoading(false));
