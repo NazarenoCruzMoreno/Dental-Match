@@ -54,6 +54,22 @@ const casoUpdateSchema = casoSchema.partial().extend({
   estado: z.enum(['abierto', 'en_progreso', 'completado', 'cancelado']).optional(),
 });
 
+// ── Turno ─────────────────────────────────────────────────────────────────────
+const turnoSchema = z.object({
+  caso_id:           z.string().uuid('caso_id inválido'),
+  fecha:             z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)'),
+  hora:              z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)'),
+  duracion_minutos:  z.preprocess(v => v ? Number(v) : 60, z.number().int().min(15).max(240)).optional(),
+  notas:             z.string().max(500).optional(),
+});
+
+const turnoUpdateSchema = z.object({
+  estado: z.enum(['pendiente','confirmado','completado','cancelado']).optional(),
+  notas:  z.string().max(500).optional(),
+  fecha:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  hora:   z.string().regex(/^\d{2}:\d{2}$/).optional(),
+});
+
 module.exports = {
   loginSchema,
   registerSchema,
@@ -63,4 +79,6 @@ module.exports = {
   pacienteUpdateSchema,
   casoSchema,
   casoUpdateSchema,
+  turnoSchema,
+  turnoUpdateSchema,
 };
