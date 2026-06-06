@@ -125,7 +125,7 @@ export default function HomePage() {
   const cards = role === "estudiante"
     ? [
         { icon: "👤", title: "Mi perfil",    desc: "Tu universidad, materias y disponibilidad.",   action: () => navigate("/profile"),      label: "Ver perfil",    primary: true },
-        { icon: "🦷", title: "Pacientes",   desc: "Explorá el marketplace de casos disponibles.", action: () => navigate("/marketplace"),  label: "Ver pacientes", primary: true },
+        { icon: "🦷", title: "Pacientes",   desc: "Explorá los casos disponibles para atender.",  action: () => navigate("/marketplace"),  label: "Ver pacientes", primary: true },
         { icon: "📋", title: "Mis casos",   desc: "Casos clínicos que estás atendiendo.",          action: () => navigate("/asignaciones"), label: "Ver mis casos", primary: false },
         { icon: "📅", title: "Mis turnos",  desc: "Confirmá y gestioná tus citas con pacientes.",  action: () => navigate("/turnos"),       label: "Ver turnos",    primary: false },
       ]

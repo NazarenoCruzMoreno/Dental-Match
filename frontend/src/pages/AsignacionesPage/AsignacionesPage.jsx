@@ -191,11 +191,11 @@ export default function AsignacionesPage() {
             </h3>
             <p style={pg.emptyText}>
               {filter === "todos"
-                ? "Explorá el marketplace y aplicá a casos de pacientes."
+                ? "Explorá los pacientes disponibles y aplicá a sus casos."
                 : "Cambiá el filtro para ver otros estados."}
             </p>
             {filter === "todos" && (
-              <button style={pg.cta} onClick={() => navigate("/marketplace")}>Ver marketplace</button>
+              <button style={pg.cta} onClick={() => navigate("/marketplace")}>Ver pacientes</button>
             )}
           </div>
         ) : (
