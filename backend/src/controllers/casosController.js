@@ -89,7 +89,7 @@ const listarCasos = async (req, res) => {
         .from('casos')
         .select(`
           *,
-          pacientes ( id, nombre, edad, problema_dental )
+          pacientes ( id, nombre, edad, problema_dental, imagen_url, telefono )
         `)
         .order('created_at', { ascending: false });
 
