@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./context/ToastContext";
 import UserMenu  from "./components/UserMenu/UserMenu";
+import BottomNav from "./components/BottomNav/BottomNav";
 import { isSessionValid, profileService } from "./services/api";
 
 // ── Lazy load de todas las páginas ──────────────────────────────────────────
@@ -64,6 +65,7 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <UserMenu />
+          <BottomNav />
           <Suspense fallback={<PageFallback />}>
             <Routes>
               {/* Públicas */}
