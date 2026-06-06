@@ -1,5 +1,5 @@
 const multer = require('multer');
-const { supabase } = require('../config/supabase');
+const { supabaseAdmin } = require('../config/supabase');
 
 // ── Config de multer (memoria + límites + filtro de tipo) ────────────────────
 const upload = multer({
@@ -21,7 +21,7 @@ const uploadToStorage = async (req, res, next) => {
     const ext      = (req.file.originalname.split('.').pop() || 'jpg').toLowerCase();
     const fileName = `pacientes/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabaseAdmin.storage
       .from(BUCKET)
       .upload(fileName, req.file.buffer, {
         contentType: req.file.mimetype,
@@ -45,7 +45,7 @@ const uploadToStorage = async (req, res, next) => {
       return res.status(500).json({ error: `Error de Storage: ${uploadError.message}` });
     }
 
-    const { data } = supabase.storage.from(BUCKET).getPublicUrl(fileName);
+    const { data } = supabaseAdmin.storage.from(BUCKET).getPublicUrl(fileName);
     req.imageUrl   = data.publicUrl;
     next();
   } catch (error) {
