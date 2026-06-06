@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { profileService, getUser } from "../../services/api";
+import { compressImage } from "../../utils/imageCompression";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 
@@ -246,11 +247,12 @@ export default function EditProfilePage() {
                     </button>
                   )}
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }}
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      setPhotoFile(file);
-                      setPhotoPreview(URL.createObjectURL(file));
+                      const compressed = await compressImage(file, { maxWidth: 800, maxHeight: 800, quality: 0.85 });
+                      setPhotoFile(compressed);
+                      setPhotoPreview(URL.createObjectURL(compressed));
                     }}
                   />
                 </div>

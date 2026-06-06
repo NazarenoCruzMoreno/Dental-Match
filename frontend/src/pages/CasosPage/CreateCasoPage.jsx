@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, casosService } from "../../services/api";
+import { compressImage } from "../../utils/imageCompression";
 import Button from "../../components/Button/Button";
 import Input from "../../components/Input/Input";
 
@@ -37,21 +38,21 @@ export default function CreateCasoPage() {
     return e;
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // Validar tipo
     if (!file.type.startsWith("image/")) {
       setServerErr("Solo se aceptan imágenes (JPG, PNG, WEBP)");
       return;
     }
-    // Validar tamaño (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setServerErr("La imagen no puede superar 5MB");
+    if (file.size > 20 * 1024 * 1024) {
+      setServerErr("La imagen no puede superar 20MB antes de compresión");
       return;
     }
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    // Comprimir antes de subir (reduce hasta 80% del peso)
+    const compressed = await compressImage(file);
+    setImageFile(compressed);
+    setImagePreview(URL.createObjectURL(compressed));
     setServerErr("");
   };
 
