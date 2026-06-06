@@ -1,27 +1,31 @@
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-const supabaseUrl         = process.env.SUPABASE_URL;
-const supabaseAnonKey     = process.env.SUPABASE_ANON_KEY;
-const supabaseServiceKey  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl        = process.env.SUPABASE_URL;
+const supabaseAnonKey    = process.env.SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ SUPABASE_URL o SUPABASE_ANON_KEY no definidas en .env');
+if (!supabaseUrl) {
+  console.error('❌ SUPABASE_URL no definida en .env');
 }
 
-// Cliente normal: respeta RLS — usar para queries comunes
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Cliente admin: bypassa RLS — usar SOLO en backend para storage y operaciones privilegiadas
-// Si la service key no está configurada, cae al cliente normal con un warning
-let supabaseAdmin;
-if (supabaseServiceKey) {
-  supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+// ── Cliente principal del backend ────────────────────────────────────────────
+// Usamos service_role para bypassar RLS — la seguridad la maneja nuestro
+// middleware de auth (JWT + roleMiddleware), no las policies de Supabase.
+// Si no hay service key, cae al anon (warning) y RLS bloqueará escrituras.
+const supabase = createClient(
+  supabaseUrl,
+  supabaseServiceKey ?? supabaseAnonKey,
+  {
     auth: { autoRefreshToken: false, persistSession: false },
-  });
-} else {
-  console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY no configurada — uploads pueden fallar por RLS');
-  supabaseAdmin = supabase;
+  }
+);
+
+if (!supabaseServiceKey) {
+  console.warn('⚠️  SUPABASE_SERVICE_ROLE_KEY no configurada — escrituras pueden fallar por RLS');
 }
+
+// Alias para que el código antiguo siga funcionando
+const supabaseAdmin = supabase;
 
 module.exports = { supabase, supabaseAdmin };
