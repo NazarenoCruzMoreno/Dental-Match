@@ -56,3 +56,32 @@ html, body {
   background-color: #0f172a;
   color: #f1f5f9;
 }
+
+/* ── Responsive: mejoras globales para mobile ─────────────────────── */
+@media (max-width: 640px) {
+  /* Reducir padding lateral en todas las páginas para aprovechar el ancho */
+  /* Inputs y botones más grandes para tap target accesible (mínimo 44px) */
+  input, select, textarea, button {
+    font-size: 15px !important; /* Evita zoom en iOS al hacer focus */
+  }
+
+  /* Modales que ocupen casi toda la pantalla en mobile */
+  [data-modal-overlay] > [data-modal-content] {
+    max-width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+    margin: auto 0 0 0 !important;
+    max-height: 92vh !important;
+  }
+}
+
+/* Tap targets mínimos 44x44 para accesibilidad iOS */
+@media (pointer: coarse) {
+  button, a, [role="button"] {
+    min-height: 36px;
+  }
+}
+
+/* Eliminar tap highlight feo en mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
