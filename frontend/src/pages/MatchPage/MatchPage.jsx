@@ -203,19 +203,27 @@ export default function MatchPage() {
   const [matchedEst,   setMatchedEst]   = useState(null);
   const [done,         setDone]         = useState(false);
 
+  // Cargar todos los casos abiertos del paciente al montar
   useEffect(() => {
     casosService.listar()
-      .then(async (casosData) => {
-        const abiertos = (casosData || []).filter(c => c.estado === "abierto" || c.estado === "en_progreso");
+      .then((casosData) => {
+        const abiertos = (casosData || []).filter(c => c.estado === "abierto");
         setCasos(abiertos);
-        if (abiertos.length > 0) {
-          const apls = await matchService.aplicantes(abiertos[0].id);
-          setAplicaciones(Array.isArray(apls) ? apls : []);
-        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
+
+  // Cuando cambia el caso activo, cargar sus aplicantes
+  useEffect(() => {
+    if (casos.length === 0) return;
+    const casoActivo = casos[casoIdx];
+    if (!casoActivo) return;
+    setCardIdx(0);
+    matchService.aplicantes(casoActivo.id)
+      .then(apls => setAplicaciones(Array.isArray(apls) ? apls : []))
+      .catch(() => setAplicaciones([]));
+  }, [casos, casoIdx]);
 
   const currentCaso = casos[casoIdx];
   const currentCard = aplicaciones[cardIdx];
@@ -255,12 +263,28 @@ export default function MatchPage() {
     </div>
   );
 
-  if (cardIdx >= aplicaciones.length) return (
+  if (aplicaciones.length === 0 || cardIdx >= aplicaciones.length) return (
     <div style={pg.center}>
-      <div style={{ textAlign: "center" }}>
+      <div style={{ textAlign: "center", maxWidth: "420px", padding: "0 20px" }}>
         <div style={{ fontSize: "56px", marginBottom: "16px" }}>⌛</div>
         <h3 style={pg.emptyTitle}>Sin aplicaciones nuevas</h3>
-        <p style={pg.emptyText}>Todavía no hay estudiantes que aplicaron a tu caso. Volvé más tarde.</p>
+        <p style={pg.emptyText}>
+          Para <strong>"{currentCaso.titulo}"</strong> todavía no hay estudiantes que apliquen.
+        </p>
+        {casos.length > 1 && (
+          <div style={pg.casosSwitch}>
+            <div style={pg.casosSwitchLabel}>Ver aplicantes de otro caso:</div>
+            {casos.map((c, i) => (
+              <button
+                key={c.id}
+                style={{ ...pg.casosSwitchBtn, ...(i === casoIdx ? pg.casosSwitchActive : {}) }}
+                onClick={() => setCasoIdx(i)}
+              >
+                {c.titulo}
+              </button>
+            ))}
+          </div>
+        )}
         <button style={pg.cta} onClick={() => navigate("/casos")}>Ver mis casos</button>
       </div>
     </div>
@@ -273,7 +297,19 @@ export default function MatchPage() {
       <div style={pg.header}>
         <button style={pg.backBtn} onClick={() => navigate("/home")}>← Inicio</button>
         <div style={pg.logoText}>Dental<span style={{ color: "#2563eb" }}>Match</span></div>
-        <div style={pg.casoPill}>{currentCaso.titulo}</div>
+        {casos.length > 1 ? (
+          <select
+            style={pg.casoSelect}
+            value={casoIdx}
+            onChange={(e) => setCasoIdx(Number(e.target.value))}
+          >
+            {casos.map((c, i) => (
+              <option key={c.id} value={i}>{c.titulo}</option>
+            ))}
+          </select>
+        ) : (
+          <div style={pg.casoPill}>{currentCaso.titulo}</div>
+        )}
       </div>
 
       {/* Stack de tarjetas */}
@@ -322,6 +358,11 @@ const pg = {
   backBtn:    { background: "none", border: "none", color: "#3b82f6", fontWeight: 600, fontSize: "14px", cursor: "pointer", fontFamily: "'Inter',sans-serif" },
   logoText:   { fontSize: "18px", fontWeight: 900, color: "#0f172a", letterSpacing: "-0.5px" },
   casoPill:   { fontSize: "12px", color: "#3b82f6", background: "#eff6ff", padding: "4px 12px", borderRadius: "999px", fontWeight: 600, maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  casoSelect: { fontSize: "12px", color: "#3b82f6", background: "#eff6ff", padding: "5px 12px", borderRadius: "999px", fontWeight: 600, maxWidth: "200px", border: "1px solid #bfdbfe", cursor: "pointer", fontFamily: "'Inter',sans-serif" },
+  casosSwitch: { margin: "24px 0", padding: "16px 18px", background: "#f8fafc", borderRadius: "14px", border: "1px solid #e2e8f0" },
+  casosSwitchLabel: { fontSize: "12px", color: "#94a3b8", fontWeight: 700, marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.5px" },
+  casosSwitchBtn: { display: "block", width: "100%", padding: "8px 14px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "6px", cursor: "pointer", fontFamily: "'Inter',sans-serif", textAlign: "left" },
+  casosSwitchActive: { background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", border: "1px solid transparent" },
   stackArea:  { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 20px 40px", gap: "20px" },
   counter:    { fontSize: "13px", color: "#94a3b8", fontWeight: 600 },
   stack:      { position: "relative", width: "100%", maxWidth: "380px", height: "520px" },
