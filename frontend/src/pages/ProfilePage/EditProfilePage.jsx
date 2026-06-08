@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { profileService, getUser } from "../../services/api";
 import { compressImage } from "../../utils/imageCompression";
+import { useToast } from "../../context/ToastContext";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 
@@ -115,6 +116,7 @@ function PacienteForm({ data, onChange }) {
 // ── Página principal ──────────────────────────────────────────────────────────
 export default function EditProfilePage() {
   const navigate = useNavigate();
+  const toast    = useToast();
   const [searchParams] = useSearchParams();
   const isNewUser = searchParams.get("new") === "1";
   const user = getUser();
@@ -181,6 +183,7 @@ export default function EditProfilePage() {
         await profileService.update(formData);
       }
       setSuccess(true);
+      toast.success("Perfil guardado correctamente");
       setTimeout(() => navigate(isNewUser ? "/home" : "/profile"), 1200);
     } catch (err) {
       setError(err.message);

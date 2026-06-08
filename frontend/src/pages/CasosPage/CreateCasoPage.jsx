@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, casosService } from "../../services/api";
 import { compressImage } from "../../utils/imageCompression";
+import { useToast } from "../../context/ToastContext";
 import Button from "../../components/Button/Button";
 import Input from "../../components/Input/Input";
 
@@ -16,6 +17,7 @@ const IconCamera = () => (<svg width="22" height="22" viewBox="0 0 24 24" fill="
 
 export default function CreateCasoPage() {
   const navigate = useNavigate();
+  const toast    = useToast();
   const fileRef  = useRef(null);
 
   const [form, setForm] = useState({
@@ -82,6 +84,7 @@ export default function CreateCasoPage() {
           notas:            form.notas || undefined,
         });
       }
+      toast.success("¡Caso publicado! Esperá aplicaciones de estudiantes.");
       navigate("/casos");
     } catch (err) {
       setServerErr(err.message);

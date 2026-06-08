@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, casosService, matchService } from "../../services/api";
+import { useToast } from "../../context/ToastContext";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 
 // ── Estrellas de rating ───────────────────────────────────────────────────────
 const Stars = ({ rating }) => {
@@ -194,6 +196,7 @@ const mo = {
 // ── Página principal ──────────────────────────────────────────────────────────
 export default function MatchPage() {
   const navigate = useNavigate();
+  const toast    = useToast();
   const user     = getUser();
   const [casos,        setCasos]        = useState([]);
   const [aplicaciones, setAplicaciones] = useState([]);
@@ -236,8 +239,11 @@ export default function MatchPage() {
         setMatchedEst(aplicacion.estudiantes);
       } else {
         await matchService.rechazar(currentCaso.id, aplicacion.estudiantes.id);
+        toast.info("Estudiante descartado");
       }
-    } catch {}
+    } catch (e) {
+      toast.error(e.message || "No se pudo procesar la acción");
+    }
     setCardIdx(i => i + 1);
   };
 

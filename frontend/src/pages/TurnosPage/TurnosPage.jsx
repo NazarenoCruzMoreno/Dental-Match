@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, turnosService, casosService } from "../../services/api";
+import { useToast } from "../../context/ToastContext";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
+import { RowSkeleton } from "../../components/Skeleton/Skeleton";
 
 const DIAS   = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MESES  = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -224,6 +227,7 @@ const tc = {
 // ── Página principal ──────────────────────────────────────────────────────────
 export default function TurnosPage() {
   const navigate     = useNavigate();
+  const toast        = useToast();
   const user         = getUser();
   const role         = user?.role;
   const [turnos,   setTurnos]   = useState([]);
@@ -247,9 +251,17 @@ export default function TurnosPage() {
       .finally(() => setLoading(false));
   }, [refresh, role]);
 
+  // Refrescar al volver del background — útil para turnos que cambian
+  useAutoRefresh(() => setRefresh(r => r + 1));
+
   const handleAccion = async (turnoId, estado) => {
-    try { await turnosService.actualizar(turnoId, { estado }); }
-    catch {}
+    const labels = { confirmado: "confirmado ✓", cancelado: "cancelado", completado: "marcado como completado 🎉" };
+    try {
+      await turnosService.actualizar(turnoId, { estado });
+      toast.success(`Turno ${labels[estado] ?? "actualizado"}`);
+    } catch (e) {
+      toast.error(e.message || "No se pudo actualizar el turno");
+    }
     setRefresh(r => r + 1);
   };
 
@@ -334,7 +346,9 @@ export default function TurnosPage() {
 
         {/* Turnos */}
         {loading ? (
-          <div style={pg.center}><div style={pg.spinner}/></div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <RowSkeleton/><RowSkeleton/><RowSkeleton/>
+          </div>
         ) : filtrados.length === 0 ? (
           <div style={pg.empty}>
             <div style={{ fontSize:"52px", marginBottom:"12px" }}>📅</div>

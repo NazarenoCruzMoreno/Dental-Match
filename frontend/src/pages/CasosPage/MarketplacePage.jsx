@@ -1,6 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, casosService, matchService } from "../../services/api";
+import { useToast } from "../../context/ToastContext";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
+import { useDebounce } from "../../hooks/useDebounce";
+import { GridSkeleton } from "../../components/Skeleton/Skeleton";
 
 const timeAgo = (date) => {
   const d = Math.floor((Date.now() - new Date(date)) / 86400000);
@@ -231,33 +235,44 @@ const c = {
 export default function MarketplacePage() {
   const navigate         = useNavigate();
   const user             = getUser();
+  const toast            = useToast();
   const [casos,    setCasos]    = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [search,   setSearch]   = useState("");
+  const debouncedSearch = useDebounce(search, 250);
   const [filter,   setFilter]   = useState("todos");
   const [selected, setSelected] = useState(null);
   const [applied,  setApplied]  = useState(new Set());
 
-  useEffect(() => {
+  // Cargar casos al montar y cuando vuelvas a la pestaña
+  const cargar = () => {
     casosService.listar()
       .then(setCasos)
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  };
+  useEffect(() => { cargar(); }, []);
+  useAutoRefresh(cargar);
 
   const TIPOS = ["todos", "Ortodoncia", "Endodoncia", "Periodoncia", "Cirugía oral", "Estética dental", "Otro"];
 
   const filtered = casos.filter(c => {
-    const q = search.toLowerCase();
+    const q = debouncedSearch.toLowerCase();
     const matchSearch = !q || c.titulo.toLowerCase().includes(q) || c.descripcion.toLowerCase().includes(q) || (c.pacientes?.nombre ?? "").toLowerCase().includes(q);
     const matchFilter = filter === "todos" || c.tipo_tratamiento === filter;
     return matchSearch && matchFilter;
   });
 
   const handleAplicar = async (casoId) => {
-    const data = await matchService.aplicar(casoId);
-    setApplied(prev => new Set([...prev, casoId]));
-    return data;
+    try {
+      const data = await matchService.aplicar(casoId);
+      setApplied(prev => new Set([...prev, casoId]));
+      toast.success("Aplicación enviada al paciente ✓");
+      return data;
+    } catch (e) {
+      toast.error(e.message);
+      throw e;
+    }
   };
 
   const nombre = user?.email?.split("@")[0] ?? "Estudiante";
@@ -321,10 +336,7 @@ export default function MarketplacePage() {
 
         {/* Grid */}
         {loading ? (
-          <div style={p.centerMsg}>
-            <div style={p.spinner} />
-            <p style={p.loadMsg}>Cargando casos...</p>
-          </div>
+          <GridSkeleton count={6} type="card" />
         ) : filtered.length === 0 ? (
           <div style={p.emptyState}>
             <div style={{ fontSize: "60px", marginBottom: "16px" }}>🔍</div>

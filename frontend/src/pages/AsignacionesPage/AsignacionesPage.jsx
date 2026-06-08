@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, asignacionesService } from "../../services/api";
+import { useAutoRefresh } from "../../hooks/useAutoRefresh";
+import { RowSkeleton } from "../../components/Skeleton/Skeleton";
 
 const IconBack  = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>);
 const IconTooth = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2C8 2 5 5 5 9c0 2.5.8 4.5 1.5 6.5L7 20c.3 1.2 1 2 2 2s1.5-.8 2-2l1-3 1 3c.5 1.2 1 2 2 2s1.7-.8 2-2l.5-4.5C18.2 13.5 19 11.5 19 9c0-4-3-7-7-7z"/></svg>);
@@ -124,12 +126,14 @@ export default function AsignacionesPage() {
   const [selected, setSelected] = useState(null);
   const [filter,   setFilter]   = useState("todos");
 
-  useEffect(() => {
+  const cargar = () => {
     asignacionesService.misAsignaciones()
       .then(d => setCasos(Array.isArray(d) ? d : []))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  };
+  useEffect(() => { cargar(); }, []);
+  useAutoRefresh(cargar);
 
   const FILTROS = ["todos", "en_progreso", "completado", "abierto"];
   const filtered = filter === "todos" ? casos : casos.filter(c => c.estado === filter);
@@ -182,7 +186,9 @@ export default function AsignacionesPage() {
 
         {/* Lista */}
         {loading ? (
-          <div style={pg.center}><div style={pg.spinner}/></div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            <RowSkeleton/><RowSkeleton/><RowSkeleton/>
+          </div>
         ) : filtered.length === 0 ? (
           <div style={pg.empty}>
             <div style={{ fontSize: "52px", marginBottom: "12px" }}>📋</div>
