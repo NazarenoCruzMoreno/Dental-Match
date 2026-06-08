@@ -72,31 +72,89 @@ html, body {
   color: #f1f5f9;
 }
 
-/* ── Responsive: mejoras globales para mobile ─────────────────────── */
-@media (max-width: 640px) {
-  /* Reducir padding lateral en todas las páginas para aprovechar el ancho */
-  /* Inputs y botones más grandes para tap target accesible (mínimo 44px) */
-  input, select, textarea, button {
-    font-size: 15px !important; /* Evita zoom en iOS al hacer focus */
-  }
-
-  /* Modales que ocupen casi toda la pantalla en mobile */
-  [data-modal-overlay] > [data-modal-content] {
-    max-width: 100% !important;
-    border-radius: 16px 16px 0 0 !important;
-    margin: auto 0 0 0 !important;
-    max-height: 92vh !important;
-  }
-}
-
-/* Tap targets mínimos 44x44 para accesibilidad iOS */
-@media (pointer: coarse) {
-  button, a, [role="button"] {
-    min-height: 36px;
-  }
-}
-
 /* Eliminar tap highlight feo en mobile */
-* {
-  -webkit-tap-highlight-color: transparent;
+* { -webkit-tap-highlight-color: transparent; }
+
+/* ── Responsive global — Tablet (≤ 768px) ──────────────────────────── */
+@media (max-width: 768px) {
+  /* Evita zoom de iOS al hacer focus en inputs */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  /* Tap targets accesibles */
+  button { min-height: 40px; }
+
+  /* Reducir padding lateral generoso */
+  main, [data-page-container] { padding-left: 16px !important; padding-right: 16px !important; }
+}
+
+/* ── Responsive global — Mobile (≤ 640px) ──────────────────────────── */
+@media (max-width: 640px) {
+
+  /* TÍTULOS más chicos para que no se desborden */
+  h1 { font-size: clamp(22px, 6vw, 32px) !important; letter-spacing: -0.5px !important; }
+  h2 { font-size: clamp(18px, 5vw, 24px) !important; }
+  h3 { font-size: clamp(15px, 4vw, 18px) !important; }
+
+  /* CARDS y CONTENEDORES con menos padding */
+  [class*="card"] > div,
+  [data-card] {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  /* MODALES — ocupan casi toda la pantalla, anclados abajo */
+  [role="dialog"],
+  [data-modal] {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    max-height: 92vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    margin: auto 0 0 0 !important;
+  }
+
+  /* GRIDS — preferir 1 columna o 2 según contenido */
+  [data-grid="cards"] {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  [data-grid="stats"] {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  /* SCROLL HORIZONTAL para filtros — más natural en mobile */
+  [data-scroll-x] {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  [data-scroll-x]::-webkit-scrollbar { display: none; }
+  [data-scroll-x] > * { flex-shrink: 0 !important; }
+
+  /* HEADERS con avatar a la derecha: ocultar texto del nombre, dejar solo avatar */
+  [data-header-name] { display: none !important; }
+
+  /* Espacio inferior para que bottom nav no tape el contenido */
+  [data-page-container] {
+    padding-bottom: 90px !important;
+  }
+}
+
+/* ── Mobile chico (≤ 380px) — iPhone SE, Galaxy chicos ─────────────── */
+@media (max-width: 380px) {
+  [data-card] { padding: 14px !important; }
+  h1 { font-size: 22px !important; }
+}
+
+/* ── Safe areas iOS (notch / barra inferior) ───────────────────────── */
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

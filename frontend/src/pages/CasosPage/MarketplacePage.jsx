@@ -82,7 +82,7 @@ export default function MarketplacePage() {
 
           <div style={p.avatarWrap}>
             <div style={p.avatar}>{nombre.charAt(0).toUpperCase()}</div>
-            <div style={p.avatarInfo}>
+            <div style={p.avatarInfo} data-header-name>
               <div style={p.avatarName}>{nombre}</div>
               <div style={p.avatarRole}>Estudiante</div>
             </div>
@@ -95,7 +95,7 @@ export default function MarketplacePage() {
 
         {/* Filtros + count */}
         <div style={p.toolbar}>
-          <div style={p.filterRow}>
+          <div style={p.filterRow} data-scroll-x>
             {TIPOS.map((t) => (
               <button key={t} style={{ ...p.filterBtn, ...(filter === t ? p.filterActive : {}) }} onClick={() => setFilter(t)}>
                 {t === "todos" ? "Todos" : t}
@@ -118,7 +118,7 @@ export default function MarketplacePage() {
             <p style={p.emptyText}>Probá con otro término o cambiá el filtro.</p>
           </div>
         ) : (
-          <div style={p.grid}>
+          <div style={p.grid} data-grid="cards">
             {filtered.map((caso) => (
               <PatientCard
                 key={caso.id}

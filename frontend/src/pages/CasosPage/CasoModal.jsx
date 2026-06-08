@@ -19,7 +19,7 @@ export default function CasoModal({ caso, onClose, onAplicar }) {
 
   return (
     <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={s.modal}>
+      <div style={s.modal} data-modal role="dialog">
 
         {/* Imagen */}
         {caso.imagen_url ? (

@@ -61,7 +61,7 @@ function StatsBar({ stats, isDark }) {
     { value: stats.matches,     label: "Matches",     color: "#10b981", bg: isDark ? "rgba(15,45,31,0.8)" : "#f0fdf4", border: isDark ? "#052e16" : "#bbf7d0" },
   ];
   return (
-    <div style={s.statsBar}>
+    <div style={s.statsBar} data-grid="stats">
       {items.map((item, i) => (
         <div key={i} style={{ ...s.statItem, background: item.bg, border: `1px solid ${item.border}` }}>
           <div style={{ ...s.statNum, color: item.color }}><AnimatedCounter target={item.value} duration={1500 + i * 200}/></div>
@@ -187,7 +187,7 @@ export default function HomePage() {
 
           {/* Cards */}
           <div style={{ fontSize: "17px", fontWeight: 800, color: isDark ? "#f1f5f9" : "#0f172a" }}>¿Qué querés hacer hoy?</div>
-          <div style={s.grid}>
+          <div style={s.grid} data-grid="cards">
             {cards.map((card, i) => (
               <div key={i} style={{
                 ...s.card,
