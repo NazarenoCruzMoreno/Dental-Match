@@ -166,9 +166,6 @@ export default function HomePage() {
             </div>
             {/* Controles — FUERA del clip, con position relative y zIndex alto */}
             <div style={s.headerControls}>
-              <button style={s.iconBtn} onClick={toggleTheme} title={isDark ? "Modo claro" : "Modo oscuro"}>
-                {isDark ? <IconSun /> : <IconMoon />}
-              </button>
               <NotificationsBell />
               <button style={s.logoutBtn} onClick={() => { clearAuth(); navigate("/login"); }}>
                 <IconLogout /> Salir
