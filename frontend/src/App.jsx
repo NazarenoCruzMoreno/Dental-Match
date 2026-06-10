@@ -21,6 +21,8 @@ const MarketplacePage  = lazy(() => import("./pages/CasosPage/MarketplacePage"))
 const MatchPage        = lazy(() => import("./pages/MatchPage/MatchPage"));
 const AsignacionesPage = lazy(() => import("./pages/AsignacionesPage/AsignacionesPage"));
 const TurnosPage       = lazy(() => import("./pages/TurnosPage/TurnosPage"));
+const ChatsListPage    = lazy(() => import("./pages/ChatPage/ChatsListPage"));
+const ChatPage         = lazy(() => import("./pages/ChatPage/ChatPage"));
 
 // ── Fallback de carga durante navegación ────────────────────────────────────
 const PageFallback = () => (
@@ -84,6 +86,8 @@ export default function App() {
               <Route path="/match"        element={<PrivateRoute><MatchPage /></PrivateRoute>} />
               <Route path="/asignaciones" element={<PrivateRoute><AsignacionesPage /></PrivateRoute>} />
               <Route path="/turnos"       element={<PrivateRoute><TurnosPage /></PrivateRoute>} />
+              <Route path="/chats"        element={<PrivateRoute><ChatsListPage /></PrivateRoute>} />
+              <Route path="/chat/:casoId" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
 
               {/* Privada — sesión + perfil completo */}
               <Route path="/home" element={<RequireProfile><HomePage /></RequireProfile>} />

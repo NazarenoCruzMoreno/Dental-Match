@@ -126,6 +126,13 @@ export const turnosService = {
     get(`/turnos/disponibilidad?estudiante_id=${estudianteId}&fecha=${fecha}`),
 };
 
+// ── Chat ─────────────────────────────────────────────────────────────────────
+export const chatService = {
+  listarChats:    ()                  => get('/messages'),
+  listarMensajes: (casoId)            => get(`/messages/${casoId}`),
+  enviar:         (casoId, content)   => post(`/messages/${casoId}`, { content }),
+};
+
 // ── Notificaciones ───────────────────────────────────────────────────────────
 export const notificationService = {
   getAll:    () => get('/notifications'),

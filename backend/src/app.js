@@ -14,6 +14,7 @@ const casosRoutes       = require('./routes/casos');
 const aplicacionRoutes  = require('./routes/aplicaciones');
 const turnosRoutes      = require('./routes/turnos');
 const statsRoutes       = require('./routes/stats');
+const messagesRoutes    = require('./routes/messages');
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/api/casos',          casosRoutes);
 app.use('/api/casos',          aplicacionRoutes); // POST /:id/aplicar, /match, etc.
 app.use('/api/turnos',         turnosRoutes);
 app.use('/api/asignaciones',   asignacionRoutes);
+app.use('/api/messages',       messagesRoutes);
 
 // Recursos secundarios
 app.use('/api/estudiantes',    estudianteRoutes);

@@ -175,7 +175,7 @@ function MatchOverlay({ estudiante, onContinue }) {
           <div style={mo.heart}>💙</div>
           <div style={mo.matchAvatar}>{estudiante?.nombre?.charAt(0).toUpperCase()}</div>
         </div>
-        <button style={mo.btn} onClick={onContinue}>¡Genial!</button>
+        <button style={mo.btn} onClick={onContinue}>💬 Empezar a chatear</button>
       </div>
     </div>
   );
@@ -249,7 +249,9 @@ export default function MatchPage() {
 
   const handleContinue = () => {
     setMatchedEst(null);
-    navigate("/casos");
+    // Llevar al chat con el estudiante elegido
+    if (currentCaso) navigate(`/chat/${currentCaso.id}`);
+    else navigate("/casos");
   };
 
   if (loading) return (

@@ -54,15 +54,18 @@ router.get('/:id/aplicantes', authMiddleware, roleMiddleware(['paciente']), asyn
         estudiantes (
           id, nombre, universidad, anio_carrera,
           materias, disponibilidad, descripcion, rating,
-          pacientes_atendidos, imagen_url
+          pacientes_atendidos, imagen_url, user_id
         )
       `)
       .eq('caso_id', casoId)
       .eq('estado', 'pendiente')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    res.json(data);
+    if (error) {
+      console.error('[aplicantes] error:', error);
+      throw error;
+    }
+    res.json(data ?? []);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
