@@ -37,6 +37,8 @@ export default function CreateCasoPage() {
       e.titulo = "El título debe tener al menos 5 caracteres";
     if (!form.descripcion.trim() || form.descripcion.length < 20)
       e.descripcion = "Describí el caso con más detalle (mínimo 20 caracteres)";
+    if (!imageFile)
+      e.imagen = "Subí una foto de tu boca para que el estudiante pueda evaluar el caso";
     return e;
   };
 
@@ -116,11 +118,11 @@ export default function CreateCasoPage() {
           <form onSubmit={handleSubmit} style={s.form}>
             {serverErr && <div style={s.errorBox}>{serverErr}</div>}
 
-            {/* ── Imagen del caso (FE-9) ── */}
+            {/* ── Imagen del caso (obligatoria) ── */}
             <div style={s.fieldGroup}>
-              <label style={s.label}>Foto del problema dental (opcional)</label>
+              <label style={s.label}>Foto del problema dental <span style={s.required}>*</span></label>
               <div
-                style={{ ...s.dropZone, ...(imagePreview ? s.dropZoneActive : {}) }}
+                style={{ ...s.dropZone, ...(imagePreview ? s.dropZoneActive : {}), ...(errors.imagen ? { borderColor: "#ef4444", background: "#fef2f2" } : {}) }}
                 onClick={() => fileRef.current?.click()}
               >
                 {imagePreview ? (
@@ -145,6 +147,7 @@ export default function CreateCasoPage() {
                 </button>
               )}
               <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageChange} />
+              {errors.imagen && <span style={s.fieldErr}>{errors.imagen}</span>}
             </div>
 
             {/* Título */}

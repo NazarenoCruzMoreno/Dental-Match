@@ -1,6 +1,27 @@
 import { useState } from "react";
 import { timeAgo } from "../../utils/format";
 
+// Imagen del caso con fallback automático si falla la carga
+function CaseImage({ src }) {
+  const [error, setError] = useState(false);
+  if (!src || error) {
+    return (
+      <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontSize: "48px" }}>🦷</span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt="Foto del caso"
+      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      onError={() => setError(true)}
+      loading="lazy"
+    />
+  );
+}
+
 // ── Tarjeta de paciente para el marketplace ─────────────────────────────────
 export default function PatientCard({ caso, onClick }) {
   const [hover, setHover] = useState(false);
@@ -12,11 +33,9 @@ export default function PatientCard({ caso, onClick }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      {/* Imagen / placeholder */}
+      {/* Imagen del caso (foto de la boca) */}
       <div style={s.imgArea}>
-        {caso.imagen_url
-          ? <img src={caso.imagen_url} alt="Foto" style={s.img} />
-          : <div style={s.imgPlaceholder}><span style={{ fontSize: "36px" }}>🦷</span></div>}
+        <CaseImage src={caso.imagen_url} />
         <div style={s.availBadge}>● Disponible</div>
       </div>
 

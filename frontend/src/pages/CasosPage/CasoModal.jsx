@@ -1,6 +1,23 @@
 import { useState } from "react";
 import { timeAgo, inferSintomas } from "../../utils/format";
 
+function CaseImage({ src, height = 220 }) {
+  const [error, setError] = useState(false);
+  if (!src || error) {
+    return (
+      <div style={{ height, background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "24px 24px 0 0" }}>
+        <span style={{ fontSize: "60px" }}>🦷</span>
+      </div>
+    );
+  }
+  return (
+    <div style={{ position: "relative", height, overflow: "hidden", borderRadius: "24px 24px 0 0" }}>
+      <img src={src} alt="Foto del caso" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setError(true)} />
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3))" }} />
+    </div>
+  );
+}
+
 // ── Modal de detalle de caso clínico (vista estudiante) ─────────────────────
 export default function CasoModal({ caso, onClose, onAplicar }) {
   const [applying, setApplying] = useState(false);
@@ -21,19 +38,11 @@ export default function CasoModal({ caso, onClose, onAplicar }) {
     <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div style={s.modal} data-modal role="dialog">
 
-        {/* Imagen */}
-        {caso.imagen_url ? (
-          <div style={s.imgWrap}>
-            <img src={caso.imagen_url} alt="Foto caso" style={s.img} />
-            <div style={s.imgOverlay} />
-            <button style={s.closeAbsolute} onClick={onClose}>✕</button>
-          </div>
-        ) : (
-          <div style={s.imgPlaceholder}>
-            <span style={{ fontSize: "52px" }}>🦷</span>
-            <button style={s.closeAbsolute} onClick={onClose}>✕</button>
-          </div>
-        )}
+        {/* Imagen del caso con fallback */}
+        <div style={{ position: "relative" }}>
+          <CaseImage src={caso.imagen_url} />
+          <button style={s.closeAbsolute} onClick={onClose}>✕</button>
+        </div>
 
         <div style={s.body}>
           {/* Header */}

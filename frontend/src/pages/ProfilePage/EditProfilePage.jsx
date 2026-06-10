@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { profileService, getUser } from "../../services/api";
 import { compressImage } from "../../utils/imageCompression";
 import { useToast } from "../../context/ToastContext";
+import AvailabilityPicker from "../../components/AvailabilityPicker/AvailabilityPicker";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 
@@ -87,7 +88,13 @@ function EstudianteForm({ data, onChange }) {
         />
       </div>
       <TagInput label="Materias" tags={data.materias} onChange={(v) => onChange("materias", v)} placeholder="Ej: Ortodoncia (Enter para agregar)" color="#3b82f6" />
-      <TagInput label="Disponibilidad" tags={data.disponibilidad} onChange={(v) => onChange("disponibilidad", v)} placeholder="Ej: Lunes 9-12 (Enter para agregar)" color="#f59e0b" />
+      <div>
+        <label style={styles.textareaLabel}>Disponibilidad <span style={{ color: "#ef4444" }}>*</span></label>
+        <AvailabilityPicker
+          value={data.disponibilidad}
+          onChange={(v) => onChange("disponibilidad", v)}
+        />
+      </div>
     </>
   );
 }
@@ -168,6 +175,15 @@ export default function EditProfilePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    // Validación: foto de perfil obligatoria para pacientes
+    if (role === "paciente" && !photoFile && !currentPhoto) {
+      setError("La foto de perfil es obligatoria para pacientes.");
+      return;
+    }
+    if (role === "estudiante" && (!formData.disponibilidad || formData.disponibilidad.length === 0)) {
+      setError("Tenés que elegir al menos un horario de disponibilidad.");
+      return;
+    }
     setSubmitting(true);
     try {
       // Si hay foto nueva, enviar como multipart/form-data
