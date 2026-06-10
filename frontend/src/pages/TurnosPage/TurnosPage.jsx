@@ -4,6 +4,7 @@ import { getUser, turnosService, casosService } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { RowSkeleton } from "../../components/Skeleton/Skeleton";
+import Calendar from "../../components/Calendar/Calendar";
 
 const DIAS   = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MESES  = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -75,10 +76,10 @@ function ReservarModal({ caso, onClose, onCreated }) {
 
         {err && <div style={mo.errBox}>{err}</div>}
 
-        {/* Fecha */}
+        {/* Fecha — calendario visual */}
         <div style={mo.field}>
-          <label style={mo.label}>Fecha</label>
-          <input type="date" min={today} value={fecha} onChange={e => handleFecha(e.target.value)} style={mo.input}/>
+          <label style={mo.label}>Elegí una fecha</label>
+          <Calendar value={fecha} onChange={handleFecha} minDate={today}/>
         </div>
 
         {/* Slots de horario */}
