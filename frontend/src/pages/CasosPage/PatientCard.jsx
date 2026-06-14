@@ -37,6 +37,9 @@ export default function PatientCard({ caso, onClick }) {
       <div style={s.imgArea}>
         <CaseImage src={caso.imagen_url} />
         <div style={s.availBadge}>● Disponible</div>
+        {caso.es_analisis && (
+          <div style={s.analisisBadge}>🎓 Análisis · Junior</div>
+        )}
       </div>
 
       <div style={s.body}>
@@ -70,6 +73,7 @@ const s = {
   img:            { width: "100%", height: "100%", objectFit: "cover", transition: "transform .3s ease" },
   imgPlaceholder: { height: "100%", background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center" },
   availBadge:     { position: "absolute", top: "10px", right: "10px", background: "rgba(16,185,129,0.9)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "999px", backdropFilter: "blur(4px)" },
+  analisisBadge:  { position: "absolute", top: "10px", left: "10px", background: "linear-gradient(135deg,#8b5cf6,#7c3aed)", color: "#fff", fontSize: "10px", fontWeight: 800, padding: "4px 10px", borderRadius: "999px", boxShadow: "0 2px 8px rgba(139,92,246,0.35)" },
   body:           { padding: "18px 20px 20px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 },
   patRow:         { display: "flex", alignItems: "center", gap: "10px" },
   avatar:         { width: "36px", height: "36px", minWidth: "36px", borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: 800 },

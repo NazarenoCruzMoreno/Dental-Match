@@ -48,6 +48,15 @@ const casoSchema = z.object({
   descripcion:      z.string().min(20, 'Describí el caso con más detalle (mínimo 20 caracteres)'),
   tipo_tratamiento: z.string().optional(),
   notas:            z.string().optional(),
+  es_analisis:      z.preprocess(v => v === 'true' || v === true, z.boolean()).optional(),
+});
+
+// ── Finalización del caso por el estudiante ─────────────────────────────────
+const finalizarCasoSchema = z.object({
+  diagnostico:          z.string().min(10, 'El diagnóstico debe tener al menos 10 caracteres'),
+  tratamiento_asignado: z.string().min(5,  'Indicá qué tratamiento se realizó'),
+  rating_paciente:      z.preprocess(v => Number(v), z.number().int().min(1).max(5)),
+  comentario:           z.string().max(500).optional(),
 });
 
 const casoUpdateSchema = casoSchema.partial().extend({
@@ -79,6 +88,7 @@ module.exports = {
   pacienteUpdateSchema,
   casoSchema,
   casoUpdateSchema,
+  finalizarCasoSchema,
   turnoSchema,
   turnoUpdateSchema,
 };

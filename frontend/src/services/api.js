@@ -93,11 +93,13 @@ export const profileService = {
 
 // ── Casos clínicos ───────────────────────────────────────────────────────────
 export const casosService = {
-  listar:         ()              => get('/casos'),
-  obtener:        (id)            => get(`/casos/${id}`),
-  crear:          (data)          => post('/casos', data),
-  crearMultipart: (formData)      => postMultipart('/casos', formData),
-  actualizar:     (id, data)      => put(`/casos/${id}`, data),
+  listar:           ()              => get('/casos'),
+  obtener:          (id)            => get(`/casos/${id}`),
+  crear:            (data)          => post('/casos', data),
+  crearMultipart:   (formData)      => postMultipart('/casos', formData),
+  actualizar:       (id, data)      => put(`/casos/${id}`, data),
+  checkPrimerCaso:  ()              => get('/casos/check-primer-caso'),
+  finalizar:        (id, data)      => post(`/casos/${id}/finalizar`, data),
 };
 
 // ── Aplicaciones y Match ─────────────────────────────────────────────────────

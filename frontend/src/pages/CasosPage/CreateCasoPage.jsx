@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, casosService } from "../../services/api";
 import { compressImage } from "../../utils/imageCompression";
@@ -22,12 +22,21 @@ export default function CreateCasoPage() {
 
   const [form, setForm] = useState({
     titulo: "", descripcion: "", tipo_tratamiento: "", notas: "",
+    es_analisis: false,
   });
-  const [imageFile,    setImageFile]    = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [errors,       setErrors]       = useState({});
-  const [submitting,   setSubmitting]   = useState(false);
-  const [serverErr,    setServerErr]    = useState("");
+  const [imageFile,     setImageFile]     = useState(null);
+  const [imagePreview,  setImagePreview]  = useState(null);
+  const [errors,        setErrors]        = useState({});
+  const [submitting,    setSubmitting]    = useState(false);
+  const [serverErr,     setServerErr]     = useState("");
+  const [esPrimerCaso,  setEsPrimerCaso]  = useState(false);
+
+  // ── Detectar si es el primer caso del paciente ────────────────────────────
+  useEffect(() => {
+    casosService.checkPrimerCaso()
+      .then(({ esPrimerCaso }) => setEsPrimerCaso(esPrimerCaso))
+      .catch(() => {});
+  }, []);
 
   const set = (field, val) => setForm(p => ({ ...p, [field]: val }));
 
@@ -77,6 +86,7 @@ export default function CreateCasoPage() {
         fd.append("descripcion",     form.descripcion.trim());
         if (form.tipo_tratamiento) fd.append("tipo_tratamiento", form.tipo_tratamiento);
         if (form.notas)            fd.append("notas",            form.notas.trim());
+        if (form.es_analisis)      fd.append("es_analisis", "true");
         await casosService.crearMultipart(fd);
       } else {
         await casosService.crear({
@@ -84,6 +94,7 @@ export default function CreateCasoPage() {
           descripcion:      form.descripcion.trim(),
           tipo_tratamiento: form.tipo_tratamiento || undefined,
           notas:            form.notas || undefined,
+          es_analisis:      form.es_analisis,
         });
       }
       toast.success("¡Caso publicado! Esperá aplicaciones de estudiantes.");
@@ -199,6 +210,30 @@ export default function CreateCasoPage() {
               />
             </div>
 
+            {/* ── Sugerencia: análisis con estudiante junior (solo primer caso) ── */}
+            {esPrimerCaso && (
+              <div style={analisis.card}>
+                <div style={analisis.iconCol}>🎓</div>
+                <div style={{ flex: 1 }}>
+                  <div style={analisis.title}>¿Es tu primera vez?</div>
+                  <p style={analisis.desc}>
+                    Podés pedir un <strong>análisis</strong> con un estudiante de los primeros años.
+                    Tu caso aparecerá primero entre los estudiantes en formación, ideal para chequeos
+                    iniciales y diagnóstico sin compromiso.
+                  </p>
+                  <label
+                    style={{ ...analisis.checkRow, ...(form.es_analisis ? analisis.checkRowActive : {}) }}
+                    onClick={() => set("es_analisis", !form.es_analisis)}
+                  >
+                    <div style={{ ...analisis.checkbox, ...(form.es_analisis ? analisis.checkboxActive : {}) }}>
+                      {form.es_analisis && "✓"}
+                    </div>
+                    <span>Sí, marcar mi caso como <strong>análisis inicial</strong></span>
+                  </label>
+                </div>
+              </div>
+            )}
+
             <div style={s.actions}>
               <button type="button" style={s.cancelBtn} onClick={() => navigate("/casos")}>Cancelar</button>
               <Button variant="primary" disabled={submitting} arrow={!submitting}>
@@ -249,4 +284,15 @@ const s = {
   errorBox:      { padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", color: "#dc2626", fontSize: "14px", fontWeight: 500 },
   actions:       { display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "8px" },
   cancelBtn:     { padding: "12px 24px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" },
+};
+
+const analisis = {
+  card:        { display: "flex", gap: "16px", padding: "20px 22px", background: "linear-gradient(135deg,#eff6ff,#dbeafe)", border: "1px solid #bfdbfe", borderRadius: "16px", alignItems: "flex-start" },
+  iconCol:     { fontSize: "38px", flexShrink: 0 },
+  title:       { fontSize: "15px", fontWeight: 800, color: "#1e40af", marginBottom: "6px", fontFamily: "'Inter',sans-serif" },
+  desc:        { fontSize: "13px", color: "#1e3a8a", lineHeight: 1.6, margin: "0 0 12px", fontFamily: "'Inter',sans-serif" },
+  checkRow:    { display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", background: "rgba(255,255,255,0.7)", borderRadius: "10px", cursor: "pointer", border: "2px solid transparent", fontSize: "13px", color: "#1e3a8a", fontWeight: 600, fontFamily: "'Inter',sans-serif", transition: "all .15s" },
+  checkRowActive:{ background: "#fff", border: "2px solid #2563eb", color: "#2563eb" },
+  checkbox:    { width: "22px", height: "22px", borderRadius: "6px", border: "2px solid #93c5fd", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff", flexShrink: 0 },
+  checkboxActive:{ background: "linear-gradient(135deg,#2563eb,#1d4ed8)", border: "2px solid transparent" },
 };
