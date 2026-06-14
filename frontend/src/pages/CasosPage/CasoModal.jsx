@@ -59,10 +59,32 @@ export default function CasoModal({ caso, onClose, onAplicar }) {
           {caso.pacientes && (
             <div style={s.patSection}>
               <div style={s.patAvatar}>{caso.pacientes.nombre?.charAt(0).toUpperCase()}</div>
-              <div>
+              <div style={{ flex: 1 }}>
                 <div style={s.patName}>{caso.pacientes.nombre}</div>
                 <div style={s.patAge}>{caso.pacientes.edad} años</div>
               </div>
+              {/* Rating + experiencia previa del paciente */}
+              {(caso.pacientes.rating > 0 || caso.pacientes.turnos_completados > 0) && (
+                <div style={{ textAlign: "right" }}>
+                  {caso.pacientes.rating > 0 && (
+                    <div style={{ fontSize: "13px", fontWeight: 800, color: "#f59e0b" }}>
+                      ★ {caso.pacientes.rating}
+                    </div>
+                  )}
+                  {caso.pacientes.turnos_completados > 0 && (
+                    <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
+                      {caso.pacientes.turnos_completados} turno{caso.pacientes.turnos_completados !== 1 ? "s" : ""}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Badge si es caso de análisis */}
+          {caso.es_analisis && (
+            <div style={{ display: "inline-block", padding: "5px 12px", background: "linear-gradient(135deg,#8b5cf6,#7c3aed)", color: "#fff", borderRadius: "999px", fontSize: "12px", fontWeight: 700, marginBottom: "16px" }}>
+              🎓 Análisis · Apto para estudiantes en formación
             </div>
           )}
 

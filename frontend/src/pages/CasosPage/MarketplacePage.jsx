@@ -8,7 +8,12 @@ import { GridSkeleton } from "../../components/Skeleton/Skeleton";
 import PatientCard from "./PatientCard";
 import CasoModal   from "./CasoModal";
 
-const TIPOS = ["todos", "Ortodoncia", "Endodoncia", "Periodoncia", "Cirugía oral", "Estética dental", "Otro"];
+// Filtros principales: análisis (para junior) vs todos los casos abiertos
+const FILTROS = [
+  { key: "todos",    label: "Todos" },
+  { key: "analisis", label: "🎓 Solo análisis" },
+  { key: "normales", label: "Casos avanzados" },
+];
 
 export default function MarketplacePage() {
   const navigate         = useNavigate();
@@ -38,7 +43,9 @@ export default function MarketplacePage() {
       || c.titulo.toLowerCase().includes(q)
       || c.descripcion.toLowerCase().includes(q)
       || (c.pacientes?.nombre ?? "").toLowerCase().includes(q);
-    const matchFilter = filter === "todos" || c.tipo_tratamiento === filter;
+    let matchFilter = true;
+    if      (filter === "analisis") matchFilter = !!c.es_analisis;
+    else if (filter === "normales") matchFilter = !c.es_analisis;
     return matchSearch && matchFilter;
   });
 
@@ -96,9 +103,9 @@ export default function MarketplacePage() {
         {/* Filtros + count */}
         <div style={p.toolbar}>
           <div style={p.filterRow} data-scroll-x>
-            {TIPOS.map((t) => (
-              <button key={t} style={{ ...p.filterBtn, ...(filter === t ? p.filterActive : {}) }} onClick={() => setFilter(t)}>
-                {t === "todos" ? "Todos" : t}
+            {FILTROS.map((f) => (
+              <button key={f.key} style={{ ...p.filterBtn, ...(filter === f.key ? p.filterActive : {}) }} onClick={() => setFilter(f.key)}>
+                {f.label}
               </button>
             ))}
           </div>
