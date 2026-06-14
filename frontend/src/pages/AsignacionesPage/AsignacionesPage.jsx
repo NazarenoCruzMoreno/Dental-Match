@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getUser, asignacionesService } from "../../services/api";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { RowSkeleton } from "../../components/Skeleton/Skeleton";
+import FinalizarCasoModal from "./FinalizarCasoModal";
 
 const IconBack  = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>);
 const IconTooth = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2C8 2 5 5 5 9c0 2.5.8 4.5 1.5 6.5L7 20c.3 1.2 1 2 2 2s1.5-.8 2-2l1-3 1 3c.5 1.2 1 2 2 2s1.7-.8 2-2l.5-4.5C18.2 13.5 19 11.5 19 9c0-4-3-7-7-7z"/></svg>);
@@ -24,7 +25,7 @@ function EstadoBadge({ estado }) {
 }
 
 // Modal de detalle de asignación
-function AsignacionModal({ caso, onClose }) {
+function AsignacionModal({ caso, onClose, onFinalizar }) {
   const pac = caso.pacientes;
   return (
     <div style={m.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
@@ -86,8 +87,26 @@ function AsignacionModal({ caso, onClose }) {
             <span style={m.date}>
               Asignado el {new Date(caso.updated_at).toLocaleDateString("es-AR", { day:"2-digit", month:"long", year:"numeric" })}
             </span>
-            <button style={m.closeAct} onClick={onClose}>Cerrar</button>
+            <div style={{ display: "flex", gap: "8px" }}>
+              {caso.estado === "en_progreso" && (
+                <button style={m.finalizarBtn} onClick={onFinalizar}>
+                  ✓ Finalizar caso
+                </button>
+              )}
+              <button style={m.closeAct} onClick={onClose}>Cerrar</button>
+            </div>
           </div>
+
+          {/* Mostrar diagnóstico si ya está finalizado */}
+          {caso.estado === "completado" && (caso.diagnostico || caso.tratamiento_asignado) && (
+            <div style={m.diagBox}>
+              <div style={m.diagLabel}>Diagnóstico final</div>
+              {caso.diagnostico && <p style={m.diagText}>{caso.diagnostico}</p>}
+              {caso.tratamiento_asignado && (
+                <div style={m.tratamientoChip}>🦷 {caso.tratamiento_asignado}</div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -116,6 +135,11 @@ const m = {
   footer:     { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "20px", paddingTop: "16px", borderTop: "1px solid #f1f5f9" },
   date:       { fontSize: "12px", color: "#94a3b8" },
   closeAct:   { padding: "10px 20px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "10px", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" },
+  finalizarBtn:{ padding: "10px 18px", background: "linear-gradient(135deg,#10b981,#059669)", color: "#fff", border: "none", borderRadius: "10px", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter',sans-serif", boxShadow: "0 4px 12px rgba(16,185,129,0.35)" },
+  diagBox:    { marginTop: "16px", padding: "14px 16px", background: "#f5f3ff", border: "1px solid #ddd6fe", borderRadius: "12px" },
+  diagLabel:  { fontSize: "11px", fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "6px" },
+  diagText:   { fontSize: "13px", color: "#1e293b", lineHeight: "1.5", margin: 0 },
+  tratamientoChip:{ display: "inline-block", marginTop: "8px", padding: "4px 12px", background: "#fff", color: "#7c3aed", borderRadius: "999px", fontSize: "12px", fontWeight: 700, border: "1px solid #ddd6fe" },
 };
 
 // ── Página principal ──────────────────────────────────────────────────────────
@@ -123,7 +147,9 @@ export default function AsignacionesPage() {
   const navigate     = useNavigate();
   const [casos,    setCasos]    = useState([]);
   const [loading,  setLoading]  = useState(true);
-  const [selected, setSelected] = useState(null);
+  const [selected,    setSelected]    = useState(null);
+  const [finalizando, setFinalizando] = useState(null);
+  const [refresh,     setRefresh]     = useState(0);
   const [filter,   setFilter]   = useState("todos");
 
   const cargar = () => {
@@ -132,7 +158,7 @@ export default function AsignacionesPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   };
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => { cargar(); }, [refresh]);
   useAutoRefresh(cargar);
 
   const FILTROS = ["todos", "en_progreso", "completado", "abierto"];
@@ -239,7 +265,20 @@ export default function AsignacionesPage() {
 
       </div>
 
-      {selected && <AsignacionModal caso={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <AsignacionModal
+          caso={selected}
+          onClose={() => setSelected(null)}
+          onFinalizar={() => { setFinalizando(selected); setSelected(null); }}
+        />
+      )}
+      {finalizando && (
+        <FinalizarCasoModal
+          caso={finalizando}
+          onClose={() => setFinalizando(null)}
+          onDone={() => setRefresh((r) => r + 1)}
+        />
+      )}
     </div>
   );
 }
