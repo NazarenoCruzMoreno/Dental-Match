@@ -114,98 +114,48 @@ html, body {
   66%       { transform: translateY(10px) rotate(-10deg); }
 }
 
-/* ── Dark mode overrides globales — atacan estilos inline ─────────── */
+/* ── Dark mode global usando inversión de filtros CSS ──────────────── */
+/* Técnica: invertir todo el documento, y re-invertir imágenes/SVG/videos
+   para que se vean normales. Funciona en TODAS las páginas sin tocar JSX. */
+
+[data-theme="dark"] html,
 [data-theme="dark"] body {
-  background-color: #0f172a;
-  color: #f1f5f9;
+  background-color: #0f172a !important;
 }
 
-/* Fondos blancos / muy claros → oscuros */
-[data-theme="dark"] [style*="background: #fff"],
-[data-theme="dark"] [style*="background:#fff"],
-[data-theme="dark"] [style*="background: #ffffff"],
-[data-theme="dark"] [style*="background:#ffffff"],
-[data-theme="dark"] [style*="background: white"],
-[data-theme="dark"] [style*="background:white"],
-[data-theme="dark"] [style*="background: rgb(255, 255, 255)"] {
-  background: #1e293b !important;
-  color: #f1f5f9 !important;
+[data-theme="dark"] #root {
+  filter: invert(0.92) hue-rotate(180deg);
+  background-color: #f1f5f9; /* base "blanca" que se invertirá a oscura */
+  min-height: 100vh;
 }
 
-/* Backgrounds muy claros tipo #f8fafc, #f1f5f9, #f0f8ff → más oscuros */
-[data-theme="dark"] [style*="background: #f8fafc"],
-[data-theme="dark"] [style*="background:#f8fafc"],
-[data-theme="dark"] [style*="background: #f1f5f9"],
-[data-theme="dark"] [style*="background:#f1f5f9"],
-[data-theme="dark"] [style*="background: #fafafa"],
-[data-theme="dark"] [style*="background:#fafafa"] {
-  background: #334155 !important;
-  color: #cbd5e1 !important;
+/* Re-invertir todo lo que tenga color propio: imágenes, SVG, video, canvas
+   y elementos con backgrounds que no queremos invertir */
+[data-theme="dark"] #root img,
+[data-theme="dark"] #root svg,
+[data-theme="dark"] #root video,
+[data-theme="dark"] #root canvas,
+[data-theme="dark"] #root picture,
+[data-theme="dark"] #root [style*="linear-gradient"],
+[data-theme="dark"] #root [style*="radial-gradient"],
+[data-theme="dark"] #root [data-no-invert] {
+  filter: invert(1) hue-rotate(180deg);
 }
 
-/* Texto oscuro (#0f172a, #1e293b) → claro */
-[data-theme="dark"] [style*="color: #0f172a"],
-[data-theme="dark"] [style*="color:#0f172a"],
-[data-theme="dark"] [style*="color: #1e293b"],
-[data-theme="dark"] [style*="color:#1e293b"] {
-  color: #f1f5f9 !important;
+/* Re-invertir SVG dentro de botones también */
+[data-theme="dark"] #root button svg {
+  filter: invert(1) hue-rotate(180deg);
 }
 
-/* Texto secundario (#64748b, #475569) → más claro */
-[data-theme="dark"] [style*="color: #64748b"],
-[data-theme="dark"] [style*="color:#64748b"],
-[data-theme="dark"] [style*="color: #475569"],
-[data-theme="dark"] [style*="color:#475569"],
-[data-theme="dark"] [style*="color: #374151"],
-[data-theme="dark"] [style*="color:#374151"] {
-  color: #94a3b8 !important;
-}
-
-/* Bordes muy claros */
-[data-theme="dark"] [style*="border: 1px solid #e2e8f0"],
-[data-theme="dark"] [style*="border: 1px solid #f1f5f9"],
-[data-theme="dark"] [style*="border: 2px solid #e2e8f0"] {
-  border-color: #334155 !important;
-}
-
-/* Gradientes de páginas (linear-gradient con f8fafc/eff6ff/fff7ed) → invertido */
-[data-theme="dark"] [style*="linear-gradient(135deg,#f8fafc"],
-[data-theme="dark"] [style*="linear-gradient(135deg, #f8fafc"],
-[data-theme="dark"] [style*="linear-gradient(160deg,#f8fafc"] {
-  background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 60%, #1c1917 100%) !important;
-}
-
-/* Inputs */
-[data-theme="dark"] input,
-[data-theme="dark"] textarea,
-[data-theme="dark"] select {
-  background: #334155 !important;
-  color: #f1f5f9 !important;
-  border-color: #475569 !important;
-}
-
-/* Placeholders */
-[data-theme="dark"] input::placeholder,
-[data-theme="dark"] textarea::placeholder {
-  color: #64748b !important;
-}
-
-/* Excepciones — colores que NO se deben tocar (gradientes azules, badges) */
-[data-theme="dark"] [style*="linear-gradient(135deg,#2563eb"],
-[data-theme="dark"] [style*="linear-gradient(135deg,#3b82f6"],
-[data-theme="dark"] [style*="linear-gradient(135deg,#1e40af"],
-[data-theme="dark"] [style*="linear-gradient(135deg,#10b981"],
-[data-theme="dark"] [style*="linear-gradient(135deg,#8b5cf6"],
-[data-theme="dark"] [style*="linear-gradient(135deg,#ef4444"],
-[data-theme="dark"] [style*="linear-gradient(135deg,#f59e0b"] {
-  /* Mantener color de gradiente original — el !important sobre background lo restaura */
-  background: revert-layer !important;
-}
-
-/* Bottom nav fondo blanco → dark */
+/* Bottom nav: arreglo de borde con esta técnica */
 [data-theme="dark"] nav[data-bottom-nav] {
-  background: rgba(30,41,59,0.98) !important;
-  border-top-color: #334155 !important;
+  border-top: 1px solid #cbd5e1;
+}
+
+/* Toasts deben mantener sus colores intensos (rojo, verde, etc.) */
+[data-theme="dark"] [class*="Toast"],
+[data-theme="dark"] [data-toast] {
+  filter: invert(1) hue-rotate(180deg);
 }
 
 /* Eliminar tap highlight feo en mobile */
