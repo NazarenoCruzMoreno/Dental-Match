@@ -123,6 +123,7 @@ export const turnosService = {
     return get(`/turnos${qs ? `?${qs}` : ''}`);
   },
   reservar:        (data)            => post('/turnos', data),
+  proponer:        (data)            => post('/turnos/proponer', data),
   actualizar:      (id, data)        => put(`/turnos/${id}`, data),
   disponibilidad:  (estudianteId, fecha) =>
     get(`/turnos/disponibilidad?estudiante_id=${estudianteId}&fecha=${fecha}`),

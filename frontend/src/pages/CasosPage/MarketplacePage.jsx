@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, casosService, matchService } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
+import { useTheme } from "../../context/ThemeContext";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useDebounce } from "../../hooks/useDebounce";
 import { GridSkeleton } from "../../components/Skeleton/Skeleton";
@@ -19,6 +20,7 @@ export default function MarketplacePage() {
   const navigate         = useNavigate();
   const user             = getUser();
   const toast            = useToast();
+  const { isDark }       = useTheme();
   const [casos,    setCasos]    = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [search,   setSearch]   = useState("");
@@ -64,10 +66,10 @@ export default function MarketplacePage() {
   const nombre = user?.email?.split("@")[0] ?? "Estudiante";
 
   return (
-    <div style={p.root}>
+    <div style={{ ...p.root, background: isDark ? "#0f172a" : "#f8fafc", color: isDark ? "#f1f5f9" : "#0f172a" }}>
 
       {/* ── HEADER ── */}
-      <header style={p.header}>
+      <header style={{ ...p.header, background: isDark ? "#1e293b" : "#fff", borderColor: isDark ? "#334155" : "#f1f5f9" }}>
         <div style={p.headerInner}>
           <div style={p.logo} onClick={() => navigate("/home")}>
             <div style={p.logoIcon}>🦷</div>
@@ -130,6 +132,7 @@ export default function MarketplacePage() {
               <PatientCard
                 key={caso.id}
                 caso={caso}
+                isDark={isDark}
                 onClick={() => setSelected(caso)}
               />
             ))}
@@ -141,6 +144,7 @@ export default function MarketplacePage() {
       {selected && (
         <CasoModal
           caso={selected}
+          isDark={isDark}
           onClose={() => setSelected(null)}
           onAplicar={handleAplicar}
         />

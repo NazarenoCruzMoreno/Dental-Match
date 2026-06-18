@@ -11,9 +11,11 @@ const MESES  = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto
 
 const ESTADO_CFG = {
   pendiente:   { label: "Pendiente",    color: "#f59e0b", bg: "#fff7ed", border: "#fed7aa" },
+  propuesto:   { label: "Propuesto",    color: "#3b82f6", bg: "#eff6ff", border: "#bfdbfe" },
   confirmado:  { label: "Confirmado",   color: "#10b981", bg: "#f0fdf4", border: "#bbf7d0" },
   completado:  { label: "Completado",   color: "#8b5cf6", bg: "#f5f3ff", border: "#ddd6fe" },
   cancelado:   { label: "Cancelado",    color: "#94a3b8", bg: "#f8fafc", border: "#e2e8f0" },
+  rechazado:   { label: "Rechazado",    color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
 };
 
 function Badge({ estado }) {
@@ -186,16 +188,30 @@ function TurnoCard({ turno, role, onAccion }) {
 
       {/* Acciones */}
       <div style={tc.actions}>
+        {/* Paciente recibe propuesta del estudiante */}
+        {role === "paciente" && turno.estado === "propuesto" && !pasado && (
+          <>
+            <button style={tc.btnConfirm} disabled={loading} onClick={() => accion("confirmado")}>✓ Aceptar</button>
+            <button style={tc.btnCancel}  disabled={loading} onClick={() => accion("rechazado")}>✕ Rechazar</button>
+          </>
+        )}
+        {/* Estudiante confirma o cancela un turno reservado por paciente */}
         {role === "estudiante" && turno.estado === "pendiente" && !pasado && (
           <>
             <button style={tc.btnConfirm} disabled={loading} onClick={() => accion("confirmado")}>✓ Confirmar</button>
             <button style={tc.btnCancel}  disabled={loading} onClick={() => accion("cancelado")}>✕</button>
           </>
         )}
+        {/* Estudiante marca como completado */}
         {role === "estudiante" && turno.estado === "confirmado" && pasado && (
           <button style={tc.btnComplete} disabled={loading} onClick={() => accion("completado")}>✓ Completado</button>
         )}
-        {turno.estado === "pendiente" && role === "paciente" && (
+        {/* Paciente cancela su propio turno pendiente o confirmado */}
+        {(turno.estado === "pendiente" || turno.estado === "confirmado") && role === "paciente" && (
+          <button style={tc.btnCancel} disabled={loading} onClick={() => accion("cancelado")}>Cancelar</button>
+        )}
+        {/* Estudiante cancela un propuesto suyo */}
+        {role === "estudiante" && turno.estado === "propuesto" && !pasado && (
           <button style={tc.btnCancel} disabled={loading} onClick={() => accion("cancelado")}>Cancelar</button>
         )}
       </div>

@@ -19,7 +19,13 @@ function CaseImage({ src, height = 220 }) {
 }
 
 // ── Modal de detalle de caso clínico (vista estudiante) ─────────────────────
-export default function CasoModal({ caso, onClose, onAplicar }) {
+export default function CasoModal({ caso, onClose, onAplicar, isDark = false }) {
+  const dynModal  = isDark ? { background: "#1e293b" } : {};
+  const dynTitle  = { color: isDark ? "#f1f5f9" : "#0f172a" };
+  const dynText   = { color: isDark ? "#cbd5e1" : "#374151" };
+  const dynPatSec = isDark ? { background: "#0f172a" } : {};
+  const dynPatName= { color: isDark ? "#f1f5f9" : "#0f172a" };
+  const dynCancel = isDark ? { background: "#334155", color: "#cbd5e1" } : {};
   const [applying, setApplying] = useState(false);
   const [done,     setDone]     = useState(false);
   const [err,      setErr]      = useState("");
@@ -36,7 +42,7 @@ export default function CasoModal({ caso, onClose, onAplicar }) {
 
   return (
     <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={s.modal} data-modal role="dialog">
+      <div style={{ ...s.modal, ...dynModal }} data-modal role="dialog">
 
         {/* Imagen del caso con fallback */}
         <div style={{ position: "relative" }}>
@@ -47,7 +53,7 @@ export default function CasoModal({ caso, onClose, onAplicar }) {
         <div style={s.body}>
           {/* Header */}
           <div style={s.mHeader}>
-            <h2 style={s.mTitle}>{caso.titulo}</h2>
+            <h2 style={{ ...s.mTitle, ...dynTitle }}>{caso.titulo}</h2>
             <div style={s.mMeta}>
               <span style={s.availBadge}>● Disponible</span>
               {caso.tipo_tratamiento && <span style={s.typePill}>{caso.tipo_tratamiento}</span>}
@@ -57,10 +63,10 @@ export default function CasoModal({ caso, onClose, onAplicar }) {
 
           {/* Info paciente */}
           {caso.pacientes && (
-            <div style={s.patSection}>
+            <div style={{ ...s.patSection, ...dynPatSec }}>
               <div style={s.patAvatar}>{caso.pacientes.nombre?.charAt(0).toUpperCase()}</div>
               <div style={{ flex: 1 }}>
-                <div style={s.patName}>{caso.pacientes.nombre}</div>
+                <div style={{ ...s.patName, ...dynPatName }}>{caso.pacientes.nombre}</div>
                 <div style={s.patAge}>{caso.pacientes.edad} años</div>
               </div>
               {/* Rating + experiencia previa del paciente */}
@@ -91,14 +97,14 @@ export default function CasoModal({ caso, onClose, onAplicar }) {
           {/* Descripción */}
           <div style={s.section}>
             <div style={s.sLabel}>Descripción completa</div>
-            <p style={s.sText}>{caso.descripcion}</p>
+            <p style={{ ...s.sText, ...dynText }}>{caso.descripcion}</p>
           </div>
 
           {/* Notas */}
           {caso.notas && (
             <div style={s.section}>
               <div style={s.sLabel}>Notas adicionales</div>
-              <p style={s.sText}>{caso.notas}</p>
+              <p style={{ ...s.sText, ...dynText }}>{caso.notas}</p>
             </div>
           )}
 
@@ -115,7 +121,7 @@ export default function CasoModal({ caso, onClose, onAplicar }) {
           {/* Acciones */}
           {err && <div style={s.errBox}>{err}</div>}
           <div style={s.actions}>
-            <button style={s.cancelBtn} onClick={onClose}>Cerrar</button>
+            <button style={{ ...s.cancelBtn, ...dynCancel }} onClick={onClose}>Cerrar</button>
             {done ? (
               <div style={s.successPill}>✅ Aplicación enviada</div>
             ) : (

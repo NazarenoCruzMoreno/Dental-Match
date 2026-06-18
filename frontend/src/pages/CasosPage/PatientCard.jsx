@@ -23,12 +23,19 @@ function CaseImage({ src }) {
 }
 
 // ── Tarjeta de paciente para el marketplace ─────────────────────────────────
-export default function PatientCard({ caso, onClick }) {
+export default function PatientCard({ caso, onClick, isDark = false }) {
   const [hover, setHover] = useState(false);
+
+  const dynCard = isDark
+    ? { background: "#1e293b", border: "1px solid #334155" }
+    : {};
+  const dynTitle = { color: isDark ? "#f1f5f9" : "#0f172a" };
+  const dynDesc  = { color: isDark ? "#94a3b8" : "#64748b" };
+  const dynName  = { color: isDark ? "#f1f5f9" : "#0f172a" };
 
   return (
     <div
-      style={{ ...s.card, ...(hover ? s.cardHover : {}) }}
+      style={{ ...s.card, ...dynCard, ...(hover ? s.cardHover : {}) }}
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -47,13 +54,13 @@ export default function PatientCard({ caso, onClick }) {
         <div style={s.patRow}>
           <div style={s.avatar}>{caso.pacientes?.nombre?.charAt(0) ?? "P"}</div>
           <div>
-            <div style={s.name}>{caso.pacientes?.nombre ?? "Paciente"}</div>
+            <div style={{ ...s.name, ...dynName }}>{caso.pacientes?.nombre ?? "Paciente"}</div>
             <div style={s.age}>{caso.pacientes?.edad} años</div>
           </div>
         </div>
 
-        <div style={s.title}>{caso.titulo}</div>
-        <p style={s.desc}>{caso.descripcion}</p>
+        <div style={{ ...s.title, ...dynTitle }}>{caso.titulo}</div>
+        <p style={{ ...s.desc, ...dynDesc }}>{caso.descripcion}</p>
 
         <div style={s.footer}>
           {caso.tipo_tratamiento && <span style={s.type}>{caso.tipo_tratamiento}</span>}

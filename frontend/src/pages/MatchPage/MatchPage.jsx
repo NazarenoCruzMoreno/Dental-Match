@@ -70,12 +70,16 @@ function SwipeCard({ aplicacion, isTop, onSwipe }) {
     >
       <div style={sw.card}>
 
-        {/* Indicadores de swipe */}
+        {/* Indicadores de swipe — opacidad proporcional al drag */}
         {drag > 30 && (
-          <div style={{ ...sw.indicator, ...sw.indicatorRight }}>MATCH 💚</div>
+          <div style={{ ...sw.indicator, ...sw.indicatorRight, opacity: Math.min(drag/120, 1), transform: `rotate(${-15 + drag/8}deg) scale(${Math.min(0.8 + drag/300, 1.2)})` }}>
+            💚 MATCH
+          </div>
         )}
         {drag < -30 && (
-          <div style={{ ...sw.indicator, ...sw.indicatorLeft }}>PASAR 💔</div>
+          <div style={{ ...sw.indicator, ...sw.indicatorLeft, opacity: Math.min(-drag/120, 1), transform: `rotate(${15 + drag/8}deg) scale(${Math.min(0.8 + -drag/300, 1.2)})` }}>
+            ✕ PASAR
+          </div>
         )}
 
         {/* Foto / avatar */}
@@ -159,22 +163,69 @@ const sw = {
   indicatorLeft:  { left: "20px", color: "#dc2626", borderColor: "#dc2626", background: "rgba(254,242,242,0.9)" },
 };
 
-// ── Match overlay ─────────────────────────────────────────────────────────────
+// ── Confetti — partículas SVG que caen desde arriba ────────────────────────
+function Confetti() {
+  const pieces = Array.from({ length: 50 });
+  const colors = ["#3b82f6","#10b981","#f59e0b","#ef4444","#8b5cf6","#ec4899","#06b6d4"];
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+      {pieces.map((_, i) => {
+        const left  = Math.random() * 100;
+        const delay = Math.random() * 0.6;
+        const size  = 6 + Math.random() * 10;
+        const color = colors[i % colors.length];
+        const rot   = Math.random() * 360;
+        return (
+          <div key={i} style={{
+            position: "absolute", top: "-20px", left: `${left}%`,
+            width: size, height: size * 1.6, background: color,
+            transform: `rotate(${rot}deg)`,
+            animation: `confettiFall ${1.8 + Math.random() * 1.5}s ${delay}s ease-in forwards`,
+            borderRadius: "2px",
+          }}/>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Match overlay con animación tipo MercadoPago ───────────────────────────
 function MatchOverlay({ estudiante, onContinue }) {
   return (
     <div style={mo.overlay}>
+      <Confetti />
       <div style={mo.box}>
-        <div style={mo.emoji}>🎉</div>
+        {/* Check de éxito tipo MercadoPago */}
+        <div style={mo.checkWrap}>
+          <svg width="88" height="88" viewBox="0 0 88 88" style={mo.checkSvg}>
+            <circle cx="44" cy="44" r="40" fill="none" stroke="#10b981" strokeWidth="4"
+              strokeDasharray="251" strokeDashoffset="251"
+              style={{ animation: "drawCircle .55s .15s ease-out forwards" }}/>
+            <path d="M27 45 L40 58 L62 32" fill="none" stroke="#10b981" strokeWidth="5"
+              strokeLinecap="round" strokeLinejoin="round"
+              strokeDasharray="60" strokeDashoffset="60"
+              style={{ animation: "drawCheck .35s .7s ease-out forwards" }}/>
+          </svg>
+        </div>
+
         <h2 style={mo.title}>¡Es un Match!</h2>
         <p style={mo.sub}>
-          <strong>{estudiante?.nombre}</strong> va a atender tu caso.
-          Te contactará pronto para coordinar el turno.
+          <strong>{estudiante?.nombre}</strong> va a atender tu caso.<br/>
+          Ya pueden empezar a chatear.
         </p>
+
         <div style={mo.avatarRow}>
-          <div style={mo.matchAvatar}>👤</div>
-          <div style={mo.heart}>💙</div>
-          <div style={mo.matchAvatar}>{estudiante?.nombre?.charAt(0).toUpperCase()}</div>
+          <div style={{ ...mo.matchAvatar, animation: "avatarPop .5s 1s both" }}>👤</div>
+          <div style={mo.heartConnect}>
+            <span style={mo.heartEmoji}>💙</span>
+          </div>
+          <div style={{ ...mo.matchAvatar, animation: "avatarPop .5s 1.15s both" }}>
+            {estudiante?.imagen_url
+              ? <img src={estudiante.imagen_url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover", borderRadius:"50%" }}/>
+              : estudiante?.nombre?.charAt(0).toUpperCase()}
+          </div>
         </div>
+
         <button style={mo.btn} onClick={onContinue}>💬 Empezar a chatear</button>
       </div>
     </div>
@@ -182,13 +233,16 @@ function MatchOverlay({ estudiante, onContinue }) {
 }
 
 const mo = {
-  overlay:   { position: "fixed", inset: 0, background: "linear-gradient(135deg,rgba(30,64,175,0.92),rgba(37,99,235,0.88))", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, backdropFilter: "blur(8px)" },
-  box:       { background: "#fff", borderRadius: "28px", padding: "48px 40px", textAlign: "center", maxWidth: "380px", width: "90%", boxShadow: "0 40px 100px rgba(0,0,0,0.3)" },
-  emoji:     { fontSize: "64px", marginBottom: "12px" },
-  title:     { fontSize: "32px", fontWeight: 900, color: "#0f172a", margin: "0 0 12px", letterSpacing: "-1px" },
-  sub:       { fontSize: "15px", color: "#64748b", lineHeight: "1.7", margin: "0 0 28px" },
-  avatarRow: { display: "flex", alignItems: "center", justifyContent: "center", gap: "16px", marginBottom: "28px" },
-  matchAvatar:{ width: "56px", height: "56px", borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px", fontWeight: 800 },
+  overlay:   { position: "fixed", inset: 0, background: "linear-gradient(135deg,rgba(30,64,175,0.92),rgba(37,99,235,0.88))", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, backdropFilter: "blur(8px)", overflow: "hidden" },
+  box:       { background: "#fff", borderRadius: "28px", padding: "48px 40px", textAlign: "center", maxWidth: "380px", width: "90%", boxShadow: "0 40px 100px rgba(0,0,0,0.3)", position: "relative", zIndex: 1, animation: "matchBoxIn .5s cubic-bezier(0.34,1.56,0.64,1)" },
+  checkWrap: { display: "flex", justifyContent: "center", marginBottom: "16px" },
+  checkSvg:  { animation: "checkPulse 1s 1s ease-out" },
+  title:     { fontSize: "30px", fontWeight: 900, color: "#0f172a", margin: "0 0 8px", letterSpacing: "-1px", animation: "matchTextIn .5s .4s both" },
+  sub:       { fontSize: "15px", color: "#64748b", lineHeight: "1.7", margin: "0 0 24px", animation: "matchTextIn .5s .55s both" },
+  avatarRow: { display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "28px" },
+  matchAvatar:{ width: "60px", height: "60px", borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", fontWeight: 800, overflow: "hidden", boxShadow: "0 6px 20px rgba(37,99,235,0.4)" },
+  heartConnect:{ position: "relative", width: "40px", height: "2px", background: "linear-gradient(90deg,#3b82f6,#ec4899,#3b82f6)", borderRadius: "1px" },
+  heartEmoji: { position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)", fontSize: "26px", animation: "heartBeat 1.4s .7s ease-in-out infinite" },
   heart:     { fontSize: "28px" },
   btn:       { padding: "14px 36px", background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", border: "none", borderRadius: "14px", fontSize: "16px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter',sans-serif", boxShadow: "0 6px 20px rgba(37,99,235,0.35)" },
 };

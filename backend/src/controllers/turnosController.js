@@ -253,4 +253,71 @@ async function notificarCambioEstado(turnoId, turno, nuevoEstado, userId, role) 
   } catch {}
 }
 
-module.exports = { reservarTurno, listarTurnos, actualizarTurno, obtenerDisponibilidad };
+// ── POST /api/turnos/proponer — Estudiante propone turno al paciente ────────
+const proponerTurno = async (req, res) => {
+  try {
+    const { id: userId, role } = req.user;
+    if (role !== 'estudiante') {
+      return res.status(403).json({ error: 'Solo los estudiantes pueden proponer turnos' });
+    }
+
+    const data = turnoSchema.parse(req.body);
+
+    // Verificar que el estudiante esté asignado al caso
+    const { data: est } = await supabase
+      .from('estudiantes').select('id, nombre').eq('user_id', userId).maybeSingle();
+    if (!est) return res.status(400).json({ error: 'Perfil de estudiante no encontrado' });
+
+    const { data: caso } = await supabase
+      .from('casos')
+      .select('id, estado, paciente_id, titulo')
+      .eq('id', data.caso_id)
+      .eq('estudiante_id', est.id)
+      .maybeSingle();
+    if (!caso) return res.status(404).json({ error: 'Caso no encontrado o no estás asignado' });
+    if (caso.estado === 'completado' || caso.estado === 'cancelado') {
+      return res.status(400).json({ error: `No podés proponer turnos en un caso ${caso.estado}` });
+    }
+
+    // Crear turno con estado propuesto
+    const { data: turno, error } = await supabase
+      .from('turnos')
+      .insert({
+        caso_id:          caso.id,
+        estudiante_id:    est.id,
+        paciente_id:      caso.paciente_id,
+        fecha:            data.fecha,
+        hora:             data.hora,
+        duracion_minutos: data.duracion_minutos ?? 60,
+        notas:            data.notas ?? null,
+        estado:           'propuesto',
+        propuesto_por:    'estudiante',
+      })
+      .select('*')
+      .single();
+
+    if (error) throw error;
+
+    // Notificar al paciente
+    const { data: pac } = await supabase
+      .from('pacientes').select('user_id').eq('id', caso.paciente_id).maybeSingle();
+    if (pac) {
+      const fechaStr = new Date(data.fecha + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'long' });
+      await supabase.from('notifications').insert({
+        user_id: pac.user_id,
+        type:    'turno_propuesto',
+        title:   '📅 Tu estudiante propuso un turno',
+        message: `${est.nombre} propuso un turno para el ${fechaStr} a las ${data.hora}hs. Aceptalo o pedile otro horario desde "Mis turnos".`,
+      });
+    }
+
+    res.status(201).json({ message: 'Propuesta enviada al paciente', turno });
+  } catch (error) {
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ error: error.errors.map(e => e.message).join(' | ') });
+    }
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = { reservarTurno, listarTurnos, actualizarTurno, obtenerDisponibilidad, proponerTurno };

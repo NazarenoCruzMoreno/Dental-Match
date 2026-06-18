@@ -73,7 +73,7 @@ const turnoSchema = z.object({
 });
 
 const turnoUpdateSchema = z.object({
-  estado: z.enum(['pendiente','confirmado','completado','cancelado']).optional(),
+  estado: z.enum(['pendiente','propuesto','confirmado','completado','cancelado','rechazado']).optional(),
   notas:  z.string().max(500).optional(),
   fecha:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   hora:   z.string().regex(/^\d{2}:\d{2}$/).optional(),
