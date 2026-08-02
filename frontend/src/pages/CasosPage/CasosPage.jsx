@@ -1,44 +1,31 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { casosService, getUser } from "../../services/api";
+import { GridSkeleton } from "../../components/Skeleton/Skeleton";
+import StatusBadge from "../../components/StatusBadge/StatusBadge";
+import Modal from "../../components/Modal/Modal";
 
 // ── Iconos ────────────────────────────────────────────────────────────────────
 const IconPlus   = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>);
 const IconBack   = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>);
 const IconTooth  = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12 2C8 2 5 5 5 9c0 2.5.8 4.5 1.5 6.5L7 20c.3 1.2 1 2 2 2s1.5-.8 2-2l1-3 1 3c.5 1.2 1 2 2 2s1.7-.8 2-2l.5-4.5C18.2 13.5 19 11.5 19 9c0-4-3-7-7-7z"/></svg>);
-const IconStar   = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" strokeWidth="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>);
+const IconStar   = () => (<svg width="14" height="14" viewBox="0 0 24 24" style={{ fill: "var(--color-warning)", stroke: "var(--color-warning)" }} strokeWidth="1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>);
 const IconSearch = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>);
-
-// ── Badge de estado ───────────────────────────────────────────────────────────
-const ESTADO_CONFIG = {
-  abierto:     { label: "Abierto",      color: "#10b981", bg: "#f0fdf4", border: "#bbf7d0" },
-  en_progreso: { label: "En progreso",  color: "#3b82f6", bg: "#eff6ff", border: "#bfdbfe" },
-  completado:  { label: "Completado",   color: "#8b5cf6", bg: "#f5f3ff", border: "#ddd6fe" },
-  cancelado:   { label: "Cancelado",    color: "#94a3b8", bg: "#f8fafc", border: "#e2e8f0" },
-};
-
-function EstadoBadge({ estado }) {
-  const cfg = ESTADO_CONFIG[estado] ?? ESTADO_CONFIG.abierto;
-  return (
-    <span style={{ padding: "3px 10px", borderRadius: "999px", fontSize: "12px", fontWeight: 700, color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`, fontFamily: "'Inter',sans-serif" }}>
-      {cfg.label}
-    </span>
-  );
-}
 
 // ── Tarjeta de caso ───────────────────────────────────────────────────────────
 function CasoCard({ caso, role, onClick }) {
   const fecha = new Date(caso.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" });
 
   return (
-    <div style={s.card} onClick={onClick}>
+    <div style={s.card} onClick={onClick} role="button" tabIndex={0}
+      onKeyDown={e => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onClick())}>
       <div style={s.cardTop}>
         <div style={s.cardIconWrap}><IconTooth /></div>
         <div style={{ flex: 1 }}>
           <div style={s.cardTitle}>{caso.titulo}</div>
           {caso.tipo_tratamiento && <div style={s.cardType}>{caso.tipo_tratamiento}</div>}
         </div>
-        <EstadoBadge estado={caso.estado} />
+        <StatusBadge estado={caso.estado} />
       </div>
 
       <p style={s.cardDesc}>{caso.descripcion.slice(0, 140)}{caso.descripcion.length > 140 ? "…" : ""}</p>
@@ -63,66 +50,61 @@ function CasoCard({ caso, role, onClick }) {
   );
 }
 
-// ── Detalle de caso (modal inline) ───────────────────────────────────────────
+// ── Detalle de caso (modal) ──────────────────────────────────────────────────
+// Nota: esta vista difiere de CasoModal (Marketplace) — acá se muestra tanto
+// la perspectiva del paciente (estudiante asignado) como la del estudiante
+// (datos del paciente), y no hay acción de "aplicar". Por eso conserva su
+// propio contenido, pero usa el <Modal> compartido en vez de un overlay a mano.
 function CasoDetail({ caso, role, onClose }) {
   const fecha = new Date(caso.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" });
   return (
-    <div style={s.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={s.modal}>
-        <div style={s.modalHeader}>
-          <div>
-            <div style={s.modalTitle}>{caso.titulo}</div>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "8px" }}>
-              <EstadoBadge estado={caso.estado} />
-              {caso.tipo_tratamiento && <span style={s.cardType}>{caso.tipo_tratamiento}</span>}
-            </div>
-          </div>
-          <button style={s.closeBtn} onClick={onClose}>✕</button>
-        </div>
-        <div style={s.modalDivider} />
-
-        <div style={s.modalSection}>
-          <div style={s.modalLabel}>Descripción</div>
-          <p style={s.modalText}>{caso.descripcion}</p>
-        </div>
-
-        {caso.notas && (
-          <div style={s.modalSection}>
-            <div style={s.modalLabel}>Notas adicionales</div>
-            <p style={s.modalText}>{caso.notas}</p>
-          </div>
-        )}
-
-        {role === "estudiante" && caso.pacientes && (
-          <div style={s.modalSection}>
-            <div style={s.modalLabel}>Paciente</div>
-            <div style={s.patientCard}>
-              <div style={{ fontWeight: 700, color: "#0f172a" }}>{caso.pacientes.nombre}</div>
-              <div style={{ color: "#64748b", fontSize: "14px" }}>{caso.pacientes.edad} años · {caso.pacientes.problema_dental}</div>
-            </div>
-          </div>
-        )}
-
-        {role === "paciente" && caso.estudiantes && (
-          <div style={s.modalSection}>
-            <div style={s.modalLabel}>Estudiante asignado</div>
-            <div style={s.patientCard}>
-              <div style={{ fontWeight: 700, color: "#0f172a" }}>{caso.estudiantes.nombre}</div>
-              <div style={{ color: "#64748b", fontSize: "14px" }}>{caso.estudiantes.universidad}</div>
-              {caso.estudiantes.rating > 0 && (
-                <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
-                  <IconStar /> <span style={{ fontSize: "13px", fontWeight: 700, color: "#f59e0b" }}>{caso.estudiantes.rating}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        <div style={s.modalFooter}>
-          <span style={{ fontSize: "13px", color: "#94a3b8" }}>Publicado el {fecha}</span>
-        </div>
+    <Modal open onClose={onClose} title={caso.titulo} maxWidth="560px">
+      <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "20px" }}>
+        <StatusBadge estado={caso.estado} />
+        {caso.tipo_tratamiento && <span style={s.cardType}>{caso.tipo_tratamiento}</span>}
       </div>
-    </div>
+
+      <div style={s.modalSection}>
+        <div style={s.modalLabel}>Descripción</div>
+        <p style={s.modalText}>{caso.descripcion}</p>
+      </div>
+
+      {caso.notas && (
+        <div style={s.modalSection}>
+          <div style={s.modalLabel}>Notas adicionales</div>
+          <p style={s.modalText}>{caso.notas}</p>
+        </div>
+      )}
+
+      {role === "estudiante" && caso.pacientes && (
+        <div style={s.modalSection}>
+          <div style={s.modalLabel}>Paciente</div>
+          <div style={s.patientCard}>
+            <div style={{ fontWeight: 700, color: "var(--text-primary)" }}>{caso.pacientes.nombre}</div>
+            <div style={{ color: "var(--text-secondary)", fontSize: "14px" }}>{caso.pacientes.edad} años · {caso.pacientes.problema_dental}</div>
+          </div>
+        </div>
+      )}
+
+      {role === "paciente" && caso.estudiantes && (
+        <div style={s.modalSection}>
+          <div style={s.modalLabel}>Estudiante asignado</div>
+          <div style={s.patientCard}>
+            <div style={{ fontWeight: 700, color: "var(--text-primary)" }}>{caso.estudiantes.nombre}</div>
+            <div style={{ color: "var(--text-secondary)", fontSize: "14px" }}>{caso.estudiantes.universidad}</div>
+            {caso.estudiantes.rating > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", marginTop: "4px" }}>
+                <IconStar /> <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--color-warning)" }}>{caso.estudiantes.rating}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div style={s.modalFooter}>
+        <span style={{ fontSize: "13px", color: "var(--text-tertiary)" }}>Publicado el {fecha}</span>
+      </div>
+    </Modal>
   );
 }
 
@@ -182,10 +164,13 @@ export default function CasosPage() {
           <div style={s.headerActions}>
             {/* Buscador */}
             <div style={s.searchWrap}>
+              <label htmlFor="casos-search" style={s.srOnly}>Buscar casos</label>
               <span style={s.searchIcon}><IconSearch /></span>
               <input
+                id="casos-search"
                 style={s.searchInput}
                 placeholder="Buscar por título o tratamiento..."
+                aria-label="Buscar casos"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
@@ -201,7 +186,7 @@ export default function CasosPage() {
 
         {/* Contenido */}
         {loading ? (
-          <div style={s.center}><div style={s.spinner} /><p style={s.loadingText}>Cargando casos...</p></div>
+          <GridSkeleton count={4} type="row" />
         ) : error ? (
           <div style={s.errorBox}>{error}</div>
         ) : filtered.length === 0 ? (
@@ -235,57 +220,49 @@ export default function CasosPage() {
 
 // ── Estilos ───────────────────────────────────────────────────────────────────
 const s = {
-  page:          { minHeight: "100vh", background: "linear-gradient(135deg,#f8fafc 0%,#eff6ff 55%,#fff7ed 100%)", padding: "36px 20px 60px", fontFamily: "'Inter',sans-serif" },
+  page:          { minHeight: "100vh", background: "var(--bg-page)", padding: "36px 20px 60px" },
   container:     { maxWidth: "820px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
 
-  pageHeader:    { background: "#fff", borderRadius: "24px", padding: "28px 32px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "16px" },
+  pageHeader:    { background: "var(--bg-card)", borderRadius: "var(--radius-lg)", padding: "28px 32px", boxShadow: "var(--shadow-sm)", border: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "16px" },
   pageTitleRow:  { display: "flex", alignItems: "center" },
-  backBtn:       { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "#3b82f6", fontWeight: 600, fontSize: "14px", cursor: "pointer", fontFamily: "'Inter',sans-serif" },
+  backBtn:       { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "var(--color-primary)", fontWeight: 600, fontSize: "14px", cursor: "pointer" },
   pageTitleBlock:{ display: "flex", alignItems: "center", gap: "14px" },
   pageIcon:      { fontSize: "36px" },
-  pageTitle:     { fontSize: "26px", fontWeight: 900, color: "#0f172a", margin: 0, letterSpacing: "-0.5px" },
-  pageSub:       { fontSize: "14px", color: "#64748b", margin: "3px 0 0" },
+  pageTitle:     { fontSize: "26px", fontWeight: 900, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.5px" },
+  pageSub:       { fontSize: "14px", color: "var(--text-secondary)", margin: "3px 0 0" },
   headerActions: { display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" },
+  srOnly:        { position: "absolute", width: "1px", height: "1px", padding: 0, margin: "-1px", overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 },
   searchWrap:    { flex: 1, minWidth: "200px", position: "relative" },
-  searchIcon:    { position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" },
-  searchInput:   { width: "100%", height: "44px", border: "2px solid #e2e8f0", borderRadius: "12px", padding: "0 16px 0 42px", fontSize: "14px", fontFamily: "'Inter',sans-serif", outline: "none", boxSizing: "border-box", color: "#0f172a" },
-  createBtn:     { display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap", boxShadow: "0 4px 12px rgba(59,130,246,0.3)" },
+  searchIcon:    { position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--text-tertiary)" },
+  searchInput:   { width: "100%", height: "44px", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", padding: "0 16px 0 42px", fontSize: "14px", outline: "none", boxSizing: "border-box", color: "var(--text-primary)", background: "var(--bg-input)" },
+  createBtn:     { display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", background: "var(--color-primary)", color: "var(--color-primary-text)", border: "none", borderRadius: "var(--radius-md)", fontSize: "14px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
 
-  count:         { fontSize: "13px", color: "#94a3b8", fontWeight: 600 },
+  count:         { fontSize: "13px", color: "var(--text-tertiary)", fontWeight: 600 },
   grid:          { display: "flex", flexDirection: "column", gap: "14px" },
 
-  card:          { background: "#fff", borderRadius: "20px", padding: "24px 28px", boxShadow: "0 4px 16px rgba(0,0,0,0.06)", cursor: "pointer", border: "2px solid transparent", transition: "all .2s ease" },
+  card:          { background: "var(--bg-card)", borderRadius: "var(--radius-lg)", padding: "24px 28px", boxShadow: "var(--shadow-sm)", cursor: "pointer", border: "1px solid var(--border)", transition: "border-color .15s ease, box-shadow .15s ease" },
   cardTop:       { display: "flex", alignItems: "flex-start", gap: "12px", marginBottom: "12px" },
-  cardIconWrap:  { width: "40px", height: "40px", minWidth: "40px", borderRadius: "12px", background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", color: "#3b82f6" },
-  cardTitle:     { fontSize: "16px", fontWeight: 800, color: "#0f172a" },
-  cardType:      { fontSize: "12px", color: "#3b82f6", fontWeight: 600, background: "#eff6ff", padding: "2px 8px", borderRadius: "999px", display: "inline-block", marginTop: "4px" },
-  cardDesc:      { fontSize: "14px", color: "#64748b", lineHeight: "1.6", margin: "0 0 14px" },
+  cardIconWrap:  { width: "40px", height: "40px", minWidth: "40px", borderRadius: "var(--radius-md)", background: "var(--bg-subtle)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-primary)" },
+  cardTitle:     { fontSize: "16px", fontWeight: 800, color: "var(--text-primary)" },
+  cardType:      { fontSize: "12px", color: "var(--color-primary)", fontWeight: 600, background: "var(--color-info-bg)", padding: "2px 8px", borderRadius: "var(--radius-full)", display: "inline-block", marginTop: "4px" },
+  cardDesc:      { fontSize: "14px", color: "var(--text-secondary)", lineHeight: "1.6", margin: "0 0 14px" },
   cardFooter:    { display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" },
-  cardDate:      { fontSize: "12px", color: "#94a3b8" },
-  assignedPill:  { fontSize: "12px", color: "#10b981", fontWeight: 600, background: "#f0fdf4", padding: "2px 10px", borderRadius: "999px", border: "1px solid #bbf7d0" },
-  patientInfo:   { fontSize: "12px", color: "#64748b", fontWeight: 500 },
-  ratingPill:    { display: "flex", alignItems: "center", gap: "3px", fontSize: "12px", fontWeight: 700, color: "#f59e0b" },
-  viewMore:      { marginLeft: "auto", fontSize: "13px", color: "#3b82f6", fontWeight: 700 },
+  cardDate:      { fontSize: "12px", color: "var(--text-tertiary)" },
+  assignedPill:  { fontSize: "12px", color: "var(--color-success)", fontWeight: 600, background: "var(--color-success-bg)", padding: "2px 10px", borderRadius: "var(--radius-full)" },
+  patientInfo:   { fontSize: "12px", color: "var(--text-secondary)", fontWeight: 500 },
+  ratingPill:    { display: "flex", alignItems: "center", gap: "3px", fontSize: "12px", fontWeight: 700, color: "var(--color-warning)" },
+  viewMore:      { marginLeft: "auto", fontSize: "13px", color: "var(--color-primary)", fontWeight: 700 },
 
-  center:        { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", padding: "60px 0" },
-  spinner:       { width: "36px", height: "36px", border: "4px solid #bfdbfe", borderTop: "4px solid #3b82f6", borderRadius: "50%", animation: "spin .8s linear infinite" },
-  loadingText:   { color: "#64748b", fontSize: "14px" },
-  errorBox:      { padding: "16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "14px", color: "#dc2626", fontSize: "14px" },
+  errorBox:      { padding: "16px", background: "var(--color-danger-bg)", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", color: "var(--color-danger)", fontSize: "14px" },
   empty:         { display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", padding: "60px 20px", textAlign: "center" },
   emptyIcon:     { fontSize: "56px" },
-  emptyText:     { fontSize: "15px", color: "#64748b", maxWidth: "380px", lineHeight: "1.7" },
-  createBtnLarge:{ display: "flex", alignItems: "center", gap: "8px", padding: "14px 28px", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", border: "none", borderRadius: "14px", fontSize: "15px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter',sans-serif", boxShadow: "0 8px 20px rgba(59,130,246,0.3)" },
+  emptyText:     { fontSize: "15px", color: "var(--text-secondary)", maxWidth: "380px", lineHeight: "1.7" },
+  createBtnLarge:{ display: "flex", alignItems: "center", gap: "8px", padding: "14px 28px", background: "var(--color-primary)", color: "var(--color-primary-text)", border: "none", borderRadius: "var(--radius-md)", fontSize: "15px", fontWeight: 700, cursor: "pointer" },
 
-  // Modal
-  overlay:       { position: "fixed", inset: 0, background: "rgba(15,23,42,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9000, backdropFilter: "blur(4px)", padding: "20px" },
-  modal:         { background: "#fff", borderRadius: "24px", padding: "36px", maxWidth: "560px", width: "100%", maxHeight: "85vh", overflowY: "auto", boxShadow: "0 30px 80px rgba(0,0,0,0.2)" },
-  modalHeader:   { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px" },
-  modalTitle:    { fontSize: "22px", fontWeight: 900, color: "#0f172a", letterSpacing: "-0.5px" },
-  closeBtn:      { background: "#f1f5f9", border: "none", borderRadius: "8px", width: "32px", height: "32px", cursor: "pointer", fontSize: "14px", color: "#64748b", flexShrink: 0 },
-  modalDivider:  { height: "1px", background: "#f1f5f9", margin: "20px 0" },
+  // Modal (contenido interno de CasoDetail, el wrapper ahora es el <Modal> compartido)
   modalSection:  { marginBottom: "20px" },
-  modalLabel:    { fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "8px" },
-  modalText:     { fontSize: "15px", color: "#374151", lineHeight: "1.7", margin: 0 },
-  patientCard:   { background: "#f8fafc", borderRadius: "12px", padding: "14px 16px" },
-  modalFooter:   { marginTop: "20px", paddingTop: "16px", borderTop: "1px solid #f1f5f9" },
+  modalLabel:    { fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "8px" },
+  modalText:     { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.7", margin: 0 },
+  patientCard:   { background: "var(--bg-subtle)", borderRadius: "var(--radius-md)", padding: "14px 16px" },
+  modalFooter:   { marginTop: "20px", paddingTop: "16px", borderTop: "1px solid var(--border)" },
 };

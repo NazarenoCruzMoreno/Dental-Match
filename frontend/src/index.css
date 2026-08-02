@@ -7,31 +7,88 @@ html, body {
 }
 #root { min-height: 100vh; }
 
-/* ── Variables de tema ──────────────────────────────────────────────── */
+/* ── Sistema de tokens ─────────────────────────────────────────────────
+   Toda página/componente debe leer color de acá vía var(--token), nunca
+   hardcodear hex. Esto es lo que hace que el dark mode funcione de verdad
+   (antes era un filter:invert() global sobre #root — se eliminó). ────── */
 :root {
-  --bg-page:      linear-gradient(135deg, #f8fafc 0%, #eff6ff 60%, #fff7ed 100%);
-  --bg-card:      #ffffff;
-  --bg-input:     #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary:#64748b;
-  --border:       #e2e8f0;
-  --shadow:       0 4px 20px rgba(0,0,0,0.06);
-  --stat-bg-blue: #eff6ff;
-  --stat-bg-amber:#fff7ed;
-  --stat-bg-green:#f0fdf4;
+  /* Marca — un solo azul, sin variantes de gradiente sueltas */
+  --color-primary:       #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-text:  #ffffff;
+
+  /* Estado semántico (usado por StatusBadge y toasts) */
+  --color-success:    #059669;
+  --color-success-bg: #ecfdf5;
+  --color-warning:    #d97706;
+  --color-warning-bg: #fffbeb;
+  --color-danger:     #dc2626;
+  --color-danger-bg:  #fef2f2;
+  --color-info:       #2563eb;
+  --color-info-bg:    #eff6ff;
+  --color-purple:     #7c3aed;
+  --color-purple-bg:  #f5f3ff;
+
+  /* Superficies y texto */
+  --bg-page:        #f8fafc;
+  --bg-card:        #ffffff;
+  --bg-input:        #ffffff;
+  --bg-subtle:      #f1f5f9;
+  --text-primary:   #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary:  #94a3b8;
+  --border:         #e2e8f0;
+  --border-strong:  #cbd5e1;
+
+  /* Sombras — sutiles, no las de "levantar tarjeta" de antes */
+  --shadow-sm:    0 1px 2px rgba(15,23,42,0.05);
+  --shadow-md:    0 2px 8px rgba(15,23,42,0.07);
+  --shadow-lg:    0 8px 24px rgba(15,23,42,0.10);
+  --shadow-focus: 0 0 0 3px rgba(37,99,235,0.15);
+
+  /* Radios — escala consistente */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-full: 999px;
 }
 
 [data-theme="dark"] {
-  --bg-page:      linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #1c1917 100%);
-  --bg-card:      #1e293b;
-  --bg-input:     #334155;
-  --text-primary: #f1f5f9;
-  --text-secondary:#94a3b8;
-  --border:       #334155;
-  --shadow:       0 4px 20px rgba(0,0,0,0.3);
-  --stat-bg-blue: #1e3a5f;
-  --stat-bg-amber:#2d1f0e;
-  --stat-bg-green:#0f2d1f;
+  --color-primary:       #3b82f6;
+  --color-primary-hover: #60a5fa;
+
+  --color-success:    #34d399;
+  --color-success-bg: #0b2a20;
+  --color-warning:    #fbbf24;
+  --color-warning-bg: #2d2008;
+  --color-danger:     #f87171;
+  --color-danger-bg:  #2d1212;
+  --color-info:       #60a5fa;
+  --color-info-bg:    #142238;
+  --color-purple:     #a78bfa;
+  --color-purple-bg:  #211a38;
+
+  --bg-page:        #0b0f19;
+  --bg-card:        #131826;
+  --bg-input:        #1a2033;
+  --bg-subtle:      #1a2033;
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary:  #64748b;
+  --border:         #232a3d;
+  --border-strong:  #313a52;
+
+  --shadow-sm:    0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md:    0 2px 10px rgba(0,0,0,0.35);
+  --shadow-lg:    0 8px 28px rgba(0,0,0,0.45);
+  --shadow-focus: 0 0 0 3px rgba(59,130,246,0.3);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ── Animaciones globales ─────────────────────────────────────────── */
@@ -114,48 +171,9 @@ html, body {
   66%       { transform: translateY(10px) rotate(-10deg); }
 }
 
-/* ── Dark mode global usando inversión de filtros CSS ──────────────── */
-/* Técnica: invertir todo el documento, y re-invertir imágenes/SVG/videos
-   para que se vean normales. Funciona en TODAS las páginas sin tocar JSX. */
-
 [data-theme="dark"] html,
 [data-theme="dark"] body {
-  background-color: #0f172a !important;
-}
-
-[data-theme="dark"] #root {
-  filter: invert(0.92) hue-rotate(180deg);
-  background-color: #f1f5f9; /* base "blanca" que se invertirá a oscura */
-  min-height: 100vh;
-}
-
-/* Re-invertir todo lo que tenga color propio: imágenes, SVG, video, canvas
-   y elementos con backgrounds que no queremos invertir */
-[data-theme="dark"] #root img,
-[data-theme="dark"] #root svg,
-[data-theme="dark"] #root video,
-[data-theme="dark"] #root canvas,
-[data-theme="dark"] #root picture,
-[data-theme="dark"] #root [style*="linear-gradient"],
-[data-theme="dark"] #root [style*="radial-gradient"],
-[data-theme="dark"] #root [data-no-invert] {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-/* Re-invertir SVG dentro de botones también */
-[data-theme="dark"] #root button svg {
-  filter: invert(1) hue-rotate(180deg);
-}
-
-/* Bottom nav: arreglo de borde con esta técnica */
-[data-theme="dark"] nav[data-bottom-nav] {
-  border-top: 1px solid #cbd5e1;
-}
-
-/* Toasts deben mantener sus colores intensos (rojo, verde, etc.) */
-[data-theme="dark"] [class*="Toast"],
-[data-theme="dark"] [data-toast] {
-  filter: invert(1) hue-rotate(180deg);
+  background-color: var(--bg-page);
 }
 
 /* Eliminar tap highlight feo en mobile */

@@ -6,6 +6,7 @@ import { useToast } from "../../context/ToastContext";
 import AvailabilityPicker from "../../components/AvailabilityPicker/AvailabilityPicker";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
+import { Skeleton } from "../../components/Skeleton/Skeleton";
 
 // ── Iconos ────────────────────────────────────────────────────────────────────
 const IconUser   = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
@@ -15,8 +16,9 @@ const IconX      = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="
 const IconBack   = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>);
 
 // ── TagInput: campo para arrays de strings ────────────────────────────────────
-function TagInput({ label, tags, onChange, placeholder, color = "#3b82f6" }) {
-  const [input, setInput] = useState("");
+function TagInput({ label, tags, onChange, placeholder, tone = "info" }) {
+  const [input, setInput]     = useState("");
+  const [focused, setFocused] = useState(false);
   const add = () => {
     const val = input.trim();
     if (val && !tags.includes(val)) onChange([...tags, val]);
@@ -27,23 +29,29 @@ function TagInput({ label, tags, onChange, placeholder, color = "#3b82f6" }) {
     <div style={tagStyles.container}>
       <label style={tagStyles.label}>{label}</label>
       <div style={tagStyles.inputRow}>
-        <div style={tagStyles.inputWrap}>
+        <div style={{
+          ...tagStyles.inputWrap,
+          borderColor: focused ? "var(--color-primary)" : "var(--border)",
+          boxShadow: focused ? "var(--shadow-focus)" : "none",
+        }}>
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), add())}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             placeholder={placeholder}
             style={tagStyles.input}
           />
         </div>
-        <button type="button" onClick={add} style={{ ...tagStyles.addBtn, background: color === "#3b82f6" ? "linear-gradient(135deg,#3b82f6,#2563eb)" : "linear-gradient(135deg,#f59e0b,#d97706)" }}>
+        <button type="button" onClick={add} style={{ ...tagStyles.addBtn, background: `var(--color-${tone})` }}>
           <IconPlus />
         </button>
       </div>
       {tags.length > 0 && (
         <div style={tagStyles.tagList}>
           {tags.map((tag, i) => (
-            <span key={i} style={{ ...tagStyles.tag, background: color === "#3b82f6" ? "#eff6ff" : "#fff7ed", color, border: `1px solid ${color === "#3b82f6" ? "#bfdbfe" : "#fed7aa"}` }}>
+            <span key={i} style={{ ...tagStyles.tag, background: `var(--color-${tone}-bg)`, color: `var(--color-${tone})` }}>
               {tag}
               <button type="button" onClick={() => remove(i)} style={tagStyles.removeBtn}><IconX /></button>
             </span>
@@ -56,11 +64,11 @@ function TagInput({ label, tags, onChange, placeholder, color = "#3b82f6" }) {
 
 const tagStyles = {
   container:  { display: "flex", flexDirection: "column", gap: "8px" },
-  label:      { fontSize: "14px", fontWeight: 600, color: "#1e293b", fontFamily: "'Inter', sans-serif" },
+  label:      { fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" },
   inputRow:   { display: "flex", gap: "8px" },
-  inputWrap:  { flex: 1, border: "2px solid #e2e8f0", borderRadius: "12px", padding: "0 14px", height: "50px", display: "flex", alignItems: "center", background: "#fff" },
-  input:      { flex: 1, border: "none", outline: "none", fontSize: "15px", fontFamily: "'Inter', sans-serif", color: "#0f172a", background: "transparent" },
-  addBtn:     { width: "50px", height: "50px", minWidth: "50px", borderRadius: "12px", border: "none", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
+  inputWrap:  { flex: 1, border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "0 14px", height: "50px", display: "flex", alignItems: "center", background: "var(--bg-input)", transition: "border-color 0.15s ease, box-shadow 0.15s ease" },
+  input:      { flex: 1, border: "none", outline: "none", fontSize: "15px", color: "var(--text-primary)", background: "transparent" },
+  addBtn:     { width: "50px", height: "50px", minWidth: "50px", borderRadius: "var(--radius-sm)", border: "none", color: "var(--color-primary-text)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" },
   tagList:    { display: "flex", flexWrap: "wrap", gap: "8px" },
   tag:        { display: "inline-flex", alignItems: "center", gap: "6px", padding: "5px 10px 5px 14px", borderRadius: "999px", fontSize: "13px", fontWeight: 600 },
   removeBtn:  { background: "none", border: "none", cursor: "pointer", padding: "0", display: "flex", color: "inherit", opacity: 0.7 },
@@ -87,9 +95,9 @@ function EstudianteForm({ data, onChange }) {
           rows={3}
         />
       </div>
-      <TagInput label="Materias" tags={data.materias} onChange={(v) => onChange("materias", v)} placeholder="Ej: Ortodoncia (Enter para agregar)" color="#3b82f6" />
+      <TagInput label="Materias" tags={data.materias} onChange={(v) => onChange("materias", v)} placeholder="Ej: Ortodoncia (Enter para agregar)" tone="info" />
       <div>
-        <label style={styles.textareaLabel}>Disponibilidad <span style={{ color: "#ef4444" }}>*</span></label>
+        <label style={styles.textareaLabel}>Disponibilidad <span style={{ color: "var(--color-danger)" }}>*</span></label>
         <AvailabilityPicker
           value={data.disponibilidad}
           onChange={(v) => onChange("disponibilidad", v)}
@@ -134,7 +142,6 @@ export default function EditProfilePage() {
 
   const [formData,   setFormData]   = useState(role === "estudiante" ? defaultEstudiante : defaultPaciente);
   const [submitting, setSubmitting] = useState(false);
-  const [success,    setSuccess]    = useState(false);
   const [error,      setError]      = useState("");
   const [loading,    setLoading]    = useState(true);
   const [photoFile,  setPhotoFile]  = useState(null);
@@ -198,7 +205,6 @@ export default function EditProfilePage() {
       } else {
         await profileService.update(formData);
       }
-      setSuccess(true);
       toast.success("Perfil guardado correctamente");
       setTimeout(() => navigate(isNewUser ? "/home" : "/profile"), 1200);
     } catch (err) {
@@ -209,8 +215,18 @@ export default function EditProfilePage() {
   };
 
   if (loading) return (
-    <div style={styles.center}>
-      <div style={styles.spinner} />
+    <div style={styles.page}>
+      <div style={styles.container}>
+        <Skeleton width="160px" height="16px" />
+        <div style={styles.card}>
+          <Skeleton width="40%" height="30px" />
+          <div style={{ marginTop: "24px", display: "flex", flexDirection: "column", gap: "18px" }}>
+            <Skeleton height="50px" borderRadius="12px" />
+            <Skeleton height="50px" borderRadius="12px" />
+            <Skeleton height="90px" borderRadius="12px" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -243,8 +259,7 @@ export default function EditProfilePage() {
           <div style={styles.line} />
 
           <form onSubmit={handleSubmit} style={styles.form}>
-            {error   && <div style={styles.errorBox}>{error}</div>}
-            {success && <div style={styles.successBox}>✅ Perfil guardado correctamente</div>}
+            {error && <div style={styles.errorBox}>{error}</div>}
 
             {/* 📸 Foto de perfil */}
             <div style={photoStyles.section}>
@@ -293,36 +308,34 @@ export default function EditProfilePage() {
 }
 
 const styles = {
-  page:         { minHeight: "100vh", background: "linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #fff7ed 100%)", padding: "40px 20px", fontFamily: "'Inter', sans-serif" },
+  page:         { minHeight: "100vh", background: "var(--bg-page)", padding: "40px 20px" },
   container:    { maxWidth: "640px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
   center:       { height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" },
-  spinner:      { width: "40px", height: "40px", border: "4px solid #bfdbfe", borderTop: "4px solid #3b82f6", borderRadius: "50%", animation: "spin 0.8s linear infinite" },
   topBar:       { display: "flex", alignItems: "center", justifyContent: "space-between" },
-  backBtn:      { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "#3b82f6", fontWeight: 600, fontSize: "14px", cursor: "pointer", fontFamily: "'Inter', sans-serif" },
-  roleBadge:    { padding: "6px 14px", background: "#eff6ff", color: "#2563eb", borderRadius: "999px", fontSize: "13px", fontWeight: 700 },
-  card:         { background: "#fff", borderRadius: "24px", padding: "40px", boxShadow: "0 4px 30px rgba(0,0,0,0.08)" },
-  title:        { fontSize: "36px", fontWeight: 900, color: "#0f172a", margin: 0, fontFamily: "'Inter', sans-serif", letterSpacing: "-1px" },
-  highlight:    { color: "#2563eb" },
-  line:         { width: "60px", height: "4px", background: "linear-gradient(90deg,#3b82f6,#60a5fa,#fdba74)", borderRadius: "3px", margin: "16px 0 28px" },
+  backBtn:      { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "var(--color-primary)", fontWeight: 600, fontSize: "14px", cursor: "pointer" },
+  roleBadge:    { padding: "6px 14px", background: "var(--color-info-bg)", color: "var(--color-info)", borderRadius: "999px", fontSize: "13px", fontWeight: 700 },
+  card:         { background: "var(--bg-card)", borderRadius: "24px", padding: "40px", boxShadow: "var(--shadow-md)" },
+  title:        { fontSize: "36px", fontWeight: 900, color: "var(--text-primary)", margin: 0, letterSpacing: "-1px" },
+  highlight:    { color: "var(--color-primary)" },
+  line:         { width: "60px", height: "4px", background: "var(--color-primary)", borderRadius: "3px", margin: "16px 0 28px" },
   form:         { display: "flex", flexDirection: "column", gap: "18px" },
-  textareaLabel:{ fontSize: "14px", fontWeight: 600, color: "#1e293b", display: "block", marginBottom: "6px" },
-  textarea:     { width: "100%", border: "2px solid #e2e8f0", borderRadius: "12px", padding: "14px 16px", fontSize: "15px", fontFamily: "'Inter', sans-serif", color: "#0f172a", outline: "none", resize: "vertical", boxSizing: "border-box", lineHeight: "1.6" },
-  welcomeBox:   { display: "flex", alignItems: "center", gap: "14px", padding: "16px 20px", background: "linear-gradient(135deg,#f0fdf4,#dcfce7)", border: "1px solid #bbf7d0", borderRadius: "14px", marginBottom: "8px" },
+  textareaLabel:{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)", display: "block", marginBottom: "6px" },
+  textarea:     { width: "100%", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", padding: "14px 16px", fontSize: "15px", color: "var(--text-primary)", background: "var(--bg-input)", outline: "none", resize: "vertical", boxSizing: "border-box", lineHeight: "1.6" },
+  welcomeBox:   { display: "flex", alignItems: "center", gap: "14px", padding: "16px 20px", background: "var(--color-success-bg)", borderRadius: "14px", marginBottom: "8px" },
   welcomeIcon:  { fontSize: "28px" },
-  welcomeTitle: { fontSize: "15px", fontWeight: 800, color: "#15803d", fontFamily: "'Inter', sans-serif" },
-  welcomeText:  { fontSize: "13px", color: "#166534", marginTop: "2px", fontFamily: "'Inter', sans-serif" },
-  errorBox:     { padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", color: "#dc2626", fontSize: "14px", fontWeight: 500, textAlign: "center" },
-  successBox:   { padding: "12px 16px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "12px", color: "#16a34a", fontSize: "14px", fontWeight: 600, textAlign: "center" },
+  welcomeTitle: { fontSize: "15px", fontWeight: 800, color: "var(--color-success)" },
+  welcomeText:  { fontSize: "13px", color: "var(--text-secondary)", marginTop: "2px" },
+  errorBox:     { padding: "12px 16px", background: "var(--color-danger-bg)", border: "1px solid var(--color-danger)", borderRadius: "var(--radius-sm)", color: "var(--color-danger)", fontSize: "14px", fontWeight: 500, textAlign: "center" },
 };
 
 const photoStyles = {
   section:     { display: "flex", flexDirection: "column", gap: "8px" },
-  label:       { fontSize: "14px", fontWeight: 600, color: "#1e293b", fontFamily: "'Inter', sans-serif" },
+  label:       { fontSize: "14px", fontWeight: 600, color: "var(--text-primary)" },
   row:         { display: "flex", alignItems: "center", gap: "16px" },
-  preview:     { width: "72px", height: "72px", minWidth: "72px", borderRadius: "50%", border: "2px solid #bfdbfe", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "#eff6ff" },
+  preview:     { width: "72px", height: "72px", minWidth: "72px", borderRadius: "50%", border: "2px solid var(--border)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--color-info-bg)" },
   img:         { width: "100%", height: "100%", objectFit: "cover" },
   placeholder: { fontSize: "28px" },
   actions:     { display: "flex", flexDirection: "column", gap: "8px" },
-  selectBtn:   { padding: "8px 16px", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter', sans-serif" },
-  removeBtn:   { padding: "6px 14px", background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", borderRadius: "8px", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: "'Inter', sans-serif" },
+  selectBtn:   { padding: "8px 16px", background: "var(--color-primary)", color: "var(--color-primary-text)", border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: 700, cursor: "pointer" },
+  removeBtn:   { padding: "6px 14px", background: "var(--color-danger-bg)", color: "var(--color-danger)", border: "1px solid var(--color-danger)", borderRadius: "8px", fontSize: "13px", fontWeight: 600, cursor: "pointer" },
 };

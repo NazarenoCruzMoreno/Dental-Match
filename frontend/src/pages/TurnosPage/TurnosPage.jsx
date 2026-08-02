@@ -4,24 +4,11 @@ import { getUser, turnosService, casosService } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { RowSkeleton } from "../../components/Skeleton/Skeleton";
-import Calendar from "../../components/Calendar/Calendar";
+import StatusBadge, { ESTADOS } from "../../components/StatusBadge/StatusBadge";
+import AgendarTurnoModal from "../../components/AgendarTurnoModal/AgendarTurnoModal";
 
 const DIAS   = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MESES  = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-
-const ESTADO_CFG = {
-  pendiente:   { label: "Pendiente",    color: "#f59e0b", bg: "#fff7ed", border: "#fed7aa" },
-  propuesto:   { label: "Propuesto",    color: "#3b82f6", bg: "#eff6ff", border: "#bfdbfe" },
-  confirmado:  { label: "Confirmado",   color: "#10b981", bg: "#f0fdf4", border: "#bbf7d0" },
-  completado:  { label: "Completado",   color: "#8b5cf6", bg: "#f5f3ff", border: "#ddd6fe" },
-  cancelado:   { label: "Cancelado",    color: "#94a3b8", bg: "#f8fafc", border: "#e2e8f0" },
-  rechazado:   { label: "Rechazado",    color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
-};
-
-function Badge({ estado }) {
-  const c = ESTADO_CFG[estado] ?? ESTADO_CFG.pendiente;
-  return <span style={{ padding:"3px 10px", borderRadius:"999px", fontSize:"12px", fontWeight:700, color:c.color, background:c.bg, border:`1px solid ${c.border}` }}>{c.label}</span>;
-}
 
 const fmtFecha = (f) => {
   const d = new Date(f + "T12:00:00");
@@ -29,122 +16,6 @@ const fmtFecha = (f) => {
 };
 
 const esPasado = (fecha, hora) => new Date(`${fecha}T${hora}`) < new Date();
-
-// ── Modal para reservar turno (paciente) ──────────────────────────────────────
-function ReservarModal({ caso, onClose, onCreated }) {
-  const [fecha,  setFecha]  = useState("");
-  const [hora,   setHora]   = useState("");
-  const [notas,  setNotas]  = useState("");
-  const [slots,  setSlots]  = useState([]);
-  const [loading,setLoading]= useState(false);
-  const [saving, setSaving] = useState(false);
-  const [err,    setErr]    = useState("");
-
-  const cargarSlots = async (f) => {
-    if (!f || !caso.estudiante_id) return;
-    setLoading(true);
-    try {
-      const data = await turnosService.disponibilidad(caso.estudiante_id, f);
-      setSlots(Array.isArray(data) ? data : []);
-    } catch { setSlots([]); }
-    finally { setLoading(false); }
-  };
-
-  const handleFecha = (f) => { setFecha(f); setHora(""); cargarSlots(f); };
-
-  const handleGuardar = async () => {
-    if (!fecha || !hora) { setErr("Elegí fecha y horario"); return; }
-    setSaving(true); setErr("");
-    try {
-      await turnosService.reservar({ caso_id: caso.id, fecha, hora, notas: notas || undefined });
-      onCreated();
-    } catch (e) { setErr(e.message); setSaving(false); }
-  };
-
-  // Fecha mínima = hoy
-  const today = new Date().toISOString().split("T")[0];
-
-  return (
-    <div style={mo.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={mo.modal}>
-        <div style={mo.header}>
-          <div>
-            <h2 style={mo.title}>Reservar turno</h2>
-            <p style={mo.sub}>{caso.titulo}</p>
-          </div>
-          <button style={mo.closeBtn} onClick={onClose}>✕</button>
-        </div>
-        <div style={mo.divider}/>
-
-        {err && <div style={mo.errBox}>{err}</div>}
-
-        {/* Fecha — calendario visual */}
-        <div style={mo.field}>
-          <label style={mo.label}>Elegí una fecha</label>
-          <Calendar value={fecha} onChange={handleFecha} minDate={today}/>
-        </div>
-
-        {/* Slots de horario */}
-        {fecha && (
-          <div style={mo.field}>
-            <label style={mo.label}>Horario disponible</label>
-            {loading ? (
-              <p style={mo.loadTxt}>Cargando horarios...</p>
-            ) : (
-              <div style={mo.slotGrid}>
-                {slots.map(s => (
-                  <button key={s.hora} disabled={!s.disponible} onClick={() => setHora(s.hora)}
-                    style={{ ...mo.slot, ...(hora === s.hora ? mo.slotActive : {}), ...(!s.disponible ? mo.slotOcupado : {}) }}>
-                    {s.hora}
-                    {!s.disponible && <div style={mo.slotLabel}>Ocupado</div>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Notas */}
-        <div style={mo.field}>
-          <label style={mo.label}>Notas adicionales (opcional)</label>
-          <textarea value={notas} onChange={e => setNotas(e.target.value)}
-            placeholder="Indicaciones especiales, dirección, etc." rows={3} style={mo.textarea}/>
-        </div>
-
-        <div style={mo.actions}>
-          <button style={mo.cancelBtn} onClick={onClose}>Cancelar</button>
-          <button style={mo.confirmBtn} disabled={saving || !fecha || !hora} onClick={handleGuardar}>
-            {saving ? "Reservando..." : "Confirmar turno"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const mo = {
-  overlay:    { position:"fixed", inset:0, background:"rgba(15,23,42,0.55)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:9000, backdropFilter:"blur(4px)", padding:"20px" },
-  modal:      { background:"#fff", borderRadius:"24px", padding:"32px", maxWidth:"500px", width:"100%", maxHeight:"88vh", overflowY:"auto", boxShadow:"0 30px 80px rgba(0,0,0,0.2)" },
-  header:     { display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:"12px" },
-  title:      { fontSize:"20px", fontWeight:900, color:"#0f172a", margin:0, fontFamily:"'Inter',sans-serif" },
-  sub:        { fontSize:"13px", color:"#64748b", margin:"4px 0 0" },
-  closeBtn:   { background:"#f1f5f9", border:"none", borderRadius:"8px", width:"32px", height:"32px", cursor:"pointer", color:"#64748b", flexShrink:0 },
-  divider:    { height:"1px", background:"#f1f5f9", margin:"20px 0" },
-  field:      { marginBottom:"18px" },
-  label:      { fontSize:"13px", fontWeight:700, color:"#1e293b", display:"block", marginBottom:"8px", fontFamily:"'Inter',sans-serif" },
-  input:      { width:"100%", height:"46px", border:"2px solid #e2e8f0", borderRadius:"12px", padding:"0 16px", fontSize:"15px", fontFamily:"'Inter',sans-serif", outline:"none", boxSizing:"border-box" },
-  loadTxt:    { fontSize:"13px", color:"#94a3b8", fontFamily:"'Inter',sans-serif" },
-  slotGrid:   { display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"8px" },
-  slot:       { padding:"10px 6px", border:"2px solid #e2e8f0", borderRadius:"10px", background:"#fff", fontSize:"14px", fontWeight:700, cursor:"pointer", color:"#0f172a", fontFamily:"'Inter',sans-serif", transition:"all .15s", position:"relative" },
-  slotActive: { border:"2px solid #2563eb", background:"#eff6ff", color:"#2563eb" },
-  slotOcupado:{ background:"#f8fafc", color:"#cbd5e1", cursor:"not-allowed", border:"2px solid #f1f5f9" },
-  slotLabel:  { fontSize:"9px", color:"#94a3b8", display:"block", marginTop:"2px" },
-  textarea:   { width:"100%", border:"2px solid #e2e8f0", borderRadius:"12px", padding:"12px 16px", fontSize:"14px", fontFamily:"'Inter',sans-serif", outline:"none", resize:"vertical", boxSizing:"border-box" },
-  errBox:     { padding:"10px 14px", background:"#fef2f2", border:"1px solid #fecaca", borderRadius:"10px", color:"#dc2626", fontSize:"13px", marginBottom:"16px" },
-  actions:    { display:"flex", gap:"10px", justifyContent:"flex-end", marginTop:"8px" },
-  cancelBtn:  { padding:"11px 20px", background:"#f1f5f9", color:"#64748b", border:"none", borderRadius:"12px", fontSize:"14px", fontWeight:600, cursor:"pointer", fontFamily:"'Inter',sans-serif" },
-  confirmBtn: { padding:"11px 24px", background:"linear-gradient(135deg,#2563eb,#1d4ed8)", color:"#fff", border:"none", borderRadius:"12px", fontSize:"14px", fontWeight:700, cursor:"pointer", fontFamily:"'Inter',sans-serif", boxShadow:"0 4px 12px rgba(37,99,235,0.3)" },
-};
 
 // ── Card de turno ─────────────────────────────────────────────────────────────
 function TurnoCard({ turno, role, onAccion }) {
@@ -173,7 +44,7 @@ function TurnoCard({ turno, role, onAccion }) {
       <div style={tc.info}>
         <div style={tc.topRow}>
           <div style={tc.casoTitle}>{turno.casos?.titulo ?? "Turno"}</div>
-          <Badge estado={turno.estado} />
+          <StatusBadge estado={turno.estado} />
         </div>
         {turno.casos?.tipo_tratamiento && <span style={tc.type}>{turno.casos.tipo_tratamiento}</span>}
         <div style={tc.personRow}>
@@ -220,25 +91,25 @@ function TurnoCard({ turno, role, onAccion }) {
 }
 
 const tc = {
-  card:        { background:"#fff", borderRadius:"18px", padding:"18px 20px", boxShadow:"0 2px 12px rgba(0,0,0,0.06)", display:"flex", gap:"16px", alignItems:"flex-start", border:"1px solid #f1f5f9", transition:"all .2s" },
+  card:        { background:"var(--bg-card)", borderRadius:"var(--radius-lg)", padding:"18px 20px", boxShadow:"var(--shadow-sm)", display:"flex", gap:"16px", alignItems:"flex-start", border:"1px solid var(--border)", transition:"all .2s" },
   cardPasado:  { opacity:0.7 },
-  dateCol:     { display:"flex", flexDirection:"column", alignItems:"center", minWidth:"52px", background:"linear-gradient(135deg,#eff6ff,#dbeafe)", borderRadius:"12px", padding:"10px 8px", textAlign:"center" },
-  dia:         { fontSize:"24px", fontWeight:900, color:"#2563eb", lineHeight:1 },
-  mes:         { fontSize:"10px", fontWeight:700, color:"#64748b", marginTop:"2px", letterSpacing:"0.5px" },
-  hora:        { fontSize:"13px", fontWeight:700, color:"#0f172a", marginTop:"6px", padding:"3px 6px", background:"#fff", borderRadius:"6px" },
+  dateCol:     { display:"flex", flexDirection:"column", alignItems:"center", minWidth:"52px", background:"var(--color-info-bg)", borderRadius:"var(--radius-md)", padding:"10px 8px", textAlign:"center" },
+  dia:         { fontSize:"24px", fontWeight:900, color:"var(--color-primary)", lineHeight:1 },
+  mes:         { fontSize:"10px", fontWeight:700, color:"var(--text-secondary)", marginTop:"2px", letterSpacing:"0.5px" },
+  hora:        { fontSize:"13px", fontWeight:700, color:"var(--text-primary)", marginTop:"6px", padding:"3px 6px", background:"var(--bg-card)", borderRadius:"6px" },
   info:        { flex:1, display:"flex", flexDirection:"column", gap:"6px" },
   topRow:      { display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:"8px" },
-  casoTitle:   { fontWeight:800, fontSize:"15px", color:"#0f172a", fontFamily:"'Inter',sans-serif" },
-  type:        { fontSize:"11px", color:"#3b82f6", background:"#eff6ff", padding:"2px 8px", borderRadius:"999px", fontWeight:600, width:"fit-content" },
+  casoTitle:   { fontWeight:800, fontSize:"15px", color:"var(--text-primary)" },
+  type:        { fontSize:"11px", color:"var(--color-primary)", background:"var(--color-info-bg)", padding:"2px 8px", borderRadius:"var(--radius-full)", fontWeight:600, width:"fit-content" },
   personRow:   { display:"flex", alignItems:"center", gap:"8px" },
-  personAvatar:{ width:"22px", height:"22px", borderRadius:"50%", background:"#3b82f6", color:"#fff", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"10px", fontWeight:800, flexShrink:0 },
-  personName:  { fontSize:"13px", color:"#64748b", fontFamily:"'Inter',sans-serif" },
-  notas:       { fontSize:"12px", color:"#94a3b8", margin:0, lineHeight:"1.4" },
-  vencido:     { fontSize:"12px", color:"#f59e0b", margin:0, fontWeight:600 },
+  personAvatar:{ width:"22px", height:"22px", borderRadius:"50%", background:"var(--color-primary)", color:"var(--color-primary-text)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"10px", fontWeight:800, flexShrink:0 },
+  personName:  { fontSize:"13px", color:"var(--text-secondary)" },
+  notas:       { fontSize:"12px", color:"var(--text-tertiary)", margin:0, lineHeight:"1.4" },
+  vencido:     { fontSize:"12px", color:"var(--color-warning)", margin:0, fontWeight:600 },
   actions:     { display:"flex", flexDirection:"column", gap:"6px", flexShrink:0 },
-  btnConfirm:  { padding:"8px 14px", background:"linear-gradient(135deg,#10b981,#059669)", color:"#fff", border:"none", borderRadius:"8px", fontSize:"12px", fontWeight:700, cursor:"pointer", fontFamily:"'Inter',sans-serif" },
-  btnComplete: { padding:"8px 14px", background:"linear-gradient(135deg,#8b5cf6,#7c3aed)", color:"#fff", border:"none", borderRadius:"8px", fontSize:"12px", fontWeight:700, cursor:"pointer", fontFamily:"'Inter',sans-serif" },
-  btnCancel:   { padding:"8px 14px", background:"#fef2f2", color:"#ef4444", border:"1px solid #fecaca", borderRadius:"8px", fontSize:"12px", fontWeight:700, cursor:"pointer", fontFamily:"'Inter',sans-serif" },
+  btnConfirm:  { padding:"8px 14px", background:"var(--color-success)", color:"var(--color-primary-text)", border:"none", borderRadius:"var(--radius-sm)", fontSize:"12px", fontWeight:700, cursor:"pointer" },
+  btnComplete: { padding:"8px 14px", background:"var(--color-purple)", color:"var(--color-primary-text)", border:"none", borderRadius:"var(--radius-sm)", fontSize:"12px", fontWeight:700, cursor:"pointer" },
+  btnCancel:   { padding:"8px 14px", background:"var(--color-danger-bg)", color:"var(--color-danger)", border:"1px solid var(--border)", borderRadius:"var(--radius-sm)", fontSize:"12px", fontWeight:700, cursor:"pointer" },
 };
 
 // ── Página principal ──────────────────────────────────────────────────────────
@@ -321,10 +192,10 @@ export default function TurnosPage() {
           {/* Stats */}
           <div style={pg.statsRow}>
             {[
-              { k:"total",      label:"Total",      color:"#3b82f6" },
-              { k:"confirmado", label:"Confirmados", color:"#10b981" },
-              { k:"pendiente",  label:"Pendientes",  color:"#f59e0b" },
-              { k:"completado", label:"Completados", color:"#8b5cf6" },
+              { k:"total",      label:"Total",      color:"var(--color-primary)" },
+              { k:"confirmado", label:"Confirmados", color:"var(--color-success)" },
+              { k:"pendiente",  label:"Pendientes",  color:"var(--color-warning)" },
+              { k:"completado", label:"Completados", color:"var(--color-purple)" },
             ].map(s => (
               <div key={s.k} style={pg.statCard}>
                 <div style={{ ...pg.statNum, color:s.color }}>{stats[s.k]}</div>
@@ -356,7 +227,7 @@ export default function TurnosPage() {
           {["todos","pendiente","confirmado","completado","cancelado"].map(f => (
             <button key={f} style={{ ...pg.filterBtn, ...(filter === f ? pg.filterActive : {}) }}
               onClick={() => setFilter(f)}>
-              {f === "todos" ? "Todos" : ESTADO_CFG[f]?.label ?? f}
+              {f === "todos" ? "Todos" : ESTADOS[f]?.label ?? f}
             </button>
           ))}
         </div>
@@ -370,7 +241,7 @@ export default function TurnosPage() {
           <div style={pg.empty}>
             <div style={{ fontSize:"52px", marginBottom:"12px" }}>📅</div>
             <h3 style={pg.emptyTitle}>
-              {filter === "todos" ? "No tenés turnos agendados" : `Sin turnos ${ESTADO_CFG[filter]?.label?.toLowerCase() ?? filter}`}
+              {filter === "todos" ? "No tenés turnos agendados" : `Sin turnos ${ESTADOS[filter]?.label?.toLowerCase() ?? filter}`}
             </h3>
             <p style={pg.emptySub}>
               {role === "paciente" && filter === "todos"
@@ -402,10 +273,13 @@ export default function TurnosPage() {
 
       {/* Modal reservar turno */}
       {modal && (
-        <ReservarModal
+        <AgendarTurnoModal
+          open
           caso={modal}
+          mode="reservar"
           onClose={() => setModal(null)}
-          onCreated={() => { setModal(null); setRefresh(r => r + 1); }}
+          onSubmit={({ fecha, hora, notas }) => turnosService.reservar({ caso_id: modal.id, fecha, hora, notas })}
+          onSuccess={() => { setModal(null); setRefresh(r => r + 1); }}
         />
       )}
     </div>
@@ -413,32 +287,32 @@ export default function TurnosPage() {
 }
 
 const pg = {
-  page:        { minHeight:"100vh", background:"linear-gradient(135deg,#f8fafc 0%,#eff6ff 55%,#fff7ed 100%)", padding:"36px 20px 60px", fontFamily:"'Inter',sans-serif" },
+  page:        { minHeight:"100vh", background:"var(--bg-page)", padding:"36px 20px 60px" },
   container:   { maxWidth:"760px", margin:"0 auto", display:"flex", flexDirection:"column", gap:"20px" },
-  header:      { background:"#fff", borderRadius:"24px", padding:"28px 32px", boxShadow:"0 4px 20px rgba(0,0,0,0.06)", display:"flex", flexDirection:"column", gap:"16px" },
-  backBtn:     { display:"flex", alignItems:"center", gap:"6px", background:"none", border:"none", color:"#3b82f6", fontWeight:600, fontSize:"14px", cursor:"pointer", fontFamily:"'Inter',sans-serif", width:"fit-content" },
+  header:      { background:"var(--bg-card)", borderRadius:"var(--radius-lg)", padding:"28px 32px", boxShadow:"var(--shadow-sm)", display:"flex", flexDirection:"column", gap:"16px" },
+  backBtn:     { display:"flex", alignItems:"center", gap:"6px", background:"none", border:"none", color:"var(--color-primary)", fontWeight:600, fontSize:"14px", cursor:"pointer", width:"fit-content" },
   titleRow:    { display:"flex", alignItems:"center", gap:"14px" },
   icon:        { fontSize:"32px" },
-  title:       { fontSize:"24px", fontWeight:900, color:"#0f172a", margin:0, letterSpacing:"-0.5px" },
-  sub:         { fontSize:"14px", color:"#64748b", margin:"3px 0 0" },
+  title:       { fontSize:"24px", fontWeight:900, color:"var(--text-primary)", margin:0, letterSpacing:"-0.5px" },
+  sub:         { fontSize:"14px", color:"var(--text-secondary)", margin:"3px 0 0" },
   statsRow:    { display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"10px" },
-  statCard:    { background:"#f8fafc", borderRadius:"12px", padding:"14px", textAlign:"center" },
+  statCard:    { background:"var(--bg-subtle)", borderRadius:"var(--radius-md)", padding:"14px", textAlign:"center" },
   statNum:     { fontSize:"24px", fontWeight:900, lineHeight:1 },
-  statLabel:   { fontSize:"11px", color:"#64748b", fontWeight:600, marginTop:"4px" },
-  reserveBox:  { background:"linear-gradient(135deg,#eff6ff,#dbeafe)", borderRadius:"20px", padding:"20px 24px", border:"1px solid #bfdbfe" },
+  statLabel:   { fontSize:"11px", color:"var(--text-secondary)", fontWeight:600, marginTop:"4px" },
+  reserveBox:  { background:"var(--color-info-bg)", borderRadius:"var(--radius-lg)", padding:"20px 24px", border:"1px solid var(--border)" },
   reserveText: { marginBottom:"12px" },
-  reserveTitle:{ fontWeight:800, fontSize:"15px", color:"#0f172a" },
-  reserveSub:  { fontSize:"13px", color:"#64748b", marginTop:"2px" },
+  reserveTitle:{ fontWeight:800, fontSize:"15px", color:"var(--text-primary)" },
+  reserveSub:  { fontSize:"13px", color:"var(--text-secondary)", marginTop:"2px" },
   casosList:   { display:"flex", gap:"10px", flexWrap:"wrap" },
-  casoBtn:     { padding:"9px 16px", background:"#fff", border:"1px solid #bfdbfe", borderRadius:"10px", fontSize:"13px", fontWeight:700, cursor:"pointer", color:"#2563eb", fontFamily:"'Inter',sans-serif", boxShadow:"0 2px 8px rgba(37,99,235,0.1)" },
+  casoBtn:     { padding:"9px 16px", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:"var(--radius-sm)", fontSize:"13px", fontWeight:700, cursor:"pointer", color:"var(--color-primary)", boxShadow:"var(--shadow-sm)" },
   filterRow:   { display:"flex", gap:"8px", flexWrap:"wrap" },
-  filterBtn:   { padding:"7px 16px", background:"#fff", border:"1px solid #e2e8f0", borderRadius:"999px", fontSize:"13px", fontWeight:600, cursor:"pointer", color:"#64748b", fontFamily:"'Inter',sans-serif" },
-  filterActive:{ background:"#2563eb", color:"#fff", border:"1px solid #2563eb" },
-  secTitle:    { fontSize:"13px", fontWeight:700, color:"#94a3b8", textTransform:"uppercase", letterSpacing:"0.8px", marginBottom:"10px" },
+  filterBtn:   { padding:"7px 16px", background:"var(--bg-card)", border:"1px solid var(--border)", borderRadius:"var(--radius-full)", fontSize:"13px", fontWeight:600, cursor:"pointer", color:"var(--text-secondary)" },
+  filterActive:{ background:"var(--color-primary)", color:"var(--color-primary-text)", border:"1px solid var(--color-primary)" },
+  secTitle:    { fontSize:"13px", fontWeight:700, color:"var(--text-tertiary)", textTransform:"uppercase", letterSpacing:"0.8px", marginBottom:"10px" },
   list:        { display:"flex", flexDirection:"column", gap:"10px", marginBottom:"24px" },
   center:      { display:"flex", justifyContent:"center", padding:"60px 0" },
-  spinner:     { width:"36px", height:"36px", border:"4px solid #bfdbfe", borderTop:"4px solid #3b82f6", borderRadius:"50%", animation:"spin .8s linear infinite" },
+  spinner:     { width:"36px", height:"36px", border:"4px solid var(--border)", borderTop:"4px solid var(--color-primary)", borderRadius:"50%", animation:"spin .8s linear infinite" },
   empty:       { textAlign:"center", padding:"60px 20px" },
-  emptyTitle:  { fontSize:"20px", fontWeight:800, color:"#0f172a", margin:"0 0 8px" },
-  emptySub:    { fontSize:"14px", color:"#64748b" },
+  emptyTitle:  { fontSize:"20px", fontWeight:800, color:"var(--text-primary)", margin:"0 0 8px" },
+  emptySub:    { fontSize:"14px", color:"var(--text-secondary)" },
 };

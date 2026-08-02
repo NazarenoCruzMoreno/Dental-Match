@@ -1,31 +1,26 @@
 import { useState } from "react";
 import { timeAgo, inferSintomas } from "../../utils/format";
+import Modal from "../../components/Modal/Modal";
+import StatusBadge from "../../components/StatusBadge/StatusBadge";
 
 function CaseImage({ src, height = 220 }) {
   const [error, setError] = useState(false);
   if (!src || error) {
     return (
-      <div style={{ height, background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "24px 24px 0 0" }}>
+      <div style={{ height, background: "var(--bg-subtle)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "var(--radius-md)" }}>
         <span style={{ fontSize: "60px" }}>🦷</span>
       </div>
     );
   }
   return (
-    <div style={{ position: "relative", height, overflow: "hidden", borderRadius: "24px 24px 0 0" }}>
+    <div style={{ position: "relative", height, overflow: "hidden", borderRadius: "var(--radius-md)" }}>
       <img src={src} alt="Foto del caso" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={() => setError(true)} />
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3))" }} />
     </div>
   );
 }
 
 // ── Modal de detalle de caso clínico (vista estudiante) ─────────────────────
-export default function CasoModal({ caso, onClose, onAplicar, isDark = false }) {
-  const dynModal  = isDark ? { background: "#1e293b" } : {};
-  const dynTitle  = { color: isDark ? "#f1f5f9" : "#0f172a" };
-  const dynText   = { color: isDark ? "#cbd5e1" : "#374151" };
-  const dynPatSec = isDark ? { background: "#0f172a" } : {};
-  const dynPatName= { color: isDark ? "#f1f5f9" : "#0f172a" };
-  const dynCancel = isDark ? { background: "#334155", color: "#cbd5e1" } : {};
+export default function CasoModal({ caso, onClose, onAplicar }) {
   const [applying, setApplying] = useState(false);
   const [done,     setDone]     = useState(false);
   const [err,      setErr]      = useState("");
@@ -41,128 +36,108 @@ export default function CasoModal({ caso, onClose, onAplicar, isDark = false }) 
   };
 
   return (
-    <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div style={{ ...s.modal, ...dynModal }} data-modal role="dialog">
+    <Modal open onClose={onClose} title={caso.titulo} maxWidth="560px">
+      {/* Imagen del caso con fallback */}
+      <div style={{ marginBottom: "16px" }}>
+        <CaseImage src={caso.imagen_url} />
+      </div>
 
-        {/* Imagen del caso con fallback */}
-        <div style={{ position: "relative" }}>
-          <CaseImage src={caso.imagen_url} />
-          <button style={s.closeAbsolute} onClick={onClose}>✕</button>
-        </div>
+      {/* Meta */}
+      <div style={s.mMeta}>
+        <StatusBadge estado="disponible" />
+        {caso.tipo_tratamiento && <span style={s.typePill}>{caso.tipo_tratamiento}</span>}
+        <span style={s.date}>{timeAgo(caso.created_at)}</span>
+      </div>
 
-        <div style={s.body}>
-          {/* Header */}
-          <div style={s.mHeader}>
-            <h2 style={{ ...s.mTitle, ...dynTitle }}>{caso.titulo}</h2>
-            <div style={s.mMeta}>
-              <span style={s.availBadge}>● Disponible</span>
-              {caso.tipo_tratamiento && <span style={s.typePill}>{caso.tipo_tratamiento}</span>}
-              <span style={s.date}>{timeAgo(caso.created_at)}</span>
-            </div>
+      {/* Info paciente */}
+      {caso.pacientes && (
+        <div style={s.patSection}>
+          <div style={s.patAvatar}>{caso.pacientes.nombre?.charAt(0).toUpperCase()}</div>
+          <div style={{ flex: 1 }}>
+            <div style={s.patName}>{caso.pacientes.nombre}</div>
+            <div style={s.patAge}>{caso.pacientes.edad} años</div>
           </div>
-
-          {/* Info paciente */}
-          {caso.pacientes && (
-            <div style={{ ...s.patSection, ...dynPatSec }}>
-              <div style={s.patAvatar}>{caso.pacientes.nombre?.charAt(0).toUpperCase()}</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ ...s.patName, ...dynPatName }}>{caso.pacientes.nombre}</div>
-                <div style={s.patAge}>{caso.pacientes.edad} años</div>
-              </div>
-              {/* Rating + experiencia previa del paciente */}
-              {(caso.pacientes.rating > 0 || caso.pacientes.turnos_completados > 0) && (
-                <div style={{ textAlign: "right" }}>
-                  {caso.pacientes.rating > 0 && (
-                    <div style={{ fontSize: "13px", fontWeight: 800, color: "#f59e0b" }}>
-                      ★ {caso.pacientes.rating}
-                    </div>
-                  )}
-                  {caso.pacientes.turnos_completados > 0 && (
-                    <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
-                      {caso.pacientes.turnos_completados} turno{caso.pacientes.turnos_completados !== 1 ? "s" : ""}
-                    </div>
-                  )}
+          {/* Rating + experiencia previa del paciente */}
+          {(caso.pacientes.rating > 0 || caso.pacientes.turnos_completados > 0) && (
+            <div style={{ textAlign: "right" }}>
+              {caso.pacientes.rating > 0 && (
+                <div style={{ fontSize: "13px", fontWeight: 800, color: "var(--color-warning)" }}>
+                  ★ {caso.pacientes.rating}
+                </div>
+              )}
+              {caso.pacientes.turnos_completados > 0 && (
+                <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>
+                  {caso.pacientes.turnos_completados} turno{caso.pacientes.turnos_completados !== 1 ? "s" : ""}
                 </div>
               )}
             </div>
           )}
+        </div>
+      )}
 
-          {/* Badge si es caso de análisis */}
-          {caso.es_analisis && (
-            <div style={{ display: "inline-block", padding: "5px 12px", background: "linear-gradient(135deg,#8b5cf6,#7c3aed)", color: "#fff", borderRadius: "999px", fontSize: "12px", fontWeight: 700, marginBottom: "16px" }}>
-              🎓 Análisis · Apto para estudiantes en formación
-            </div>
-          )}
+      {/* Badge si es caso de análisis */}
+      {caso.es_analisis && (
+        <div style={{ marginBottom: "16px" }}>
+          <StatusBadge estado="analisis" label="🎓 Análisis · Apto para estudiantes en formación" />
+        </div>
+      )}
 
-          {/* Descripción */}
-          <div style={s.section}>
-            <div style={s.sLabel}>Descripción completa</div>
-            <p style={{ ...s.sText, ...dynText }}>{caso.descripcion}</p>
-          </div>
+      {/* Descripción */}
+      <div style={s.section}>
+        <div style={s.sLabel}>Descripción completa</div>
+        <p style={s.sText}>{caso.descripcion}</p>
+      </div>
 
-          {/* Notas */}
-          {caso.notas && (
-            <div style={s.section}>
-              <div style={s.sLabel}>Notas adicionales</div>
-              <p style={{ ...s.sText, ...dynText }}>{caso.notas}</p>
-            </div>
-          )}
+      {/* Notas */}
+      {caso.notas && (
+        <div style={s.section}>
+          <div style={s.sLabel}>Notas adicionales</div>
+          <p style={s.sText}>{caso.notas}</p>
+        </div>
+      )}
 
-          {/* Síntomas */}
-          {sintomas.length > 0 && (
-            <div style={s.section}>
-              <div style={s.sLabel}>Síntomas detectados</div>
-              <div style={s.tagRow}>
-                {sintomas.map((sym) => <span key={sym} style={s.tag}>{sym}</span>)}
-              </div>
-            </div>
-          )}
-
-          {/* Acciones */}
-          {err && <div style={s.errBox}>{err}</div>}
-          <div style={s.actions}>
-            <button style={{ ...s.cancelBtn, ...dynCancel }} onClick={onClose}>Cerrar</button>
-            {done ? (
-              <div style={s.successPill}>✅ Aplicación enviada</div>
-            ) : (
-              <button style={s.applyBtn} onClick={handleAplicar} disabled={applying}>
-                {applying ? "Enviando..." : "Tomar Paciente"}
-              </button>
-            )}
+      {/* Síntomas */}
+      {sintomas.length > 0 && (
+        <div style={s.section}>
+          <div style={s.sLabel}>Síntomas detectados</div>
+          <div style={s.tagRow}>
+            {sintomas.map((sym) => <span key={sym} style={s.tag}>{sym}</span>)}
           </div>
         </div>
+      )}
+
+      {/* Acciones */}
+      {err && <div style={s.errBox}>{err}</div>}
+      <div style={s.actions}>
+        <button style={s.cancelBtn} onClick={onClose}>Cerrar</button>
+        {done ? (
+          <div style={s.successPill}>✅ Aplicación enviada</div>
+        ) : (
+          <button style={s.applyBtn} onClick={handleAplicar} disabled={applying}>
+            {applying ? "Enviando..." : "Tomar Paciente"}
+          </button>
+        )}
       </div>
-    </div>
+    </Modal>
   );
 }
 
 const s = {
-  overlay:        { position: "fixed", inset: 0, background: "rgba(15,23,42,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9000, backdropFilter: "blur(6px)", padding: "20px" },
-  modal:          { background: "#fff", borderRadius: "24px", maxWidth: "560px", width: "100%", maxHeight: "88vh", overflowY: "auto", boxShadow: "0 40px 100px rgba(0,0,0,0.25)" },
-  imgWrap:        { position: "relative", height: "220px", overflow: "hidden", borderRadius: "24px 24px 0 0" },
-  img:            { width: "100%", height: "100%", objectFit: "cover" },
-  imgOverlay:     { position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3))" },
-  imgPlaceholder: { height: "160px", background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "24px 24px 0 0", position: "relative" },
-  closeAbsolute:  { position: "absolute", top: "14px", right: "14px", background: "rgba(0,0,0,0.35)", border: "none", borderRadius: "8px", width: "32px", height: "32px", color: "#fff", cursor: "pointer", fontSize: "14px", backdropFilter: "blur(4px)" },
-  body:           { padding: "28px 32px 32px" },
-  mHeader:        { marginBottom: "16px" },
-  mTitle:         { fontSize: "22px", fontWeight: 900, color: "#0f172a", margin: "0 0 8px", letterSpacing: "-0.5px", fontFamily: "'Inter',sans-serif" },
-  mMeta:          { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" },
-  availBadge:     { fontSize: "12px", fontWeight: 700, color: "#10b981", background: "#f0fdf4", padding: "3px 10px", borderRadius: "999px", border: "1px solid #bbf7d0" },
-  typePill:       { fontSize: "12px", color: "#3b82f6", background: "#eff6ff", padding: "3px 10px", borderRadius: "999px", fontWeight: 600 },
-  date:           { fontSize: "12px", color: "#94a3b8" },
-  patSection:     { display: "flex", alignItems: "center", gap: "12px", padding: "14px 16px", background: "#f8fafc", borderRadius: "14px", marginBottom: "20px" },
-  patAvatar:      { width: "44px", height: "44px", borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", fontWeight: 800, flexShrink: 0 },
-  patName:        { fontWeight: 700, color: "#0f172a", fontFamily: "'Inter',sans-serif" },
-  patAge:         { fontSize: "13px", color: "#64748b" },
+  mMeta:          { display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap", marginBottom: "16px" },
+  typePill:       { fontSize: "12px", color: "var(--color-primary)", background: "var(--color-info-bg)", padding: "3px 10px", borderRadius: "var(--radius-full)", fontWeight: 600 },
+  date:           { fontSize: "12px", color: "var(--text-tertiary)" },
+  patSection:     { display: "flex", alignItems: "center", gap: "12px", padding: "14px 16px", background: "var(--bg-subtle)", borderRadius: "var(--radius-md)", marginBottom: "20px" },
+  patAvatar:      { width: "44px", height: "44px", borderRadius: "50%", background: "var(--color-primary)", color: "var(--color-primary-text)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", fontWeight: 800, flexShrink: 0 },
+  patName:        { fontWeight: 700, color: "var(--text-primary)" },
+  patAge:         { fontSize: "13px", color: "var(--text-secondary)" },
   section:        { marginBottom: "18px" },
-  sLabel:         { fontSize: "11px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "6px" },
-  sText:          { fontSize: "15px", color: "#374151", lineHeight: "1.7", margin: 0, fontFamily: "'Inter',sans-serif" },
+  sLabel:         { fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "6px" },
+  sText:          { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.7", margin: 0 },
   tagRow:         { display: "flex", gap: "8px", flexWrap: "wrap" },
-  tag:            { padding: "5px 12px", background: "#eff6ff", color: "#2563eb", borderRadius: "999px", fontSize: "12px", fontWeight: 700, border: "1px solid #bfdbfe" },
-  errBox:         { padding: "10px 14px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "10px", color: "#dc2626", fontSize: "13px", marginBottom: "12px" },
+  tag:            { padding: "5px 12px", background: "var(--color-info-bg)", color: "var(--color-primary)", borderRadius: "var(--radius-full)", fontSize: "12px", fontWeight: 700 },
+  errBox:         { padding: "10px 14px", background: "var(--color-danger-bg)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--color-danger)", fontSize: "13px", marginBottom: "12px" },
   actions:        { display: "flex", gap: "12px", justifyContent: "flex-end", marginTop: "8px" },
-  cancelBtn:      { padding: "12px 24px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" },
-  applyBtn:       { padding: "12px 28px", background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter',sans-serif", boxShadow: "0 4px 14px rgba(37,99,235,0.35)" },
-  successPill:    { padding: "12px 20px", background: "#f0fdf4", color: "#16a34a", borderRadius: "12px", fontSize: "14px", fontWeight: 700 },
+  cancelBtn:      { padding: "12px 24px", background: "var(--bg-subtle)", color: "var(--text-secondary)", border: "none", borderRadius: "var(--radius-md)", fontSize: "14px", fontWeight: 600, cursor: "pointer" },
+  applyBtn:       { padding: "12px 28px", background: "var(--color-primary)", color: "var(--color-primary-text)", border: "none", borderRadius: "var(--radius-md)", fontSize: "14px", fontWeight: 700, cursor: "pointer" },
+  successPill:    { padding: "12px 20px", background: "var(--color-success-bg)", color: "var(--color-success)", borderRadius: "var(--radius-md)", fontSize: "14px", fontWeight: 700 },
 };

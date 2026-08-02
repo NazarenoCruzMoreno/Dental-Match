@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { timeAgo } from "../../utils/format";
+import StatusBadge from "../../components/StatusBadge/StatusBadge";
 
 // Imagen del caso con fallback automático si falla la carga
 function CaseImage({ src }) {
   const [error, setError] = useState(false);
   if (!src || error) {
     return (
-      <div style={{ width: "100%", height: "100%", background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: "100%", height: "100%", background: "var(--bg-subtle)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <span style={{ fontSize: "48px" }}>🦷</span>
       </div>
     );
@@ -23,29 +24,29 @@ function CaseImage({ src }) {
 }
 
 // ── Tarjeta de paciente para el marketplace ─────────────────────────────────
-export default function PatientCard({ caso, onClick, isDark = false }) {
+export default function PatientCard({ caso, onClick }) {
   const [hover, setHover] = useState(false);
 
-  const dynCard = isDark
-    ? { background: "#1e293b", border: "1px solid #334155" }
-    : {};
-  const dynTitle = { color: isDark ? "#f1f5f9" : "#0f172a" };
-  const dynDesc  = { color: isDark ? "#94a3b8" : "#64748b" };
-  const dynName  = { color: isDark ? "#f1f5f9" : "#0f172a" };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); }
+  };
 
   return (
     <div
-      style={{ ...s.card, ...dynCard, ...(hover ? s.cardHover : {}) }}
+      style={{ ...s.card, ...(hover ? s.cardHover : {}) }}
       onClick={onClick}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
     >
       {/* Imagen del caso (foto de la boca) */}
       <div style={s.imgArea}>
         <CaseImage src={caso.imagen_url} />
         <div style={s.availBadge}>● Disponible</div>
         {caso.es_analisis && (
-          <div style={s.analisisBadge}>🎓 Análisis · Junior</div>
+          <div style={s.analisisBadgeWrap}><StatusBadge estado="analisis" /></div>
         )}
       </div>
 
@@ -54,13 +55,13 @@ export default function PatientCard({ caso, onClick, isDark = false }) {
         <div style={s.patRow}>
           <div style={s.avatar}>{caso.pacientes?.nombre?.charAt(0) ?? "P"}</div>
           <div>
-            <div style={{ ...s.name, ...dynName }}>{caso.pacientes?.nombre ?? "Paciente"}</div>
+            <div style={s.name}>{caso.pacientes?.nombre ?? "Paciente"}</div>
             <div style={s.age}>{caso.pacientes?.edad} años</div>
           </div>
         </div>
 
-        <div style={{ ...s.title, ...dynTitle }}>{caso.titulo}</div>
-        <p style={{ ...s.desc, ...dynDesc }}>{caso.descripcion}</p>
+        <div style={s.title}>{caso.titulo}</div>
+        <p style={s.desc}>{caso.descripcion}</p>
 
         <div style={s.footer}>
           {caso.tipo_tratamiento && <span style={s.type}>{caso.tipo_tratamiento}</span>}
@@ -74,23 +75,21 @@ export default function PatientCard({ caso, onClick, isDark = false }) {
 }
 
 const s = {
-  card:           { background: "#fff", borderRadius: "18px", overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: "1px solid #f1f5f9", cursor: "pointer", transition: "all .22s ease", display: "flex", flexDirection: "column" },
-  cardHover:      { transform: "translateY(-4px)", boxShadow: "0 12px 32px rgba(37,99,235,0.13)", border: "1px solid #bfdbfe" },
+  card:           { background: "var(--bg-card)", borderRadius: "var(--radius-lg)", overflow: "hidden", boxShadow: "var(--shadow-sm)", border: "1px solid var(--border)", cursor: "pointer", transition: "border-color .2s ease, box-shadow .2s ease", display: "flex", flexDirection: "column" },
+  cardHover:      { boxShadow: "var(--shadow-md)", border: "1px solid var(--border-strong)" },
   imgArea:        { position: "relative", height: "160px", overflow: "hidden", flexShrink: 0 },
-  img:            { width: "100%", height: "100%", objectFit: "cover", transition: "transform .3s ease" },
-  imgPlaceholder: { height: "100%", background: "linear-gradient(135deg,#eff6ff,#dbeafe)", display: "flex", alignItems: "center", justifyContent: "center" },
-  availBadge:     { position: "absolute", top: "10px", right: "10px", background: "rgba(16,185,129,0.9)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "999px", backdropFilter: "blur(4px)" },
-  analisisBadge:  { position: "absolute", top: "10px", left: "10px", background: "linear-gradient(135deg,#8b5cf6,#7c3aed)", color: "#fff", fontSize: "10px", fontWeight: 800, padding: "4px 10px", borderRadius: "999px", boxShadow: "0 2px 8px rgba(139,92,246,0.35)" },
+  availBadge:     { position: "absolute", top: "10px", right: "10px", background: "var(--color-success)", color: "var(--color-primary-text)", fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "var(--radius-full)" },
+  analisisBadgeWrap: { position: "absolute", top: "10px", left: "10px" },
   body:           { padding: "18px 20px 20px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 },
   patRow:         { display: "flex", alignItems: "center", gap: "10px" },
-  avatar:         { width: "36px", height: "36px", minWidth: "36px", borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: 800 },
-  name:           { fontWeight: 700, fontSize: "14px", color: "#0f172a", fontFamily: "'Inter',sans-serif" },
-  age:            { fontSize: "12px", color: "#94a3b8" },
-  title:          { fontWeight: 800, fontSize: "15px", color: "#0f172a", lineHeight: 1.3, fontFamily: "'Inter',sans-serif" },
-  desc:           { fontSize: "13px", color: "#64748b", lineHeight: "1.55", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" },
+  avatar:         { width: "36px", height: "36px", minWidth: "36px", borderRadius: "50%", background: "var(--color-primary)", color: "var(--color-primary-text)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: 800 },
+  name:           { fontWeight: 700, fontSize: "14px", color: "var(--text-primary)" },
+  age:            { fontSize: "12px", color: "var(--text-tertiary)" },
+  title:          { fontWeight: 800, fontSize: "15px", color: "var(--text-primary)", lineHeight: 1.3 },
+  desc:           { fontSize: "13px", color: "var(--text-secondary)", lineHeight: "1.55", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" },
   footer:         { display: "flex", alignItems: "center", gap: "8px", marginTop: "auto" },
-  type:           { fontSize: "11px", color: "#3b82f6", background: "#eff6ff", padding: "2px 8px", borderRadius: "999px", fontWeight: 600 },
-  date:           { fontSize: "11px", color: "#94a3b8", marginLeft: "auto" },
-  btn:            { width: "100%", padding: "10px", background: "#f8fafc", color: "#2563eb", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter',sans-serif", transition: "all .2s", marginTop: "4px" },
-  btnHover:       { background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", border: "1px solid transparent", boxShadow: "0 4px 12px rgba(37,99,235,0.3)" },
+  type:           { fontSize: "11px", color: "var(--color-primary)", background: "var(--color-info-bg)", padding: "2px 8px", borderRadius: "var(--radius-full)", fontWeight: 600 },
+  date:           { fontSize: "11px", color: "var(--text-tertiary)", marginLeft: "auto" },
+  btn:            { width: "100%", padding: "10px", background: "var(--bg-subtle)", color: "var(--color-primary)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", fontSize: "13px", fontWeight: 700, cursor: "pointer", transition: "all .2s", marginTop: "4px" },
+  btnHover:       { background: "var(--color-primary)", color: "var(--color-primary-text)", border: "1px solid transparent" },
 };

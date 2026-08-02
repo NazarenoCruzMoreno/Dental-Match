@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, casosService, matchService } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
-import { useTheme } from "../../context/ThemeContext";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
 import { useDebounce } from "../../hooks/useDebounce";
 import { GridSkeleton } from "../../components/Skeleton/Skeleton";
@@ -20,7 +19,6 @@ export default function MarketplacePage() {
   const navigate         = useNavigate();
   const user             = getUser();
   const toast            = useToast();
-  const { isDark }       = useTheme();
   const [casos,    setCasos]    = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [search,   setSearch]   = useState("");
@@ -66,10 +64,10 @@ export default function MarketplacePage() {
   const nombre = user?.email?.split("@")[0] ?? "Estudiante";
 
   return (
-    <div style={{ ...p.root, background: isDark ? "#0f172a" : "#f8fafc", color: isDark ? "#f1f5f9" : "#0f172a" }}>
+    <div style={p.root}>
 
       {/* ── HEADER ── */}
-      <header style={{ ...p.header, background: isDark ? "#1e293b" : "#fff", borderColor: isDark ? "#334155" : "#f1f5f9" }}>
+      <header style={p.header}>
         <div style={p.headerInner}>
           <div style={p.logo} onClick={() => navigate("/home")}>
             <div style={p.logoIcon}>🦷</div>
@@ -77,16 +75,19 @@ export default function MarketplacePage() {
           </div>
 
           <div style={p.searchBox}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" style={{ flexShrink: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" style={{ flexShrink: 0 }}>
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
               style={p.searchInput}
               placeholder="Buscar pacientes..."
+              aria-label="Buscar pacientes"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            {search && <button style={p.clearBtn} onClick={() => setSearch("")}>✕</button>}
+            {search && (
+              <button style={p.clearBtn} onClick={() => setSearch("")} aria-label="Limpiar búsqueda">✕</button>
+            )}
           </div>
 
           <div style={p.avatarWrap}>
@@ -112,8 +113,8 @@ export default function MarketplacePage() {
             ))}
           </div>
           <div style={p.statChip}>
-            <span style={{ fontWeight: 800, color: "#2563eb" }}>{filtered.length}</span>
-            <span style={{ color: "#94a3b8" }}> disponibles</span>
+            <span style={{ fontWeight: 800, color: "var(--color-primary)" }}>{filtered.length}</span>
+            <span style={{ color: "var(--text-tertiary)" }}> disponibles</span>
           </div>
         </div>
 
@@ -132,7 +133,6 @@ export default function MarketplacePage() {
               <PatientCard
                 key={caso.id}
                 caso={caso}
-                isDark={isDark}
                 onClick={() => setSelected(caso)}
               />
             ))}
@@ -144,7 +144,6 @@ export default function MarketplacePage() {
       {selected && (
         <CasoModal
           caso={selected}
-          isDark={isDark}
           onClose={() => setSelected(null)}
           onAplicar={handleAplicar}
         />
@@ -154,33 +153,33 @@ export default function MarketplacePage() {
 }
 
 const p = {
-  root:         { minHeight: "100vh", background: "#f8fafc", fontFamily: "'Inter',sans-serif" },
+  root:         { minHeight: "100vh", background: "var(--bg-page)", color: "var(--text-primary)" },
 
-  header:       { background: "#fff", borderBottom: "1px solid #f1f5f9", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 12px rgba(0,0,0,0.05)" },
+  header:       { background: "var(--bg-card)", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: 100, boxShadow: "var(--shadow-sm)" },
   headerInner:  { maxWidth: "1200px", margin: "0 auto", padding: "0 20px", height: "64px", display: "flex", alignItems: "center", gap: "16px" },
   logo:         { display: "flex", alignItems: "center", gap: "10px", cursor: "pointer", flexShrink: 0 },
   logoIcon:     { fontSize: "22px" },
-  logoText:     { fontSize: "18px", fontWeight: 900, color: "#0f172a", letterSpacing: "-0.5px" },
-  logoBlue:     { color: "#2563eb" },
-  searchBox:    { flex: 1, minWidth: 0, maxWidth: "480px", height: "40px", border: "1px solid #e2e8f0", borderRadius: "10px", padding: "0 14px", display: "flex", alignItems: "center", gap: "10px", background: "#f8fafc" },
-  searchInput:  { flex: 1, minWidth: 0, border: "none", background: "transparent", outline: "none", fontSize: "14px", color: "#0f172a", fontFamily: "'Inter',sans-serif" },
-  clearBtn:     { background: "none", border: "none", color: "#94a3b8", cursor: "pointer", fontSize: "12px", padding: "2px 4px" },
+  logoText:     { fontSize: "18px", fontWeight: 900, color: "var(--text-primary)", letterSpacing: "-0.5px" },
+  logoBlue:     { color: "var(--color-primary)" },
+  searchBox:    { flex: 1, minWidth: 0, maxWidth: "480px", height: "40px", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", padding: "0 14px", display: "flex", alignItems: "center", gap: "10px", background: "var(--bg-subtle)" },
+  searchInput:  { flex: 1, minWidth: 0, border: "none", background: "transparent", outline: "none", fontSize: "14px", color: "var(--text-primary)" },
+  clearBtn:     { background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer", fontSize: "12px", padding: "2px 4px" },
   avatarWrap:   { display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 },
-  avatar:       { width: "36px", height: "36px", borderRadius: "50%", background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "15px", fontWeight: 800 },
+  avatar:       { width: "36px", height: "36px", borderRadius: "50%", background: "var(--color-primary)", color: "var(--color-primary-text)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "15px", fontWeight: 800 },
   avatarInfo:   { lineHeight: 1.3 },
-  avatarName:   { fontSize: "13px", fontWeight: 700, color: "#0f172a" },
-  avatarRole:   { fontSize: "11px", color: "#94a3b8" },
+  avatarName:   { fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" },
+  avatarRole:   { fontSize: "11px", color: "var(--text-tertiary)" },
 
   main:         { maxWidth: "1200px", margin: "0 auto", padding: "24px 20px 60px" },
   toolbar:      { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", gap: "12px", flexWrap: "wrap" },
   filterRow:    { display: "flex", gap: "8px", flexWrap: "wrap" },
-  filterBtn:    { padding: "7px 14px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "999px", fontSize: "13px", fontWeight: 600, cursor: "pointer", color: "#64748b", fontFamily: "'Inter',sans-serif", transition: "all .15s" },
-  filterActive: { background: "#2563eb", color: "#fff", border: "1px solid #2563eb", boxShadow: "0 2px 8px rgba(37,99,235,0.25)" },
-  statChip:     { fontSize: "13px", fontFamily: "'Inter',sans-serif" },
+  filterBtn:    { padding: "7px 14px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-full)", fontSize: "13px", fontWeight: 600, cursor: "pointer", color: "var(--text-secondary)", transition: "all .15s" },
+  filterActive: { background: "var(--color-primary)", color: "var(--color-primary-text)", border: "1px solid var(--color-primary)" },
+  statChip:     { fontSize: "13px" },
 
   grid:         { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "16px" },
 
   emptyState:   { textAlign: "center", padding: "80px 20px" },
-  emptyTitle:   { fontSize: "20px", fontWeight: 800, color: "#0f172a", margin: "0 0 8px" },
-  emptyText:    { fontSize: "15px", color: "#64748b" },
+  emptyTitle:   { fontSize: "20px", fontWeight: 800, color: "var(--text-primary)", margin: "0 0 8px" },
+  emptyText:    { fontSize: "15px", color: "var(--text-secondary)" },
 };

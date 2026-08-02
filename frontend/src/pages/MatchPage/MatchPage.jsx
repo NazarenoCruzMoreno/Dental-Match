@@ -3,18 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getUser, casosService, matchService } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
 import { useAutoRefresh } from "../../hooks/useAutoRefresh";
-
-// ── Estrellas de rating ───────────────────────────────────────────────────────
-const Stars = ({ rating }) => {
-  const full = Math.round(rating);
-  return (
-    <div style={{ display: "flex", gap: "2px" }}>
-      {[1,2,3,4,5].map(i => (
-        <span key={i} style={{ color: i <= full ? "#f59e0b" : "#e2e8f0", fontSize: "14px" }}>★</span>
-      ))}
-    </div>
-  );
-};
+import RatingStars from "../../components/RatingStars/RatingStars";
 
 // ── Tarjeta swipeable ─────────────────────────────────────────────────────────
 function SwipeCard({ aplicacion, isTop, onSwipe }) {
@@ -72,12 +61,20 @@ function SwipeCard({ aplicacion, isTop, onSwipe }) {
 
         {/* Indicadores de swipe — opacidad proporcional al drag */}
         {drag > 30 && (
-          <div style={{ ...sw.indicator, ...sw.indicatorRight, opacity: Math.min(drag/120, 1), transform: `rotate(${-15 + drag/8}deg) scale(${Math.min(0.8 + drag/300, 1.2)})` }}>
+          <div
+            aria-live="polite"
+            aria-atomic="true"
+            style={{ ...sw.indicator, ...sw.indicatorRight, opacity: Math.min(drag/120, 1), transform: `rotate(${-15 + drag/8}deg) scale(${Math.min(0.8 + drag/300, 1.2)})` }}
+          >
             💚 MATCH
           </div>
         )}
         {drag < -30 && (
-          <div style={{ ...sw.indicator, ...sw.indicatorLeft, opacity: Math.min(-drag/120, 1), transform: `rotate(${15 + drag/8}deg) scale(${Math.min(0.8 + -drag/300, 1.2)})` }}>
+          <div
+            aria-live="polite"
+            aria-atomic="true"
+            style={{ ...sw.indicator, ...sw.indicatorLeft, opacity: Math.min(-drag/120, 1), transform: `rotate(${15 + drag/8}deg) scale(${Math.min(0.8 + -drag/300, 1.2)})` }}
+          >
             ✕ PASAR
           </div>
         )}
@@ -105,7 +102,7 @@ function SwipeCard({ aplicacion, isTop, onSwipe }) {
         <div style={sw.body}>
           {/* Rating */}
           <div style={sw.ratingRow}>
-            <Stars rating={est.rating ?? 0} />
+            <RatingStars readOnly value={est.rating ?? 0} size={14} />
             <span style={sw.ratingNum}>{est.rating ?? 0}</span>
             <span style={sw.caseCount}>· {est.pacientes_atendidos ?? 0} casos atendidos</span>
           </div>
@@ -137,43 +134,45 @@ function SwipeCard({ aplicacion, isTop, onSwipe }) {
 }
 
 const sw = {
-  card:           { background: "#fff", borderRadius: "24px", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.15)", userSelect: "none" },
+  card:           { background: "var(--bg-card)", borderRadius: "24px", overflow: "hidden", boxShadow: "var(--shadow-lg)", userSelect: "none" },
   imgArea:        { position: "relative", height: "300px", overflow: "hidden" },
   img:            { width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" },
-  imgPlaceholder: { width: "100%", height: "100%", background: "linear-gradient(135deg,#1e40af,#2563eb,#3b82f6)", display: "flex", alignItems: "center", justifyContent: "center" },
+  imgPlaceholder: { width: "100%", height: "100%", background: "linear-gradient(135deg, var(--color-primary-hover), var(--color-primary))", display: "flex", alignItems: "center", justifyContent: "center" },
   bigAvatar:      { width: "100px", height: "100px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "42px", fontWeight: 900, border: "3px solid rgba(255,255,255,0.4)" },
   imgGradient:    { position: "absolute", bottom: 0, left: 0, right: 0, height: "120px", background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)", pointerEvents: "none" },
   nameOverlay:    { position: "absolute", bottom: "16px", left: "20px", right: "20px" },
-  cardName:       { fontSize: "22px", fontWeight: 900, color: "#fff", letterSpacing: "-0.5px", fontFamily: "'Inter',sans-serif" },
+  cardName:       { fontSize: "22px", fontWeight: 900, color: "#fff", letterSpacing: "-0.5px" },
   cardUni:        { fontSize: "13px", color: "rgba(255,255,255,0.85)", marginTop: "2px" },
   cardYear:       { fontSize: "12px", color: "rgba(255,255,255,0.7)" },
   body:           { padding: "20px 22px 24px", display: "flex", flexDirection: "column", gap: "12px" },
   ratingRow:      { display: "flex", alignItems: "center", gap: "6px" },
-  ratingNum:      { fontWeight: 800, fontSize: "14px", color: "#f59e0b" },
-  caseCount:      { fontSize: "13px", color: "#94a3b8" },
-  desc:           { fontSize: "14px", color: "#64748b", lineHeight: "1.6", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" },
+  ratingNum:      { fontWeight: 800, fontSize: "14px", color: "var(--color-warning)" },
+  caseCount:      { fontSize: "13px", color: "var(--text-tertiary)" },
+  desc:           { fontSize: "14px", color: "var(--text-secondary)", lineHeight: "1.6", margin: 0, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" },
   tagRow:         { display: "flex", gap: "6px", flexWrap: "wrap" },
-  tag:            { fontSize: "11px", color: "#2563eb", background: "#eff6ff", padding: "3px 10px", borderRadius: "999px", fontWeight: 700, border: "1px solid #bfdbfe" },
-  tagMore:        { fontSize: "11px", color: "#94a3b8", padding: "3px 8px" },
+  tag:            { fontSize: "11px", color: "var(--color-info)", background: "var(--color-info-bg)", padding: "3px 10px", borderRadius: "999px", fontWeight: 700, border: "1px solid var(--border)" },
+  tagMore:        { fontSize: "11px", color: "var(--text-tertiary)", padding: "3px 8px" },
   availRow:       { display: "flex", alignItems: "center", gap: "6px" },
   availIcon:      { fontSize: "14px" },
-  availText:      { fontSize: "13px", color: "#64748b" },
+  availText:      { fontSize: "13px", color: "var(--text-secondary)" },
   indicator:      { position: "absolute", top: "20px", padding: "8px 18px", borderRadius: "999px", fontSize: "16px", fontWeight: 900, zIndex: 20, border: "3px solid", backdropFilter: "blur(4px)" },
-  indicatorRight: { right: "20px", color: "#16a34a", borderColor: "#16a34a", background: "rgba(240,253,244,0.9)" },
-  indicatorLeft:  { left: "20px", color: "#dc2626", borderColor: "#dc2626", background: "rgba(254,242,242,0.9)" },
+  indicatorRight: { right: "20px", color: "var(--color-success)", borderColor: "var(--color-success)", background: "var(--color-success-bg)" },
+  indicatorLeft:  { left: "20px", color: "var(--color-danger)", borderColor: "var(--color-danger)", background: "var(--color-danger-bg)" },
 };
 
 // ── Confetti — partículas SVG que caen desde arriba ────────────────────────
+// Paleta fija de 4 tonos de marca (valores del tema claro) — el confetti es un
+// efecto corto de celebración sobre el overlay, no necesita seguir el tema.
+const CONFETTI_COLORS = ["#2563eb", "#059669", "#d97706", "#7c3aed"]; // primary / success / warning / purple
 function Confetti() {
   const pieces = Array.from({ length: 50 });
-  const colors = ["#3b82f6","#10b981","#f59e0b","#ef4444","#8b5cf6","#ec4899","#06b6d4"];
   return (
     <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
       {pieces.map((_, i) => {
         const left  = Math.random() * 100;
         const delay = Math.random() * 0.6;
         const size  = 6 + Math.random() * 10;
-        const color = colors[i % colors.length];
+        const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
         const rot   = Math.random() * 360;
         return (
           <div key={i} style={{
@@ -192,16 +191,16 @@ function Confetti() {
 // ── Match overlay con animación tipo MercadoPago ───────────────────────────
 function MatchOverlay({ estudiante, onContinue }) {
   return (
-    <div style={mo.overlay}>
+    <div style={mo.overlay} aria-live="polite" aria-atomic="true">
       <Confetti />
       <div style={mo.box}>
         {/* Check de éxito tipo MercadoPago */}
         <div style={mo.checkWrap}>
           <svg width="88" height="88" viewBox="0 0 88 88" style={mo.checkSvg}>
-            <circle cx="44" cy="44" r="40" fill="none" stroke="#10b981" strokeWidth="4"
+            <circle cx="44" cy="44" r="40" fill="none" stroke="var(--color-success)" strokeWidth="4"
               strokeDasharray="251" strokeDashoffset="251"
               style={{ animation: "drawCircle .55s .15s ease-out forwards" }}/>
-            <path d="M27 45 L40 58 L62 32" fill="none" stroke="#10b981" strokeWidth="5"
+            <path d="M27 45 L40 58 L62 32" fill="none" stroke="var(--color-success)" strokeWidth="5"
               strokeLinecap="round" strokeLinejoin="round"
               strokeDasharray="60" strokeDashoffset="60"
               style={{ animation: "drawCheck .35s .7s ease-out forwards" }}/>
@@ -233,18 +232,18 @@ function MatchOverlay({ estudiante, onContinue }) {
 }
 
 const mo = {
-  overlay:   { position: "fixed", inset: 0, background: "linear-gradient(135deg,rgba(30,64,175,0.92),rgba(37,99,235,0.88))", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, backdropFilter: "blur(8px)", overflow: "hidden" },
-  box:       { background: "#fff", borderRadius: "28px", padding: "48px 40px", textAlign: "center", maxWidth: "380px", width: "90%", boxShadow: "0 40px 100px rgba(0,0,0,0.3)", position: "relative", zIndex: 1, animation: "matchBoxIn .5s cubic-bezier(0.34,1.56,0.64,1)" },
+  overlay:   { position: "fixed", inset: 0, background: "linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 92%, transparent), color-mix(in srgb, var(--color-primary-hover) 88%, transparent))", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, backdropFilter: "blur(8px)", overflow: "hidden" },
+  box:       { background: "var(--bg-card)", borderRadius: "28px", padding: "48px 40px", textAlign: "center", maxWidth: "380px", width: "90%", boxShadow: "var(--shadow-lg)", position: "relative", zIndex: 1, animation: "matchBoxIn .5s cubic-bezier(0.34,1.56,0.64,1)" },
   checkWrap: { display: "flex", justifyContent: "center", marginBottom: "16px" },
   checkSvg:  { animation: "checkPulse 1s 1s ease-out" },
-  title:     { fontSize: "30px", fontWeight: 900, color: "#0f172a", margin: "0 0 8px", letterSpacing: "-1px", animation: "matchTextIn .5s .4s both" },
-  sub:       { fontSize: "15px", color: "#64748b", lineHeight: "1.7", margin: "0 0 24px", animation: "matchTextIn .5s .55s both" },
+  title:     { fontSize: "30px", fontWeight: 900, color: "var(--text-primary)", margin: "0 0 8px", letterSpacing: "-1px", animation: "matchTextIn .5s .4s both" },
+  sub:       { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.7", margin: "0 0 24px", animation: "matchTextIn .5s .55s both" },
   avatarRow: { display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "28px" },
-  matchAvatar:{ width: "60px", height: "60px", borderRadius: "50%", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", fontWeight: 800, overflow: "hidden", boxShadow: "0 6px 20px rgba(37,99,235,0.4)" },
-  heartConnect:{ position: "relative", width: "40px", height: "2px", background: "linear-gradient(90deg,#3b82f6,#ec4899,#3b82f6)", borderRadius: "1px" },
+  matchAvatar:{ width: "60px", height: "60px", borderRadius: "50%", background: "linear-gradient(135deg, var(--color-primary-hover), var(--color-primary))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", fontWeight: 800, overflow: "hidden", boxShadow: "0 6px 20px color-mix(in srgb, var(--color-primary) 40%, transparent)" },
+  heartConnect:{ position: "relative", width: "40px", height: "2px", background: "linear-gradient(90deg, var(--color-primary), var(--color-purple), var(--color-primary))", borderRadius: "1px" },
   heartEmoji: { position: "absolute", top: "-14px", left: "50%", transform: "translateX(-50%)", fontSize: "26px", animation: "heartBeat 1.4s .7s ease-in-out infinite" },
   heart:     { fontSize: "28px" },
-  btn:       { padding: "14px 36px", background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", border: "none", borderRadius: "14px", fontSize: "16px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter',sans-serif", boxShadow: "0 6px 20px rgba(37,99,235,0.35)" },
+  btn:       { padding: "14px 36px", background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))", color: "var(--color-primary-text)", border: "none", borderRadius: "14px", fontSize: "16px", fontWeight: 700, cursor: "pointer", boxShadow: "0 6px 20px color-mix(in srgb, var(--color-primary) 35%, transparent)" },
 };
 
 // ── Página principal ──────────────────────────────────────────────────────────
@@ -310,7 +309,7 @@ export default function MatchPage() {
 
   if (loading) return (
     <div style={pg.center}>
-      <div style={{ width: "40px", height: "40px", border: "4px solid #bfdbfe", borderTop: "4px solid #2563eb", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
+      <div style={{ width: "40px", height: "40px", border: "4px solid var(--border)", borderTop: "4px solid var(--color-primary)", borderRadius: "50%", animation: "spin .8s linear infinite" }} />
     </div>
   );
 
@@ -358,7 +357,7 @@ export default function MatchPage() {
       {/* Header */}
       <div style={pg.header}>
         <button style={pg.backBtn} onClick={() => navigate("/home")}>← Inicio</button>
-        <div style={pg.logoText}>Dental<span style={{ color: "#2563eb" }}>Match</span></div>
+        <div style={pg.logoText}>Dental<span style={{ color: "var(--color-primary)" }}>Match</span></div>
         {casos.length > 1 ? (
           <select
             style={pg.casoSelect}
@@ -415,28 +414,28 @@ export default function MatchPage() {
 }
 
 const pg = {
-  root:       { minHeight: "100vh", background: "linear-gradient(160deg,#f8fafc 0%,#eff6ff 55%,#fff7ed 100%)", fontFamily: "'Inter',sans-serif", display: "flex", flexDirection: "column" },
-  header:     { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", background: "#fff", borderBottom: "1px solid #f1f5f9", boxShadow: "0 1px 8px rgba(0,0,0,0.04)" },
-  backBtn:    { background: "none", border: "none", color: "#3b82f6", fontWeight: 600, fontSize: "14px", cursor: "pointer", fontFamily: "'Inter',sans-serif" },
-  logoText:   { fontSize: "18px", fontWeight: 900, color: "#0f172a", letterSpacing: "-0.5px" },
-  casoPill:   { fontSize: "12px", color: "#3b82f6", background: "#eff6ff", padding: "4px 12px", borderRadius: "999px", fontWeight: 600, maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-  casoSelect: { fontSize: "12px", color: "#3b82f6", background: "#eff6ff", padding: "5px 12px", borderRadius: "999px", fontWeight: 600, maxWidth: "200px", border: "1px solid #bfdbfe", cursor: "pointer", fontFamily: "'Inter',sans-serif" },
-  casosSwitch: { margin: "24px 0", padding: "16px 18px", background: "#f8fafc", borderRadius: "14px", border: "1px solid #e2e8f0" },
-  casosSwitchLabel: { fontSize: "12px", color: "#94a3b8", fontWeight: 700, marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.5px" },
-  casosSwitchBtn: { display: "block", width: "100%", padding: "8px 14px", background: "#fff", border: "1px solid #e2e8f0", borderRadius: "10px", fontSize: "13px", fontWeight: 600, color: "#475569", marginBottom: "6px", cursor: "pointer", fontFamily: "'Inter',sans-serif", textAlign: "left" },
-  casosSwitchActive: { background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", border: "1px solid transparent" },
+  root:       { minHeight: "100vh", background: "var(--bg-page)", display: "flex", flexDirection: "column" },
+  header:     { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", background: "var(--bg-card)", borderBottom: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" },
+  backBtn:    { background: "none", border: "none", color: "var(--color-primary)", fontWeight: 600, fontSize: "14px", cursor: "pointer" },
+  logoText:   { fontSize: "18px", fontWeight: 900, color: "var(--text-primary)", letterSpacing: "-0.5px" },
+  casoPill:   { fontSize: "12px", color: "var(--color-primary)", background: "var(--color-info-bg)", padding: "4px 12px", borderRadius: "999px", fontWeight: 600, maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  casoSelect: { fontSize: "12px", color: "var(--color-primary)", background: "var(--color-info-bg)", padding: "5px 12px", borderRadius: "999px", fontWeight: 600, maxWidth: "200px", border: "1px solid var(--border)", cursor: "pointer" },
+  casosSwitch: { margin: "24px 0", padding: "16px 18px", background: "var(--bg-subtle)", borderRadius: "14px", border: "1px solid var(--border)" },
+  casosSwitchLabel: { fontSize: "12px", color: "var(--text-tertiary)", fontWeight: 700, marginBottom: "10px", textTransform: "uppercase", letterSpacing: "0.5px" },
+  casosSwitchBtn: { display: "block", width: "100%", padding: "8px 14px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "10px", fontSize: "13px", fontWeight: 600, color: "var(--text-secondary)", marginBottom: "6px", cursor: "pointer", textAlign: "left" },
+  casosSwitchActive: { background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))", color: "var(--color-primary-text)", border: "1px solid transparent" },
   stackArea:  { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 20px 40px", gap: "20px" },
-  counter:    { fontSize: "13px", color: "#94a3b8", fontWeight: 600 },
+  counter:    { fontSize: "13px", color: "var(--text-tertiary)", fontWeight: 600 },
   stack:      { position: "relative", width: "100%", maxWidth: "380px", height: "520px" },
   hint:       { display: "flex", gap: "16px", alignItems: "center" },
-  hintLeft:   { fontSize: "13px", color: "#ef4444", fontWeight: 600 },
-  hintText:   { fontSize: "13px", color: "#94a3b8" },
-  hintRight:  { fontSize: "13px", color: "#10b981", fontWeight: 600 },
+  hintLeft:   { fontSize: "13px", color: "var(--color-danger)", fontWeight: 600 },
+  hintText:   { fontSize: "13px", color: "var(--text-tertiary)" },
+  hintRight:  { fontSize: "13px", color: "var(--color-success)", fontWeight: 600 },
   btnRow:     { display: "flex", gap: "24px" },
-  rejectBtn:  { width: "60px", height: "60px", borderRadius: "50%", background: "#fff", border: "2px solid #fecaca", color: "#ef4444", fontSize: "22px", cursor: "pointer", boxShadow: "0 4px 16px rgba(239,68,68,0.2)", transition: "all .2s" },
-  matchBtn:   { width: "60px", height: "60px", borderRadius: "50%", background: "linear-gradient(135deg,#2563eb,#1d4ed8)", border: "none", color: "#fff", fontSize: "22px", cursor: "pointer", boxShadow: "0 4px 16px rgba(37,99,235,0.35)", transition: "all .2s" },
-  center:     { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", background: "#f8fafc" },
-  emptyTitle: { fontSize: "22px", fontWeight: 900, color: "#0f172a", margin: "0 0 8px" },
-  emptyText:  { fontSize: "15px", color: "#64748b", marginBottom: "24px" },
-  cta:        { padding: "14px 28px", background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", border: "none", borderRadius: "14px", fontSize: "15px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter',sans-serif" },
+  rejectBtn:  { width: "60px", height: "60px", borderRadius: "50%", background: "var(--bg-card)", border: "2px solid color-mix(in srgb, var(--color-danger) 35%, transparent)", color: "var(--color-danger)", fontSize: "22px", cursor: "pointer", boxShadow: "0 4px 16px color-mix(in srgb, var(--color-danger) 20%, transparent)", transition: "all .2s" },
+  matchBtn:   { width: "60px", height: "60px", borderRadius: "50%", background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))", border: "none", color: "var(--color-primary-text)", fontSize: "22px", cursor: "pointer", boxShadow: "0 4px 16px color-mix(in srgb, var(--color-primary) 35%, transparent)", transition: "all .2s" },
+  center:     { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-page)" },
+  emptyTitle: { fontSize: "22px", fontWeight: 900, color: "var(--text-primary)", margin: "0 0 8px" },
+  emptyText:  { fontSize: "15px", color: "var(--text-secondary)", marginBottom: "24px" },
+  cta:        { padding: "14px 28px", background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))", color: "var(--color-primary-text)", border: "none", borderRadius: "14px", fontSize: "15px", fontWeight: 700, cursor: "pointer" },
 };

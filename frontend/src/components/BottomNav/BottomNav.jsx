@@ -75,31 +75,30 @@ const styles = {
   nav:    {
     display: "none", // Se activa por media query inline abajo
     position: "fixed", bottom: 0, left: 0, right: 0,
-    background: "rgba(255,255,255,0.98)",
-    borderTop: "1px solid #e2e8f0",
+    background: "var(--bg-card)",
+    borderTop: "1px solid var(--border)",
     backdropFilter: "blur(12px)",
     WebkitBackdropFilter: "blur(12px)",
     padding: "8px 8px calc(8px + env(safe-area-inset-bottom)) 8px",
     zIndex: 7000,
-    fontFamily: "'Inter',sans-serif",
-    boxShadow: "0 -4px 20px rgba(0,0,0,0.06)",
+    boxShadow: "var(--shadow-lg)",
   },
   tab: {
     flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "3px",
-    background: "none", border: "none", padding: "8px 4px", cursor: "pointer", color: "#94a3b8",
+    background: "none", border: "none", padding: "8px 4px", cursor: "pointer", color: "var(--text-tertiary)",
     transition: "color .2s",
   },
   iconWrap: {
     width: "40px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center",
-    borderRadius: "14px", transition: "all .25s cubic-bezier(0.4,0,0.2,1)",
+    borderRadius: "var(--radius-md)", transition: "all .25s cubic-bezier(0.4,0,0.2,1)",
   },
   iconActive: {
-    background: "linear-gradient(135deg,#2563eb,#1d4ed8)",
-    color: "#fff",
-    boxShadow: "0 4px 12px rgba(37,99,235,0.35)",
+    background: "var(--color-primary)",
+    color: "var(--color-primary-text)",
+    boxShadow: "var(--shadow-md)",
   },
   label:       { fontSize: "10px", fontWeight: 600, letterSpacing: "0.2px" },
-  labelActive: { color: "#2563eb", fontWeight: 700 },
+  labelActive: { color: "var(--color-primary)", fontWeight: 700 },
 };
 
 // ── Media query inline (estilo CSS-in-JS) ─────────────────────────────────

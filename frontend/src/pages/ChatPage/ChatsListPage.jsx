@@ -54,8 +54,23 @@ export default function ChatsListPage() {
                 ? new Date(c.lastMessage.created_at).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
                 : "";
 
+              const irAlChat = () => navigate(`/chat/${c.id}`);
+
               return (
-                <div key={c.id} style={s.chatRow} onClick={() => navigate(`/chat/${c.id}`)}>
+                <div
+                  key={c.id}
+                  style={s.chatRow}
+                  onClick={irAlChat}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Abrir chat con ${nombre}`}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      irAlChat();
+                    }
+                  }}
+                >
                   <div style={s.avatar}>
                     {otro?.imagen_url
                       ? <img src={otro.imagen_url} alt="" style={{ width:"100%", height:"100%", objectFit:"cover", borderRadius:"50%" }}/>
@@ -84,24 +99,24 @@ export default function ChatsListPage() {
 }
 
 const s = {
-  page:        { minHeight: "100vh", background: "linear-gradient(135deg,#f8fafc 0%,#eff6ff 55%,#fff7ed 100%)", padding: "36px 20px 80px", fontFamily: "'Inter',sans-serif" },
+  page:        { minHeight: "100vh", background: "var(--bg-page)", padding: "36px 20px 80px" },
   container:   { maxWidth: "720px", margin: "0 auto" },
-  header:      { background: "#fff", borderRadius: "20px", padding: "24px 28px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", marginBottom: "20px" },
-  backBtn:     { display: "inline-block", background: "none", border: "none", color: "#3b82f6", fontWeight: 600, fontSize: "14px", cursor: "pointer", marginBottom: "10px", padding: 0, fontFamily: "'Inter',sans-serif" },
-  title:       { fontSize: "24px", fontWeight: 900, color: "#0f172a", margin: 0 },
-  sub:         { fontSize: "14px", color: "#64748b", margin: "4px 0 0" },
+  header:      { background: "var(--bg-card)", borderRadius: "var(--radius-lg)", padding: "24px 28px", boxShadow: "var(--shadow-sm)", marginBottom: "20px" },
+  backBtn:     { display: "inline-block", background: "none", border: "none", color: "var(--color-primary)", fontWeight: 600, fontSize: "14px", cursor: "pointer", marginBottom: "10px", padding: 0 },
+  title:       { fontSize: "24px", fontWeight: 900, color: "var(--text-primary)", margin: 0 },
+  sub:         { fontSize: "14px", color: "var(--text-secondary)", margin: "4px 0 0" },
   list:        { display: "flex", flexDirection: "column", gap: "10px" },
-  chatRow:     { display: "flex", gap: "14px", alignItems: "center", padding: "14px 18px", background: "#fff", borderRadius: "16px", cursor: "pointer", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", transition: "transform .15s" },
-  avatar:      { width: "48px", height: "48px", borderRadius: "50%", background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "18px", overflow: "hidden", flexShrink: 0 },
+  chatRow:     { display: "flex", gap: "14px", alignItems: "center", padding: "14px 18px", background: "var(--bg-card)", borderRadius: "var(--radius-md)", cursor: "pointer", boxShadow: "var(--shadow-sm)", transition: "transform .15s", border: "1px solid var(--border)" },
+  avatar:      { width: "48px", height: "48px", borderRadius: "50%", background: "var(--color-primary)", color: "var(--color-primary-text)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "18px", overflow: "hidden", flexShrink: 0 },
   chatBody:    { flex: 1, minWidth: 0 },
   chatTop:     { display: "flex", justifyContent: "space-between", alignItems: "center" },
-  chatName:    { fontWeight: 800, color: "#0f172a", fontSize: "15px" },
-  chatTime:    { fontSize: "11px", color: "#94a3b8" },
+  chatName:    { fontWeight: 800, color: "var(--text-primary)", fontSize: "15px" },
+  chatTime:    { fontSize: "11px", color: "var(--text-tertiary)" },
   chatBottom:  { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "3px" },
-  chatPreview: { fontSize: "13px", color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 },
-  unreadBadge: { background: "#ef4444", color: "#fff", borderRadius: "10px", padding: "2px 8px", fontSize: "11px", fontWeight: 800, minWidth: "20px", textAlign: "center", marginLeft: "8px" },
-  casoTitle:   { fontSize: "11px", color: "#94a3b8", marginTop: "4px" },
-  empty:       { textAlign: "center", padding: "60px 20px", background: "#fff", borderRadius: "20px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" },
-  emptyTitle:  { fontSize: "18px", fontWeight: 800, color: "#0f172a", margin: "0 0 8px" },
-  emptyText:   { fontSize: "14px", color: "#64748b" },
+  chatPreview: { fontSize: "13px", color: "var(--text-secondary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1 },
+  unreadBadge: { background: "var(--color-danger)", color: "var(--color-primary-text)", borderRadius: "10px", padding: "2px 8px", fontSize: "11px", fontWeight: 800, minWidth: "20px", textAlign: "center", marginLeft: "8px" },
+  casoTitle:   { fontSize: "11px", color: "var(--text-tertiary)", marginTop: "4px" },
+  empty:       { textAlign: "center", padding: "60px 20px", background: "var(--bg-card)", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-sm)" },
+  emptyTitle:  { fontSize: "18px", fontWeight: 800, color: "var(--text-primary)", margin: "0 0 8px" },
+  emptyText:   { fontSize: "14px", color: "var(--text-secondary)" },
 };

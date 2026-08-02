@@ -38,6 +38,14 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // Cerrar con tecla Escape
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open]);
+
   // No mostrar en rutas públicas ni sin sesión
   if (PUBLIC_PATHS.includes(location.pathname) || !isSessionValid() || !user) return null;
 
@@ -112,7 +120,7 @@ export default function UserMenu() {
             <span style={s.itemIcon}><IconSwitch /></span> Cambiar de cuenta
           </button>
           <button style={{ ...s.item, ...s.itemDanger }} onClick={cerrarSesion}>
-            <span style={{ ...s.itemIcon, color: "#ef4444" }}><IconLogout /></span> Cerrar sesión
+            <span style={{ ...s.itemIcon, color: "var(--color-danger)" }}><IconLogout /></span> Cerrar sesión
           </button>
         </div>
       )}
@@ -121,22 +129,22 @@ export default function UserMenu() {
 }
 
 const s = {
-  wrapper:      { position: "fixed", top: "16px", right: "16px", zIndex: 8000, fontFamily: "'Inter',sans-serif" },
-  avatarBtn:    { position: "relative", width: "44px", height: "44px", borderRadius: "50%", border: "2px solid rgba(255,255,255,0.9)", background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, overflow: "hidden", boxShadow: "0 4px 16px rgba(37,99,235,0.35)" },
+  wrapper:      { position: "fixed", top: "16px", right: "16px", zIndex: 8000 },
+  avatarBtn:    { position: "relative", width: "44px", height: "44px", borderRadius: "var(--radius-full)", border: "2px solid rgba(255,255,255,0.9)", background: "var(--color-primary)", color: "var(--color-primary-text)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, overflow: "hidden", boxShadow: "var(--shadow-md)" },
   avatarImg:    { width: "100%", height: "100%", objectFit: "cover" },
   avatarInitial:{ fontSize: "18px", fontWeight: 800 },
-  onlineDot:    { position: "absolute", bottom: "1px", right: "1px", width: "11px", height: "11px", borderRadius: "50%", background: "#10b981", border: "2px solid #fff" },
+  onlineDot:    { position: "absolute", bottom: "1px", right: "1px", width: "11px", height: "11px", borderRadius: "var(--radius-full)", background: "var(--color-success)", border: "2px solid var(--bg-card)" },
 
-  dropdown:     { position: "absolute", top: "54px", right: 0, width: "260px", background: "#fff", borderRadius: "16px", boxShadow: "0 20px 60px rgba(0,0,0,0.18)", border: "1px solid #f1f5f9", overflow: "hidden", animation: "fadeIn .15s ease" },
+  dropdown:     { position: "absolute", top: "54px", right: 0, width: "260px", background: "var(--bg-card)", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)", overflow: "hidden", animation: "fadeIn .15s ease" },
   header:       { display: "flex", gap: "12px", padding: "18px 18px 14px", alignItems: "center" },
-  headerAvatar: { width: "48px", height: "48px", minWidth: "48px", borderRadius: "50%", background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  headerAvatar: { width: "48px", height: "48px", minWidth: "48px", borderRadius: "var(--radius-full)", background: "var(--color-primary)", color: "var(--color-primary-text)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" },
   headerInitial:{ fontSize: "20px", fontWeight: 800 },
   headerInfo:   { flex: 1, overflow: "hidden" },
-  headerName:   { fontSize: "15px", fontWeight: 800, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
-  headerEmail:  { fontSize: "12px", color: "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: "1px" },
-  roleBadge:    { display: "inline-block", marginTop: "6px", fontSize: "11px", fontWeight: 700, color: "#2563eb", background: "#eff6ff", padding: "2px 8px", borderRadius: "999px" },
-  divider:      { height: "1px", background: "#f1f5f9", margin: "2px 0" },
-  item:         { display: "flex", alignItems: "center", gap: "12px", width: "100%", padding: "11px 18px", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 600, color: "#334155", fontFamily: "'Inter',sans-serif", textAlign: "left", transition: "background .12s" },
-  itemIcon:     { color: "#64748b", display: "flex", alignItems: "center" },
-  itemDanger:   { color: "#ef4444" },
+  headerName:   { fontSize: "15px", fontWeight: 800, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" },
+  headerEmail:  { fontSize: "12px", color: "var(--text-tertiary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: "1px" },
+  roleBadge:    { display: "inline-block", marginTop: "6px", fontSize: "11px", fontWeight: 700, color: "var(--color-info)", background: "var(--color-info-bg)", padding: "2px 8px", borderRadius: "var(--radius-full)" },
+  divider:      { height: "1px", background: "var(--border)", margin: "2px 0" },
+  item:         { display: "flex", alignItems: "center", gap: "12px", width: "100%", padding: "11px 18px", background: "none", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 600, color: "var(--text-secondary)", textAlign: "left", transition: "background .12s" },
+  itemIcon:     { color: "var(--text-secondary)", display: "flex", alignItems: "center" },
+  itemDanger:   { color: "var(--color-danger)" },
 };

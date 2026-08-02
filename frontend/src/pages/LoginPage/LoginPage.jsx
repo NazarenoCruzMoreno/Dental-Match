@@ -8,7 +8,7 @@ import Button from "../../components/Button/Button";
 import { validateEmail, validatePassword } from "../../utils/validation";
 import { authService, setSessionToken, setUser } from "../../services/api";
 
-const IconCalendar = () => (<svg width="28" height="28" viewBox="0 0 24 24"><path fill="#3B82F6" d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/></svg>);
+const IconCalendar = () => (<svg width="28" height="28" viewBox="0 0 24 24" style={{ color: "var(--color-primary)" }}><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/></svg>);
 const IconMail = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>);
 const IconLock = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
 
@@ -68,7 +68,7 @@ export default function LoginPage() {
     }
   };
 
-  const glassContent = (<><IconCalendar /><div><div style={styles.glassTitle}>Panel Digital</div><div style={styles.glassSub}>Gestión de turnos en tiempo real.</div></div><span style={{ color: "#3B82F6", fontSize: "20px" }}>→</span></>);
+  const glassContent = (<><IconCalendar /><div><div style={styles.glassTitle}>Panel Digital</div><div style={styles.glassSub}>Gestión de turnos en tiempo real.</div></div><span style={{ color: "var(--color-primary)", fontSize: "20px" }}>→</span></>);
 
   return (
     <Layout>
@@ -86,7 +86,7 @@ export default function LoginPage() {
               <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => handleBlur("email")} error={touched.email ? errors.email : ""} placeholder="juan@email.com" icon={<IconMail />} />
               <div>
                 <Input label="Contraseña" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => handleBlur("password")} error={touched.password ? errors.password : ""} placeholder="••••••••" icon={<IconLock />} />
-                <p style={styles.forgotLink} onClick={() => setResetMode(true)}>¿Olvidaste tu contraseña?</p>
+                <button type="button" style={styles.forgotLink} onClick={() => setResetMode(true)}>¿Olvidaste tu contraseña?</button>
               </div>
               <Button variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
                 {submitting ? "Ingresando..." : "Iniciar sesión"}
@@ -122,14 +122,14 @@ export default function LoginPage() {
 
 const styles = {
   form: { display: "flex", flexDirection: "column", gap: "16px", maxWidth: "480px" },
-  errorBox: { padding: "12px 16px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", color: "#dc2626", fontSize: "14px", fontWeight: 500, fontFamily: "'Inter', sans-serif", textAlign: "center" },
-  forgotLink: { fontSize: "13px", color: "#3b82f6", fontWeight: 600, cursor: "pointer", textAlign: "right", margin: "8px 0 0", fontFamily: "'Inter', sans-serif" },
-  registerLink: { marginTop: "20px", fontSize: "14px", color: "#64748b", textAlign: "center", fontFamily: "'Inter', sans-serif" },
-  link: { color: "#3b82f6", fontWeight: 600, cursor: "pointer" },
-  resetDesc: { fontSize: "15px", color: "#475569", lineHeight: "1.6", fontFamily: "'Inter', sans-serif", marginBottom: "8px" },
+  errorBox: { padding: "12px 16px", background: "var(--color-danger-bg)", border: "1px solid var(--color-danger)", borderRadius: "12px", color: "var(--color-danger)", fontSize: "14px", fontWeight: 500, textAlign: "center" },
+  forgotLink: { fontSize: "13px", color: "var(--color-primary)", fontWeight: 600, cursor: "pointer", textAlign: "right", margin: "8px 0 0", background: "none", border: "none", padding: 0, display: "block", marginLeft: "auto" },
+  registerLink: { marginTop: "20px", fontSize: "14px", color: "var(--text-secondary)", textAlign: "center" },
+  link: { color: "var(--color-primary)", fontWeight: 600, cursor: "pointer" },
+  resetDesc: { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "8px" },
   resetSuccess: { textAlign: "center", padding: "24px 0" },
   resetIcon: { fontSize: "48px", marginBottom: "16px" },
-  resetSuccessText: { fontSize: "15px", color: "#475569", lineHeight: "1.7", fontFamily: "'Inter', sans-serif" },
-  glassTitle: { fontWeight: 900, color: "#0369A1", fontSize: "16px", fontFamily: "'Inter', sans-serif" },
-  glassSub: { fontSize: "14px", color: "#075985", marginTop: "3px", fontFamily: "'Inter', sans-serif" },
+  resetSuccessText: { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.7" },
+  glassTitle: { fontWeight: 900, color: "var(--text-primary)", fontSize: "16px" },
+  glassSub: { fontSize: "14px", color: "var(--text-secondary)", marginTop: "3px" },
 };

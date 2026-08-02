@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Modal from "../Modal/Modal";
 
 const TOUR_KEY = "dental_tour_v2"; // v2 fuerza reset del tour anterior
 
@@ -34,7 +35,7 @@ export default function OnboardingTour({ onDone }) {
   };
 
   return (
-    <div style={st.overlay} onClick={(e) => e.target === e.currentTarget && finish()}>
+    <Modal open={visible} onClose={finish} maxWidth="440px">
       <div style={st.card}>
         <div style={st.dots}>
           {steps.map((_, i) => (
@@ -53,22 +54,21 @@ export default function OnboardingTour({ onDone }) {
         </div>
         <div style={st.hint}>Paso {step + 1} de {steps.length}</div>
       </div>
-    </div>
+    </Modal>
   );
 }
 
 const st = {
-  overlay:   { position: "fixed", inset: 0, background: "rgba(15,23,42,0.65)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, backdropFilter: "blur(6px)" },
-  card:      { background: "#fff", borderRadius: "28px", padding: "44px 40px 32px", maxWidth: "440px", width: "90%", textAlign: "center", boxShadow: "0 40px 100px rgba(0,0,0,0.3)" },
+  card:      { textAlign: "center" },
   dots:      { display: "flex", justifyContent: "center", gap: "8px", marginBottom: "28px" },
-  dot:       { width: "8px", height: "8px", borderRadius: "50%", background: "#e2e8f0", cursor: "pointer", transition: "all .25s" },
-  dotActive: { background: "#3b82f6", width: "28px", borderRadius: "4px" },
-  dotDone:   { background: "#bfdbfe" },
+  dot:       { width: "8px", height: "8px", borderRadius: "var(--radius-full)", background: "var(--border)", cursor: "pointer", transition: "all .25s" },
+  dotActive: { background: "var(--color-primary)", width: "28px", borderRadius: "var(--radius-sm)" },
+  dotDone:   { background: "var(--color-primary-hover)" },
   icon:      { fontSize: "56px", marginBottom: "14px", lineHeight: 1 },
-  title:     { fontSize: "22px", fontWeight: 900, color: "#0f172a", margin: "0 0 10px", fontFamily: "'Inter',sans-serif", letterSpacing: "-0.5px" },
-  text:      { fontSize: "15px", color: "#64748b", lineHeight: "1.7", margin: "0 0 30px", fontFamily: "'Inter',sans-serif" },
+  title:     { fontSize: "22px", fontWeight: 900, color: "var(--text-primary)", margin: "0 0 10px", letterSpacing: "-0.5px" },
+  text:      { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.7", margin: "0 0 30px" },
   actions:   { display: "flex", gap: "12px", justifyContent: "center" },
-  skipBtn:   { padding: "11px 20px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "'Inter',sans-serif" },
-  nextBtn:   { padding: "11px 28px", background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: "'Inter',sans-serif", boxShadow: "0 8px 20px rgba(59,130,246,0.35)" },
-  hint:      { marginTop: "16px", fontSize: "12px", color: "#94a3b8", fontFamily: "'Inter',sans-serif" },
+  skipBtn:   { padding: "11px 20px", background: "var(--bg-subtle)", color: "var(--text-secondary)", border: "none", borderRadius: "var(--radius-md)", fontSize: "14px", fontWeight: 600, cursor: "pointer" },
+  nextBtn:   { padding: "11px 28px", background: "var(--color-primary)", color: "var(--color-primary-text)", border: "none", borderRadius: "var(--radius-md)", fontSize: "14px", fontWeight: 700, cursor: "pointer", boxShadow: "var(--shadow-md)" },
+  hint:      { marginTop: "16px", fontSize: "12px", color: "var(--text-tertiary)" },
 };

@@ -109,16 +109,16 @@ export default function Calendar({ value, onChange, minDate, maxDate }) {
 }
 
 const s = {
-  calendar:  { background: "#fff", borderRadius: "14px", padding: "14px", border: "1px solid #e2e8f0", fontFamily: "'Inter',sans-serif", userSelect: "none" },
+  calendar:  { background: "var(--bg-card)", borderRadius: "var(--radius-md)", padding: "14px", border: "1px solid var(--border)", userSelect: "none" },
   header:    { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" },
-  navBtn:    { width: "32px", height: "32px", borderRadius: "8px", border: "1px solid #e2e8f0", background: "#f8fafc", color: "#475569", fontSize: "18px", fontWeight: 700, cursor: "pointer", lineHeight: 1 },
-  monthLabel:{ fontSize: "14px", fontWeight: 800, color: "#0f172a" },
+  navBtn:    { width: "32px", height: "32px", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)", background: "var(--bg-subtle)", color: "var(--text-secondary)", fontSize: "18px", fontWeight: 700, cursor: "pointer", lineHeight: 1 },
+  monthLabel:{ fontSize: "14px", fontWeight: 800, color: "var(--text-primary)" },
   weekdays:  { display: "grid", gridTemplateColumns: "repeat(7,1fr)", marginBottom: "4px" },
-  weekday:   { textAlign: "center", fontSize: "11px", fontWeight: 700, color: "#94a3b8", padding: "4px 0" },
+  weekday:   { textAlign: "center", fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", padding: "4px 0" },
   grid:      { display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: "2px" },
-  day:       { aspectRatio: "1", border: "none", background: "transparent", borderRadius: "8px", fontSize: "13px", fontWeight: 600, color: "#0f172a", cursor: "pointer", fontFamily: "'Inter',sans-serif", transition: "all .15s" },
-  daySel:    { background: "linear-gradient(135deg,#2563eb,#1d4ed8)", color: "#fff", fontWeight: 800, boxShadow: "0 4px 12px rgba(37,99,235,0.35)" },
-  dayToday:  { background: "#eff6ff", color: "#2563eb", fontWeight: 800 },
-  dayDisabled:{ color: "#cbd5e1", cursor: "not-allowed", pointerEvents: "none" },
+  day:       { aspectRatio: "1", border: "none", background: "transparent", borderRadius: "var(--radius-sm)", fontSize: "13px", fontWeight: 600, color: "var(--text-primary)", cursor: "pointer", transition: "all .15s" },
+  daySel:    { background: "var(--color-primary)", color: "var(--color-primary-text)", fontWeight: 800, boxShadow: "var(--shadow-md)" },
+  dayToday:  { background: "var(--color-info-bg)", color: "var(--color-info)", fontWeight: 800 },
+  dayDisabled:{ color: "var(--text-tertiary)", cursor: "not-allowed", pointerEvents: "none" },
   empty:     { aspectRatio: "1" },
 };

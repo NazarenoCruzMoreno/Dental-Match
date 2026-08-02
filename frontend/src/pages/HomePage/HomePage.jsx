@@ -5,36 +5,12 @@ import { useTheme } from "../../context/ThemeContext";
 import NotificationsBell from "../../components/Notifications/NotificationsBell";
 import OnboardingTour from "../../components/OnboardingTour/OnboardingTour";
 import ActivityGraph from "../../components/ActivityGraph/ActivityGraph";
+import { Skeleton, GridSkeleton } from "../../components/Skeleton/Skeleton";
 
 // ── Iconos ─────────────────────────────────────────────────────────────────────
 const IconProfile = () => (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
 const IconLogout  = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>);
 const IconEdit    = () => (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>);
-const IconMoon    = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>);
-const IconSun     = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>);
-
-
-// ── 🌊 Olas fijas — más altas y prominentes, cambian con dark mode ────────────
-const WaveBackground = ({ isDark }) => {
-  const c = isDark
-    ? { w1: "#1e3a5f", w2: "#1d4ed8", w3: "#1e40af", o1: 0.6, o2: 0.5, o3: 0.4 }
-    : { w1: "#93c5fd", w2: "#60a5fa", w3: "#3b82f6", o1: 0.55, o2: 0.45, o3: 0.38 };
-  return (
-    <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, pointerEvents: "none", zIndex: 0, lineHeight: 0 }} aria-hidden="true">
-      <svg viewBox="0 0 1440 180" preserveAspectRatio="none" style={{ width: "100%", height: "180px", display: "block" }}>
-        {/* Ola trasera — más clara y alta */}
-        <path d="M0,90 C180,45 360,130 540,85 C720,40 900,120 1080,78 C1260,36 1380,100 1440,72 L1440,180 L0,180 Z"
-          fill={c.w1} fillOpacity={c.o1}/>
-        {/* Ola media */}
-        <path d="M0,115 C200,75 400,145 600,108 C800,71 1000,138 1200,100 C1320,80 1390,112 1440,98 L1440,180 L0,180 Z"
-          fill={c.w2} fillOpacity={c.o2}/>
-        {/* Ola delantera — más oscura y cercana */}
-        <path d="M0,138 C240,105 480,160 720,132 C960,104 1200,155 1440,138 L1440,180 L0,180 Z"
-          fill={c.w3} fillOpacity={c.o3}/>
-      </svg>
-    </div>
-  );
-};
 
 // ── A: Contador animado ────────────────────────────────────────────────────────
 function AnimatedCounter({ target, duration = 1800 }) {
@@ -54,18 +30,18 @@ function AnimatedCounter({ target, duration = 1800 }) {
   return <span>{count}</span>;
 }
 
-function StatsBar({ stats, isDark }) {
+function StatsBar({ stats }) {
   const items = [
-    { value: stats.estudiantes, label: "Estudiantes", color: "#3b82f6", bg: isDark ? "rgba(30,58,95,0.8)" : "#eff6ff", border: isDark ? "#1e3a5f" : "#bfdbfe" },
-    { value: stats.pacientes,   label: "Pacientes",   color: "#f59e0b", bg: isDark ? "rgba(45,31,14,0.8)" : "#fff7ed", border: isDark ? "#451a03" : "#fed7aa" },
-    { value: stats.matches,     label: "Matches",     color: "#10b981", bg: isDark ? "rgba(15,45,31,0.8)" : "#f0fdf4", border: isDark ? "#052e16" : "#bbf7d0" },
+    { value: stats.estudiantes, label: "Estudiantes", color: "var(--color-info)",    bg: "var(--color-info-bg)" },
+    { value: stats.pacientes,   label: "Pacientes",   color: "var(--color-warning)", bg: "var(--color-warning-bg)" },
+    { value: stats.matches,     label: "Matches",     color: "var(--color-success)", bg: "var(--color-success-bg)" },
   ];
   return (
     <div style={s.statsBar} data-grid="stats">
       {items.map((item, i) => (
-        <div key={i} style={{ ...s.statItem, background: item.bg, border: `1px solid ${item.border}` }}>
+        <div key={i} style={{ ...s.statItem, background: item.bg }}>
           <div style={{ ...s.statNum, color: item.color }}><AnimatedCounter target={item.value} duration={1500 + i * 200}/></div>
-          <div style={{ ...s.statLabel, color: isDark ? "#94a3b8" : "#64748b" }}>{item.label}</div>
+          <div style={{ ...s.statLabel, color: "var(--text-secondary)" }}>{item.label}</div>
         </div>
       ))}
     </div>
@@ -73,31 +49,33 @@ function StatsBar({ stats, isDark }) {
 }
 
 // ── D: Progreso del perfil ─────────────────────────────────────────────────────
-function ProfileProgress({ perfil, role, onEdit, isDark }) {
+function ProfileProgress({ perfil, role, onEdit }) {
   const fields = role === "estudiante"
     ? ["nombre","universidad","descripcion","materias","disponibilidad","anio_carrera"]
     : ["nombre","edad","problema_dental","telefono","imagen_url"];
   const filled = perfil
     ? fields.filter(f => { const v = perfil[f]; return v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && v.length === 0); }).length
     : 0;
-  const pct   = Math.round((filled / fields.length) * 100);
-  const color = pct < 50 ? "#f59e0b" : pct < 100 ? "#3b82f6" : "#10b981";
-  const msg   = pct < 50  ? "Completá tu perfil para aparecer en búsquedas"
-              : pct < 100 ? "¡Casi listo! Agregá los datos que faltan"
-              : "Tu perfil está completo 🎉";
+  const pct     = Math.round((filled / fields.length) * 100);
+  const tone    = pct < 50 ? "warning" : pct < 100 ? "info" : "success";
+  const color   = `var(--color-${tone})`;
+  const colorBg = `var(--color-${tone}-bg)`;
+  const msg     = pct < 50  ? "Completá tu perfil para aparecer en búsquedas"
+                : pct < 100 ? "¡Casi listo! Agregá los datos que faltan"
+                : "Tu perfil está completo 🎉";
   return (
-    <div style={{ ...s.progressCard, background: isDark ? "#1e293b" : "#fff", boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.3)" : s.progressCard.boxShadow }}>
+    <div style={s.progressCard}>
       <div style={s.progressHeader}>
         <div>
-          <div style={{ ...s.progressTitle, color: isDark ? "#f1f5f9" : "#0f172a" }}>Completitud del perfil</div>
-          <div style={{ ...s.progressMsg, color: isDark ? "#94a3b8" : "#64748b" }}>{msg}</div>
+          <div style={s.progressTitle}>Completitud del perfil</div>
+          <div style={s.progressMsg}>{msg}</div>
         </div>
-        <button style={{ ...s.progressEditBtn, color, borderColor: `${color}50`, background: `${color}15` }} onClick={onEdit}>
+        <button style={{ ...s.progressEditBtn, color, borderColor: color, background: colorBg }} onClick={onEdit}>
           <IconEdit /> Editar
         </button>
       </div>
-      <div style={{ ...s.progressBarBg, background: isDark ? "#334155" : "#f1f5f9" }}>
-        <div style={{ ...s.progressBarFill, width: `${pct}%`, background: `linear-gradient(90deg,${color},${color}cc)` }}/>
+      <div style={s.progressBarBg}>
+        <div style={{ ...s.progressBarFill, width: `${pct}%`, background: color }}/>
       </div>
       <div style={{ ...s.progressPct, color }}>{pct}%</div>
     </div>
@@ -106,16 +84,19 @@ function ProfileProgress({ perfil, role, onEdit, isDark }) {
 
 // ── Página principal ───────────────────────────────────────────────────────────
 export default function HomePage() {
-  const navigate             = useNavigate();
-  const { isDark, toggleTheme } = useTheme();
-  const user                 = getUser();
-  const role                 = user?.role;
+  const navigate       = useNavigate();
+  const { isDark }     = useTheme();
+  const user            = getUser();
+  const role            = user?.role;
   const [perfil,  setPerfil]  = useState(null);
   const [stats,   setStats]   = useState({ estudiantes: 0, pacientes: 0, matches: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    profileService.get().then(({ perfil }) => setPerfil(perfil)).catch(() => {});
-    statsService.publicas().then(setStats).catch(() => {});
+    Promise.allSettled([
+      profileService.get().then(({ perfil }) => setPerfil(perfil)),
+      statsService.publicas().then(setStats),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const nombre    = perfil?.nombre ?? user?.email?.split("@")[0] ?? "usuario";
@@ -136,19 +117,29 @@ export default function HomePage() {
         { icon: "📅", title: "Mis turnos",     desc: "Reservá y seguí tus citas con estudiantes.",    action: () => navigate("/turnos"),      label: "Ver turnos",    primary: false },
       ];
 
-  const pageBg = isDark
-    ? "linear-gradient(160deg,#0f172a 0%,#1e1b4b 55%,#1c1917 100%)"
-    : "linear-gradient(160deg,#f8fafc 0%,#eff6ff 55%,#fff7ed 100%)";
+  if (loading) {
+    return (
+      <div style={s.pageWrapper}>
+        <div style={s.page}>
+          <div style={s.container}>
+            <Skeleton height="160px" borderRadius="24px" />
+            <div style={s.statsBar} data-grid="stats">
+              {[0, 1, 2].map((i) => <Skeleton key={i} height="86px" borderRadius="16px" />)}
+            </div>
+            <Skeleton height="94px" borderRadius="20px" />
+            <GridSkeleton count={4} type="card" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     /* pageWrapper: scroll vertical habilitado, no corta nada */
-    <div style={{ ...s.pageWrapper, background: pageBg }}>
+    <div style={s.pageWrapper}>
 
       {/* 🌍 Onboarding — primera vez */}
       <OnboardingTour />
-
-      {/* 🌊 Olas — fixed al fondo, siempre visibles */}
-      <WaveBackground isDark={isDark} />
 
       {/* Contenido scrollable */}
       <div style={s.page}>
@@ -156,8 +147,6 @@ export default function HomePage() {
 
           {/* C: Card bienvenida — sin overflow:hidden para que notifs no se corten */}
           <div style={s.welcomeCard}>
-            {/* Círculos decorativos — clips propios */}
-            <div style={s.deco1}/><div style={s.deco2}/>
             <div style={s.welcomeLeft}>
               <div style={s.badge}>DENTAL MATCH</div>
               <h1 style={s.title}>Hola, <span style={s.highlight}>{nombre}</span> 👋</h1>
@@ -174,40 +163,30 @@ export default function HomePage() {
           </div>
 
           {/* A: Stats reales */}
-          <StatsBar stats={stats} isDark={isDark} />
+          <StatsBar stats={stats} />
 
           {/* D: Progreso */}
-          {perfil !== null && <ProfileProgress perfil={perfil} role={role} onEdit={() => navigate("/profile/edit")} isDark={isDark} />}
+          {perfil !== null && <ProfileProgress perfil={perfil} role={role} onEdit={() => navigate("/profile/edit")} />}
 
           {/* 📊 Actividad */}
           <ActivityGraph role={role} isDark={isDark} />
 
           {/* Cards */}
-          <div style={{ fontSize: "17px", fontWeight: 800, color: isDark ? "#f1f5f9" : "#0f172a" }}>¿Qué querés hacer hoy?</div>
+          <div style={s.sectionLabel}>¿Qué querés hacer hoy?</div>
           <div style={s.grid} data-grid="cards">
             {cards.map((card, i) => (
-              <div key={i} style={{
-                ...s.card,
-                ...(card.primary ? s.cardPrimary : {}),
-                background: card.primary
-                  ? (isDark ? "linear-gradient(135deg,#1e3a5f,#1e293b)" : "linear-gradient(135deg,#fff,#eff6ff)")
-                  : (isDark ? "#1e293b" : "#fff"),
-                boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.3)" : s.card.boxShadow,
-              }}>
+              <div key={i} style={{ ...s.card, ...(card.primary ? s.cardPrimary : {}) }}>
                 <div style={{ fontSize: "28px" }}>{card.icon}</div>
-                <h3 style={{ ...s.cardTitle, color: isDark ? "#f1f5f9" : "#0f172a" }}>{card.title}</h3>
-                <p style={{ ...s.cardDesc, color: isDark ? "#94a3b8" : "#64748b" }}>{card.desc}</p>
+                <h3 style={s.cardTitle}>{card.title}</h3>
+                <p style={s.cardDesc}>{card.desc}</p>
                 <button
-                  style={{ ...s.cardBtn, ...(card.action ? s.cardBtnPrimary : { ...s.cardBtnDisabled, background: isDark ? "#334155" : "#f1f5f9", color: isDark ? "#64748b" : "#94a3b8" }) }}
+                  style={{ ...s.cardBtn, ...(card.action ? s.cardBtnPrimary : s.cardBtnDisabled) }}
                   onClick={card.action ?? undefined} disabled={!card.action}>
                   {card.action && <IconProfile />}{card.label}
                 </button>
               </div>
             ))}
           </div>
-
-          {/* Espaciado para que las olas no tapen el contenido */}
-          <div style={{ height: "100px" }} />
         </div>
       </div>
     </div>
@@ -217,45 +196,44 @@ export default function HomePage() {
 // ── Estilos ────────────────────────────────────────────────────────────────────
 const s = {
   /* Wrapper: sin overflow — el scroll lo maneja html/body via index.css */
-  pageWrapper:    { minHeight: "100vh", position: "relative", fontFamily: "'Inter',sans-serif" },
+  pageWrapper:    { minHeight: "100vh", position: "relative", background: "var(--bg-page)" },
   page:           { position: "relative", zIndex: 1, padding: "36px 20px 20px" },
   container:      { maxWidth: "820px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
 
   /* Welcome card: SIN overflow:hidden para que el dropdown de notifs salga */
-  welcomeCard:    { background: "linear-gradient(135deg,#1e40af 0%,#2563eb 50%,#3b82f6 100%)", borderRadius: "24px", padding: "32px 36px", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", boxShadow: "0 20px 60px rgba(37,99,235,0.35)", flexWrap: "wrap", gap: "16px" },
+  welcomeCard:    { background: "var(--color-primary)", borderRadius: "24px", padding: "32px 36px", color: "var(--color-primary-text)", display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", boxShadow: "var(--shadow-md)", flexWrap: "wrap", gap: "16px" },
   welcomeLeft:    { display: "flex", flexDirection: "column", gap: "10px", zIndex: 1, flex: 1 },
-  badge:          { display: "inline-block", background: "rgba(255,255,255,0.2)", color: "#fff", padding: "5px 14px", borderRadius: "999px", fontSize: "11px", fontWeight: 900, letterSpacing: "1.5px", width: "fit-content" },
+  badge:          { display: "inline-block", background: "rgba(255,255,255,0.2)", color: "var(--color-primary-text)", padding: "5px 14px", borderRadius: "999px", fontSize: "11px", fontWeight: 900, letterSpacing: "1.5px", width: "fit-content" },
   title:          { fontSize: "30px", fontWeight: 900, margin: 0, letterSpacing: "-1px", lineHeight: 1.2 },
-  highlight:      { color: "#93c5fd" },
+  highlight:      { opacity: 0.85 },
   sub:            { fontSize: "14px", color: "rgba(255,255,255,0.8)", margin: 0, lineHeight: "1.6", maxWidth: "360px" },
   rolePill:       { display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 14px", background: "rgba(255,255,255,0.15)", borderRadius: "999px", fontSize: "13px", fontWeight: 700, width: "fit-content" },
   headerControls: { display: "flex", alignItems: "center", gap: "8px", zIndex: 2, flexShrink: 0, position: "relative" },
-  iconBtn:        { display: "flex", alignItems: "center", justifyContent: "center", width: "40px", height: "40px", background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "10px", cursor: "pointer", color: "#fff" },
-  logoutBtn:      { display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "10px", fontSize: "13px", fontWeight: 600, cursor: "pointer" },
-  /* Decorativos del card — posicionados pero sin clip externo */
-  deco1:          { position: "absolute", width: "200px", height: "200px", borderRadius: "50%", background: "rgba(255,255,255,0.07)", top: "-60px", right: "80px", pointerEvents: "none", zIndex: 0 },
-  deco2:          { position: "absolute", width: "140px", height: "140px", borderRadius: "50%", background: "rgba(255,255,255,0.05)", bottom: "-40px", right: "20px", pointerEvents: "none", zIndex: 0 },
+  iconBtn:        { display: "flex", alignItems: "center", justifyContent: "center", width: "40px", height: "40px", background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "10px", cursor: "pointer", color: "var(--color-primary-text)" },
+  logoutBtn:      { display: "flex", alignItems: "center", gap: "8px", padding: "10px 16px", background: "rgba(255,255,255,0.15)", color: "var(--color-primary-text)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "10px", fontSize: "13px", fontWeight: 600, cursor: "pointer" },
 
   statsBar:       { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "14px" },
   statItem:       { borderRadius: "16px", padding: "18px 16px", textAlign: "center" },
   statNum:        { fontSize: "30px", fontWeight: 900, letterSpacing: "-1px", lineHeight: 1 },
   statLabel:      { fontSize: "11px", fontWeight: 600, marginTop: "6px", textTransform: "uppercase", letterSpacing: "0.5px" },
 
-  progressCard:   { background: "#fff", borderRadius: "20px", padding: "20px 24px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "10px" },
+  progressCard:   { background: "var(--bg-card)", borderRadius: "20px", padding: "20px 24px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "10px" },
   progressHeader: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" },
-  progressTitle:  { fontSize: "14px", fontWeight: 800 },
-  progressMsg:    { fontSize: "12px", marginTop: "2px" },
+  progressTitle:  { fontSize: "14px", fontWeight: 800, color: "var(--text-primary)" },
+  progressMsg:    { fontSize: "12px", marginTop: "2px", color: "var(--text-secondary)" },
   progressEditBtn:{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 12px", border: "1px solid", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer", flexShrink: 0 },
-  progressBarBg:  { height: "8px", borderRadius: "999px", overflow: "hidden" },
+  progressBarBg:  { height: "8px", borderRadius: "999px", overflow: "hidden", background: "var(--bg-subtle)" },
   progressBarFill:{ height: "100%", borderRadius: "999px", transition: "width 1.2s cubic-bezier(0.4,0,0.2,1)" },
   progressPct:    { fontSize: "12px", fontWeight: 800, textAlign: "right" },
 
+  sectionLabel:   { fontSize: "17px", fontWeight: 800, color: "var(--text-primary)" },
+
   grid:           { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(210px,1fr))", gap: "16px" },
-  card:           { borderRadius: "20px", padding: "22px 18px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: "10px" },
-  cardPrimary:    { border: "2px solid #bfdbfe" },
-  cardTitle:      { fontSize: "15px", fontWeight: 800, margin: 0 },
-  cardDesc:       { fontSize: "13px", lineHeight: "1.6", margin: 0, flex: 1 },
+  card:           { background: "var(--bg-card)", borderRadius: "20px", padding: "22px 18px", boxShadow: "var(--shadow-sm)", display: "flex", flexDirection: "column", gap: "10px" },
+  cardPrimary:    { border: "1px solid var(--color-primary)" },
+  cardTitle:      { fontSize: "15px", fontWeight: 800, margin: 0, color: "var(--text-primary)" },
+  cardDesc:       { fontSize: "13px", lineHeight: "1.6", margin: 0, flex: 1, color: "var(--text-secondary)" },
   cardBtn:        { display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "10px 14px", borderRadius: "10px", fontSize: "13px", fontWeight: 700, border: "none", cursor: "pointer", marginTop: "4px" },
-  cardBtnPrimary: { background: "linear-gradient(135deg,#3b82f6,#2563eb)", color: "#fff" },
-  cardBtnDisabled:{ background: "#f1f5f9", color: "#94a3b8", cursor: "not-allowed" },
+  cardBtnPrimary: { background: "var(--color-primary)", color: "var(--color-primary-text)" },
+  cardBtnDisabled:{ background: "var(--bg-subtle)", color: "var(--text-tertiary)", cursor: "not-allowed" },
 };

@@ -1,7 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  API client — todo el acceso al backend pasa por acá
 // ─────────────────────────────────────────────────────────────────────────────
-const BASE_URL = '/api';
+// En dev, '/api' pasa por el proxy de vite.config.js hacia localhost:3000.
+// En producción, VITE_API_URL apunta directo al backend deployado (Render).
+const BASE_URL = `${import.meta.env.VITE_API_URL ?? ''}/api`;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const handleResponse = async (res) => {
