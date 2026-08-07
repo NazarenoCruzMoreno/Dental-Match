@@ -296,7 +296,7 @@ export default function EditProfilePage() {
             {role === "estudiante" && <EstudianteForm data={formData} onChange={handleChange} />}
             {role === "paciente"   && <PacienteForm   data={formData} onChange={handleChange} />}
 
-            <Button variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
+            <Button type="submit" variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
               {submitting ? "Guardando..." : "Guardar cambios"}
             </Button>
           </form>

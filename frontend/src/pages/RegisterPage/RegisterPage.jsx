@@ -94,7 +94,7 @@ export default function RegisterPage() {
           />
           {errors.terms && <span style={styles.fieldError}>{errors.terms}</span>}
 
-          <Button variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
+          <Button type="submit" variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
             {submitting ? "Creando cuenta..." : "Crear cuenta"}
           </Button>
         </form>

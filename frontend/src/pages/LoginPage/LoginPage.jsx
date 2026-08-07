@@ -88,7 +88,7 @@ export default function LoginPage() {
                 <Input label="Contraseña" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => handleBlur("password")} error={touched.password ? errors.password : ""} placeholder="••••••••" icon={<IconLock />} />
                 <button type="button" style={styles.forgotLink} onClick={() => setResetMode(true)}>¿Olvidaste tu contraseña?</button>
               </div>
-              <Button variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
+              <Button type="submit" variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
                 {submitting ? "Ingresando..." : "Iniciar sesión"}
               </Button>
             </form>
@@ -100,7 +100,7 @@ export default function LoginPage() {
               <form onSubmit={handleReset} style={styles.form}>
                 <p style={styles.resetDesc}>Ingresá tu email y te enviamos un link para restablecer tu contraseña.</p>
                 <Input label="Email" type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="juan@email.com" icon={<IconMail />} />
-                <Button variant="primary" fullWidth disabled={resetLoading} arrow={!resetLoading}>
+                <Button type="submit" variant="primary" fullWidth disabled={resetLoading} arrow={!resetLoading}>
                   {resetLoading ? "Enviando..." : "Enviar link"}
                 </Button>
               </form>

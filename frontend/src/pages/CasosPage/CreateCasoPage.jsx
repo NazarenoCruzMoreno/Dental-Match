@@ -232,7 +232,7 @@ export default function CreateCasoPage() {
 
             <div style={s.actions}>
               <button type="button" style={s.cancelBtn} onClick={() => navigate("/casos")}>Cancelar</button>
-              <Button variant="primary" disabled={submitting} arrow={!submitting}>
+              <Button type="submit" variant="primary" disabled={submitting} arrow={!submitting}>
                 {submitting ? "Publicando..." : "Publicar caso"}
               </Button>
             </div>
