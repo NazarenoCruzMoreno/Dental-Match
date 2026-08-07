@@ -1,1 +1,15 @@
-/* Empty */
+@keyframes dm-hero-glow-breathe {
+  0%, 100% { opacity: 0.28; transform: scale(0.94); }
+  50%      { opacity: 0.5;  transform: scale(1.06); }
+}
+
+.dm-hero-glow {
+  animation: dm-hero-glow-breathe 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-hero-glow {
+    animation: none;
+    opacity: 0.35;
+  }
+}
