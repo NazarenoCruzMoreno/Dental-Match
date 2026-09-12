@@ -4,6 +4,7 @@ import { casosService, getUser } from "../../services/api";
 import { GridSkeleton } from "../../components/Skeleton/Skeleton";
 import StatusBadge from "../../components/StatusBadge/StatusBadge";
 import Modal from "../../components/Modal/Modal";
+import DejarResenaModal from "../../components/DejarResenaModal/DejarResenaModal";
 
 // ── Iconos ────────────────────────────────────────────────────────────────────
 const IconPlus   = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>);
@@ -55,7 +56,7 @@ function CasoCard({ caso, role, onClick }) {
 // la perspectiva del paciente (estudiante asignado) como la del estudiante
 // (datos del paciente), y no hay acción de "aplicar". Por eso conserva su
 // propio contenido, pero usa el <Modal> compartido en vez de un overlay a mano.
-function CasoDetail({ caso, role, onClose }) {
+function CasoDetail({ caso, role, onClose, onDejarResena }) {
   const fecha = new Date(caso.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" });
   return (
     <Modal open onClose={onClose} title={caso.titulo} maxWidth="560px">
@@ -98,6 +99,9 @@ function CasoDetail({ caso, role, onClose }) {
               </div>
             )}
           </div>
+          {caso.estado === "completado" && (
+            <button style={s.reviewBtn} onClick={onDejarResena}>⭐ Dejar reseña</button>
+          )}
         </div>
       )}
 
@@ -118,6 +122,7 @@ export default function CasosPage() {
   const [error,    setError]    = useState("");
   const [search,   setSearch]   = useState("");
   const [selected, setSelected] = useState(null);
+  const [resenaTarget, setResenaTarget] = useState(null); // caso cuyo estudiante se está calificando
 
   useEffect(() => {
     casosService.listar()
@@ -213,7 +218,22 @@ export default function CasosPage() {
       </div>
 
       {/* Modal de detalle */}
-      {selected && <CasoDetail caso={selected} role={role} onClose={() => setSelected(null)} />}
+      {selected && (
+        <CasoDetail
+          caso={selected}
+          role={role}
+          onClose={() => setSelected(null)}
+          onDejarResena={() => { setResenaTarget(selected); setSelected(null); }}
+        />
+      )}
+
+      {/* Modal para calificar al estudiante asignado */}
+      <DejarResenaModal
+        open={!!resenaTarget}
+        onClose={() => setResenaTarget(null)}
+        estudianteId={resenaTarget?.estudiantes?.id}
+        estudianteNombre={resenaTarget?.estudiantes?.nombre}
+      />
     </div>
   );
 }
@@ -264,5 +284,6 @@ const s = {
   modalLabel:    { fontSize: "11px", fontWeight: 700, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: "8px" },
   modalText:     { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.7", margin: 0 },
   patientCard:   { background: "var(--bg-subtle)", borderRadius: "var(--radius-md)", padding: "14px 16px" },
+  reviewBtn:     { marginTop: "10px", padding: "8px 14px", background: "var(--color-warning-bg)", color: "var(--color-warning)", border: "none", borderRadius: "var(--radius-sm)", fontSize: "13px", fontWeight: 700, cursor: "pointer" },
   modalFooter:   { marginTop: "20px", paddingTop: "16px", borderTop: "1px solid var(--border)" },
 };
