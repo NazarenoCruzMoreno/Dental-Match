@@ -1,9 +1,9 @@
 const express = require('express');
 const { supabase } = require('../config/supabase');
 const { authMiddleware } = require('../middlewares/auth');
+const { verificarToken } = require('../config/jwt');
 
 const router = express.Router();
-router.use(authMiddleware);
 
 // ── Helper: verificar que el usuario participa del caso ────────────────────
 async function userBelongsToCase(casoId, userId) {
@@ -18,6 +18,63 @@ async function userBelongsToCase(casoId, userId) {
   const estudianteUserId = caso.estudiantes?.user_id;
   return userId === pacienteUserId || userId === estudianteUserId;
 }
+
+// ── SSE: registro de streams abiertos por caso ──────────────────────────────
+// Un solo proceso Render (free tier) => un Map en memoria alcanza. Si algún
+// día se corre con más de una instancia, esto necesita un adapter compartido
+// (ej. pub/sub de Supabase Realtime o Redis) para que los eventos crucen entre
+// procesos — igual que le pasaría a Socket.io sin un adapter.
+const streams = new Map(); // casoId -> Set<res>
+
+function broadcastMensaje(casoId, mensaje) {
+  const subs = streams.get(casoId);
+  if (!subs || subs.size === 0) return;
+  const payload = `event: message\ndata: ${JSON.stringify(mensaje)}\n\n`;
+  for (const res of subs) res.write(payload);
+}
+
+// ── GET /api/messages/:casoId/stream — SSE, mensajes en tiempo real ─────────
+// Registrada ANTES de router.use(authMiddleware): EventSource (API nativa del
+// navegador) no permite mandar headers custom, así que el JWT viaja por query
+// string acá y se valida a mano. El resto de las rutas de este archivo sigue
+// exigiendo el header Authorization normal, sin cambios.
+router.get('/:casoId/stream', async (req, res) => {
+  const { casoId } = req.params;
+  let user;
+  try {
+    user = verificarToken(req.query.token);
+  } catch {
+    return res.status(401).json({ error: 'Token inválido' });
+  }
+
+  const allowed = await userBelongsToCase(casoId, user.id);
+  if (!allowed) return res.status(403).json({ error: 'No tenés acceso a este chat' });
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no', // por si hay un proxy tipo nginx en el medio
+  });
+  res.write('retry: 3000\n\n'); // si se corta, el navegador reintenta a los 3s
+
+  if (!streams.has(casoId)) streams.set(casoId, new Set());
+  streams.get(casoId).add(res);
+
+  // Render (y la mayoría de los proxies) cortan conexiones idle — sin esto,
+  // un chat sin mensajes nuevos por un rato se desconectaría solo.
+  const heartbeat = setInterval(() => res.write(':heartbeat\n\n'), 25000);
+
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    const subs = streams.get(casoId);
+    subs?.delete(res);
+    if (subs && subs.size === 0) streams.delete(casoId);
+  });
+});
+
+// ── A partir de acá, auth normal por header Bearer ──────────────────────────
+router.use(authMiddleware);
 
 // ── POST /api/messages/:casoId — Enviar mensaje ─────────────────────────────
 router.post('/:casoId', async (req, res) => {
@@ -39,6 +96,9 @@ router.post('/:casoId', async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    broadcastMensaje(casoId, data);
+
     res.status(201).json(data);
   } catch (e) {
     res.status(500).json({ error: e.message });

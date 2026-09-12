@@ -4,15 +4,6 @@ import { chatService, getUser, casosService, turnosService } from "../../service
 import { useToast } from "../../context/ToastContext";
 import AgendarTurnoModal from "../../components/AgendarTurnoModal/AgendarTurnoModal";
 
-// ── Hook simple para polling cada N segundos ────────────────────────────────
-function useInterval(callback, ms) {
-  useEffect(() => {
-    if (!ms) return;
-    const id = setInterval(callback, ms);
-    return () => clearInterval(id);
-  }, [callback, ms]);
-}
-
 export default function ChatPage() {
   const { casoId }   = useParams();
   const navigate     = useNavigate();
@@ -24,6 +15,13 @@ export default function ChatPage() {
   const [sending,  setSending]  = useState(false);
   const [showProponerTurno, setShowProponerTurno] = useState(false);
   const endRef = useRef(null);
+
+  // Agrega un mensaje evitando duplicados por id. Hace falta tanto acá como
+  // en el listener de SSE porque es una carrera real: el broadcast le puede
+  // llegar al propio emisor por el stream ANTES de que resuelva su POST.
+  const agregarMensaje = (nuevo) => {
+    setMessages((m) => (m.some((x) => x.id === nuevo.id) ? m : [...m, nuevo]));
+  };
 
   const cargar = async () => {
     try {
@@ -41,8 +39,15 @@ export default function ChatPage() {
     cargar();
   }, [casoId]);
 
-  // Poll cada 4 segundos (chat en vivo simple sin websockets)
-  useInterval(cargar, 4000);
+  // Chat en tiempo real vía SSE — reemplaza el polling de 4s. El navegador
+  // reconecta solo si se corta la conexión (retry seteado por el backend).
+  useEffect(() => {
+    const source = new EventSource(chatService.streamUrl(casoId));
+
+    source.addEventListener("message", (e) => agregarMensaje(JSON.parse(e.data)));
+
+    return () => source.close();
+  }, [casoId]);
 
   // Auto-scroll al final
   useEffect(() => {
@@ -55,7 +60,7 @@ export default function ChatPage() {
     setSending(true);
     try {
       const nuevo = await chatService.enviar(casoId, text.trim());
-      setMessages((m) => [...m, nuevo]);
+      agregarMensaje(nuevo);
       setText("");
     } catch (err) {
       toast.error(err.message);
@@ -150,7 +155,7 @@ export default function ChatPage() {
             toast.success("¡Propuesta enviada al paciente!");
             // Mandar mensaje al chat
             chatService.enviar(casoId, "📅 Te propuse un turno. Mirá en tus turnos y aceptalo o decime si querés otro horario.")
-              .then((nuevo) => setMessages((m) => [...m, nuevo]))
+              .then(agregarMensaje)
               .catch(() => {});
           }}
         />
