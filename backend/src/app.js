@@ -1,12 +1,12 @@
 const express = require('express');
 const cors    = require('cors');
+const helmet  = require('helmet');
 const errorHandler = require('./middlewares/errorHandler');
+const { generalLimiter } = require('./middlewares/rateLimiters');
 
 // ── Rutas ─────────────────────────────────────────────────────────────────────
 const authRoutes        = require('./routes/users');
 const profileRoutes     = require('./routes/profile');
-const estudianteRoutes  = require('./routes/estudiantes');
-const pacienteRoutes    = require('./routes/pacientes');
 const asignacionRoutes  = require('./routes/asignaciones');
 const notifRoutes       = require('./routes/notifications');
 const reviewRoutes      = require('./routes/reviews');
@@ -18,7 +18,13 @@ const messagesRoutes    = require('./routes/messages');
 
 const app = express();
 
+// Render (y la mayoría de los PaaS) corren la app detrás de un proxy/load
+// balancer — sin esto, express-rate-limit ve la IP del proxy en vez de la
+// del cliente real (o directamente tira error de validación de X-Forwarded-For).
+app.set('trust proxy', 1);
+
 // ── Middlewares globales ─────────────────────────────────────────────────────
+app.use(helmet());
 app.use(cors({
   origin: process.env.FRONTEND_URL
     ? process.env.FRONTEND_URL.split(',')
@@ -27,6 +33,7 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use('/api', generalLimiter);
 
 // ── Rutas de la API ──────────────────────────────────────────────────────────
 // Auth y perfil
@@ -41,8 +48,6 @@ app.use('/api/asignaciones',   asignacionRoutes);
 app.use('/api/messages',       messagesRoutes);
 
 // Recursos secundarios
-app.use('/api/estudiantes',    estudianteRoutes);
-app.use('/api/pacientes',      pacienteRoutes);
 app.use('/api/notifications',  notifRoutes);
 app.use('/api/reviews',        reviewRoutes);
 
