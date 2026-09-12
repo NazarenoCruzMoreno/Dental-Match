@@ -5,11 +5,38 @@
 // En producción, VITE_API_URL apunta directo al backend deployado (Render).
 const BASE_URL = `${import.meta.env.VITE_API_URL ?? ''}/api`;
 
+// ── Sesión expirada ──────────────────────────────────────────────────────────
+// Un 401 en /auth/login o /auth/register es "credenciales inválidas", no una
+// sesión vencida — no se debe interceptar. Cualquier otro 401 significa que el
+// JWT ya no es válido (venció, o el backend lo rechazó), así que cerramos
+// sesión y mandamos al usuario a loguearse de nuevo.
+export const SESSION_EXPIRED_MSG_KEY = 'sessionExpiredMessage';
+let sessionExpiredHandled = false; // evita loguear/redirigir más de una vez si vuelan varios 401 juntos
+
+const handleSessionExpired = () => {
+  if (sessionExpiredHandled) return;
+  sessionExpiredHandled = true;
+
+  clearAuth();
+  // window.location.href hace un reload completo: cualquier Toast disparado acá
+  // no llegaría a verse. Guardamos el mensaje y lo mostramos ya en /login.
+  sessionStorage.setItem(SESSION_EXPIRED_MSG_KEY, 'Tu sesión ha expirado. Por favor, ingresá nuevamente.');
+
+  if (!window.location.pathname.startsWith('/login')) {
+    window.location.href = '/login';
+  }
+};
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const handleResponse = async (res) => {
   // Soportamos respuestas no-JSON (raras pero posibles)
   const ct  = res.headers.get('content-type') ?? '';
   const data = ct.includes('application/json') ? await res.json() : null;
+
+  if (res.status === 401 && !res.url.includes('/auth/')) {
+    handleSessionExpired();
+  }
+
   if (!res.ok) throw new Error(data?.error ?? `Error ${res.status}`);
   return data;
 };
@@ -136,6 +163,9 @@ export const chatService = {
   listarChats:    ()                  => get('/messages'),
   listarMensajes: (casoId)            => get(`/messages/${casoId}`),
   enviar:         (casoId, content)   => post(`/messages/${casoId}`, { content }),
+  // EventSource nativo no manda headers custom, así que el token va por query
+  // string acá — la ruta /stream lo valida a mano en el backend.
+  streamUrl:      (casoId)            => `${BASE_URL}/messages/${casoId}/stream?token=${encodeURIComponent(getAuthToken())}`,
 };
 
 // ── Notificaciones ───────────────────────────────────────────────────────────

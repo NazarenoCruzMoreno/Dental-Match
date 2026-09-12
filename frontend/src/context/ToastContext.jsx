@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { SESSION_EXPIRED_MSG_KEY } from "../services/api";
 
 const ToastContext = createContext(null);
 
@@ -25,6 +26,16 @@ export function ToastProvider({ children }) {
     info:    (msg, d) => show(msg, "info",    d),
     warning: (msg, d) => show(msg, "warning", d),
   };
+
+  // Mensaje "flash": lo dejó guardado api.js antes de un window.location.href
+  // por sesión expirada (un Toast disparado justo antes del reload no llega a verse).
+  useEffect(() => {
+    const msg = sessionStorage.getItem(SESSION_EXPIRED_MSG_KEY);
+    if (msg) {
+      sessionStorage.removeItem(SESSION_EXPIRED_MSG_KEY);
+      show(msg, "error", 5000);
+    }
+  }, [show]);
 
   return (
     <ToastContext.Provider value={api}>
