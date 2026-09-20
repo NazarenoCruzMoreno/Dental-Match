@@ -4,13 +4,13 @@ export default function Card({ title, highlight, description, badge, badgeText, 
   return (
     <>
       <div className="dm-auth-form-panel" style={styles.left}>
-        <h1 style={styles.title}>{title} <span style={styles.titleHighlight}>{highlight}</span></h1>
-        {description && <p style={styles.desc}>{description}</p>}
+        <h1 className="dm-hero-title" style={styles.title}>{title} <span style={styles.titleHighlight}>{highlight}</span></h1>
+        {description && <p className="dm-hero-desc" style={styles.desc}>{description}</p>}
         {children}
       </div>
       <div className="dm-auth-visual-panel" style={styles.right}>
         {badge && <div style={styles.badge}>{badgeText}</div>}
-        <div style={styles.imageWrap}>
+        <div className="dm-hero-float" style={styles.imageWrap}>
           <div className="dm-hero-glow" style={styles.heroGlow} aria-hidden="true"></div>
           <div style={styles.imageFrame}>
             <img src={imageSrc} style={styles.img} alt={imageAlt || "hero"} />
