@@ -20,10 +20,6 @@ export default function LoginPage() {
   const [touched, setTouched] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
-  const [resetMode, setResetMode] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [resetSent, setResetSent] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
 
   const handleBlur = (field) => { setTouched((prev) => ({ ...prev, [field]: true })); };
 
@@ -53,68 +49,29 @@ export default function LoginPage() {
     }
   };
 
-  const handleReset = async (e) => {
-    e.preventDefault();
-    const result = validateEmail(resetEmail);
-    if (!result.valid) return;
-    setResetLoading(true);
-    try {
-      await authService.resetPassword(resetEmail);
-      setResetSent(true);
-    } catch {
-      setResetSent(true); // igual mostramos éxito por seguridad
-    } finally {
-      setResetLoading(false);
-    }
-  };
-
   const glassContent = (<><IconCalendar /><div><div style={styles.glassTitle}>Panel Digital</div><div style={styles.glassSub}>Gestión de turnos en tiempo real.</div></div><span style={{ color: "var(--color-primary)", fontSize: "20px" }}>→</span></>);
 
   return (
     <Layout>
       <Card
-        title={resetMode ? "Recuperar" : "Bienvenido"}
-        highlight={resetMode ? "contraseña" : "de vuelta"}
+        title="Bienvenido"
+        highlight="de vuelta"
         badge={true} badgeText="DENTAL MATCH"
         imageSrc={imagenInicio} imageAlt="hero"
         glassContent={glassContent}
       >
-        {!resetMode ? (
-          <>
-            <form onSubmit={handleSubmit} style={styles.form}>
-              {serverError && <div style={styles.errorBox}>{serverError}</div>}
-              <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => handleBlur("email")} error={touched.email ? errors.email : ""} placeholder="juan@email.com" icon={<IconMail />} />
-              <div>
-                <Input label="Contraseña" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => handleBlur("password")} error={touched.password ? errors.password : ""} placeholder="••••••••" icon={<IconLock />} />
-                <button type="button" style={styles.forgotLink} onClick={() => setResetMode(true)}>¿Olvidaste tu contraseña?</button>
-              </div>
-              <Button type="submit" variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
-                {submitting ? "Ingresando..." : "Iniciar sesión"}
-              </Button>
-            </form>
-            <p style={styles.registerLink}>¿No tenés cuenta? <span style={styles.link} onClick={() => navigate("/")}>Crear cuenta</span></p>
-          </>
-        ) : (
-          <>
-            {!resetSent ? (
-              <form onSubmit={handleReset} style={styles.form}>
-                <p style={styles.resetDesc}>Ingresá tu email y te enviamos un link para restablecer tu contraseña.</p>
-                <Input label="Email" type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="juan@email.com" icon={<IconMail />} />
-                <Button type="submit" variant="primary" fullWidth disabled={resetLoading} arrow={!resetLoading}>
-                  {resetLoading ? "Enviando..." : "Enviar link"}
-                </Button>
-              </form>
-            ) : (
-              <div style={styles.resetSuccess}>
-                <div style={styles.resetIcon}>📬</div>
-                <p style={styles.resetSuccessText}>¡Listo! Si el email existe, vas a recibir un link para restablecer tu contraseña.</p>
-              </div>
-            )}
-            <p style={styles.registerLink}>
-              <span style={styles.link} onClick={() => { setResetMode(false); setResetSent(false); setResetEmail(""); }}>← Volver al login</span>
-            </p>
-          </>
-        )}
+        <form onSubmit={handleSubmit} style={styles.form}>
+          {serverError && <div style={styles.errorBox}>{serverError}</div>}
+          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => handleBlur("email")} error={touched.email ? errors.email : ""} placeholder="juan@email.com" icon={<IconMail />} />
+          <div>
+            <Input label="Contraseña" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => handleBlur("password")} error={touched.password ? errors.password : ""} placeholder="••••••••" icon={<IconLock />} />
+            <button type="button" style={styles.forgotLink} onClick={() => navigate("/forgot-password")}>¿Olvidaste tu contraseña?</button>
+          </div>
+          <Button type="submit" variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
+            {submitting ? "Ingresando..." : "Iniciar sesión"}
+          </Button>
+        </form>
+        <p style={styles.registerLink}>¿No tenés cuenta? <span style={styles.link} onClick={() => navigate("/")}>Crear cuenta</span></p>
       </Card>
     </Layout>
   );
@@ -126,10 +83,6 @@ const styles = {
   forgotLink: { fontSize: "13px", color: "var(--color-primary)", fontWeight: 600, cursor: "pointer", textAlign: "right", margin: "8px 0 0", background: "none", border: "none", padding: 0, display: "block", marginLeft: "auto" },
   registerLink: { marginTop: "20px", fontSize: "14px", color: "var(--text-secondary)", textAlign: "center" },
   link: { color: "var(--color-primary)", fontWeight: 600, cursor: "pointer" },
-  resetDesc: { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "8px" },
-  resetSuccess: { textAlign: "center", padding: "24px 0" },
-  resetIcon: { fontSize: "48px", marginBottom: "16px" },
-  resetSuccessText: { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.7" },
   glassTitle: { fontWeight: 900, color: "var(--text-primary)", fontSize: "16px" },
   glassSub: { fontSize: "14px", color: "var(--text-secondary)", marginTop: "3px" },
 };

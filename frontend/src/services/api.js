@@ -105,12 +105,22 @@ export const authService = {
       body: JSON.stringify({ email, password }),
     }).then(handleResponse),
 
-  resetPassword: (email) =>
-    fetch(`${BASE_URL}/auth/reset-password`, {
+  forgotPassword: (email) =>
+    fetch(`${BASE_URL}/auth/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     }).then(handleResponse),
+
+  resetPassword: (token, nuevaContrasena) =>
+    fetch(`${BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, nueva_contrasena: nuevaContrasena }),
+    }).then(handleResponse),
+
+  verifyEmail: (token) =>
+    fetch(`${BASE_URL}/auth/verify-email?token=${encodeURIComponent(token)}`).then(handleResponse),
 };
 
 // ── Perfil ───────────────────────────────────────────────────────────────────

@@ -10,8 +10,11 @@ import { isSessionValid, profileService } from "./services/api";
 // ── Lazy load de todas las páginas ──────────────────────────────────────────
 // Cada página se descarga solo cuando el usuario navega a ella.
 const SelectionPage    = lazy(() => import("./pages/SelectionPage/SelectionPage"));
-const RegisterPage     = lazy(() => import("./pages/RegisterPage/RegisterPage"));
-const LoginPage        = lazy(() => import("./pages/LoginPage/LoginPage"));
+const RegisterPage        = lazy(() => import("./pages/RegisterPage/RegisterPage"));
+const LoginPage           = lazy(() => import("./pages/LoginPage/LoginPage"));
+const ForgotPasswordPage  = lazy(() => import("./pages/ForgotPasswordPage/ForgotPasswordPage"));
+const ResetPasswordPage   = lazy(() => import("./pages/ResetPasswordPage/ResetPasswordPage"));
+const VerifyEmailPage     = lazy(() => import("./pages/VerifyEmailPage/VerifyEmailPage"));
 const HomePage         = lazy(() => import("./pages/HomePage/HomePage"));
 const ProfilePage      = lazy(() => import("./pages/ProfilePage/ProfilePage"));
 const EditProfilePage  = lazy(() => import("./pages/ProfilePage/EditProfilePage"));
@@ -76,6 +79,11 @@ export default function App() {
               <Route path="/"         element={<PublicRoute><SelectionPage /></PublicRoute>} />
               <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
               <Route path="/login"    element={<PublicRoute><LoginPage /></PublicRoute>} />
+              <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+              {/* /reset-password NO es PublicRoute a secas: si ya hay sesión activa igual
+                  tiene que poder cambiarse la contraseña con el link del email. */}
+              <Route path="/reset-password"  element={<ResetPasswordPage />} />
+              <Route path="/verify-email"    element={<VerifyEmailPage />} />
 
               {/* Privadas — solo sesión */}
               <Route path="/profile"      element={<PrivateRoute><ProfilePage /></PrivateRoute>} />

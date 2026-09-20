@@ -8,7 +8,7 @@ import Button from "../../components/Button/Button";
 import Checkbox from "../../components/Checkbox/Checkbox";
 import { useUserType } from "../../hooks/useUserType";
 import { validateForm } from "../../utils/validation";
-import { authService, setSessionToken, setUser } from "../../services/api";
+import { authService } from "../../services/api";
 
 const IconCalendar = () => (<svg width="28" height="28" viewBox="0 0 24 24" style={{ color: "var(--color-primary)" }}><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/></svg>);
 const IconUser = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
@@ -27,6 +27,7 @@ export default function RegisterPage() {
   const [touched, setTouched] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
+  const [registered, setRegistered] = useState(false);
 
   const handleBlur = (field) => { setTouched((prev) => ({ ...prev, [field]: true })); };
 
@@ -56,10 +57,9 @@ export default function RegisterPage() {
     setSubmitting(true);
     try {
       const role = userType || "paciente";
-      const data = await authService.register(email, password, role);
-      setSessionToken(data.token);
-      setUser(data.user);
-      navigate("/profile/edit?new=1"); // perfil obligatorio al registrarse
+      await authService.register(email, password, role);
+      // Ya no auto-loguea: hay que confirmar el email antes de poder entrar.
+      setRegistered(true);
     } catch (error) {
       setServerError(error.message);
     } finally {
@@ -73,32 +73,42 @@ export default function RegisterPage() {
   return (
     <Layout>
       <Card title="Crear" highlight="cuenta" badge={true} badgeText="DENTAL MATCH" imageSrc={imagenInicio} imageAlt="hero" glassContent={glassContent}>
-        {userType && (<div style={styles.userTypeBadge}><span style={styles.userTypeIcon}>{userType === "estudiante" ? "🎓" : "👤"}</span>Registrando como <strong>{userTypeLabel}</strong></div>)}
-        <form onSubmit={handleSubmit} style={styles.form}>
-          {serverError && <div style={styles.errorBox}>{serverError}</div>}
-          <Input label="Nombre completo" value={name} onChange={(e) => setName(e.target.value)} onBlur={() => handleBlur("name")} error={touched.name ? errors.name : ""} placeholder="Juan Pérez" icon={<IconUser />} />
-          <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => handleBlur("email")} error={touched.email ? errors.email : ""} placeholder="juan@email.com" icon={<IconMail />} />
-          <Input label="Contraseña" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => handleBlur("password")} error={touched.password ? errors.password : ""} placeholder="••••••••" icon={<IconLock />} />
-          <Input label="Confirmar contraseña" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onBlur={() => handleBlur("confirmPassword")} error={touched.confirmPassword ? errors.confirmPassword : ""} placeholder="••••••••" icon={<IconLock />} />
+        {!registered ? (
+          <>
+            {userType && (<div style={styles.userTypeBadge}><span style={styles.userTypeIcon}>{userType === "estudiante" ? "🎓" : "👤"}</span>Registrando como <strong>{userTypeLabel}</strong></div>)}
+            <form onSubmit={handleSubmit} style={styles.form}>
+              {serverError && <div style={styles.errorBox}>{serverError}</div>}
+              <Input label="Nombre completo" value={name} onChange={(e) => setName(e.target.value)} onBlur={() => handleBlur("name")} error={touched.name ? errors.name : ""} placeholder="Juan Pérez" icon={<IconUser />} />
+              <Input label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} onBlur={() => handleBlur("email")} error={touched.email ? errors.email : ""} placeholder="juan@email.com" icon={<IconMail />} />
+              <Input label="Contraseña" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onBlur={() => handleBlur("password")} error={touched.password ? errors.password : ""} placeholder="••••••••" icon={<IconLock />} />
+              <Input label="Confirmar contraseña" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onBlur={() => handleBlur("confirmPassword")} error={touched.confirmPassword ? errors.confirmPassword : ""} placeholder="••••••••" icon={<IconLock />} />
 
-          <Checkbox
-            id="accept-terms"
-            checked={acceptTerms}
-            onChange={setAcceptTerms}
-            error={!!(errors.terms && !acceptTerms)}
-            label={
-              <>
-                Acepto los <span style={styles.termsLink} onClick={(e) => e.stopPropagation()}>términos y condiciones</span> y la <span style={styles.termsLink} onClick={(e) => e.stopPropagation()}>política de privacidad</span>
-              </>
-            }
-          />
-          {errors.terms && <span style={styles.fieldError}>{errors.terms}</span>}
+              <Checkbox
+                id="accept-terms"
+                checked={acceptTerms}
+                onChange={setAcceptTerms}
+                error={!!(errors.terms && !acceptTerms)}
+                label={
+                  <>
+                    Acepto los <span style={styles.termsLink} onClick={(e) => e.stopPropagation()}>términos y condiciones</span> y la <span style={styles.termsLink} onClick={(e) => e.stopPropagation()}>política de privacidad</span>
+                  </>
+                }
+              />
+              {errors.terms && <span style={styles.fieldError}>{errors.terms}</span>}
 
-          <Button type="submit" variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
-            {submitting ? "Creando cuenta..." : "Crear cuenta"}
-          </Button>
-        </form>
-        <p style={styles.loginLink}>¿Ya tenés cuenta? <span style={styles.link} onClick={() => navigate("/login")}>Iniciar sesión</span></p>
+              <Button type="submit" variant="primary" fullWidth disabled={submitting} arrow={!submitting}>
+                {submitting ? "Creando cuenta..." : "Crear cuenta"}
+              </Button>
+            </form>
+            <p style={styles.loginLink}>¿Ya tenés cuenta? <span style={styles.link} onClick={() => navigate("/login")}>Iniciar sesión</span></p>
+          </>
+        ) : (
+          <div style={styles.success}>
+            <div style={styles.successIcon}>📬</div>
+            <p style={styles.successText}>¡Cuenta creada! Te mandamos un link a <strong>{email}</strong> para confirmar tu email — revisá también spam. Después de confirmarlo ya podés iniciar sesión.</p>
+            <Button variant="primary" arrow={false} onClick={() => navigate("/login")}>Ir al login</Button>
+          </div>
+        )}
       </Card>
     </Layout>
   );
@@ -113,6 +123,9 @@ const styles = {
   fieldError: { fontSize: "12px", color: "var(--color-danger)", fontWeight: 500, marginTop: "-8px" },
   loginLink: { marginTop: "20px", fontSize: "14px", color: "var(--text-secondary)", textAlign: "center" },
   link: { color: "var(--color-primary)", fontWeight: 600, cursor: "pointer" },
+  success: { textAlign: "center", padding: "24px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" },
+  successIcon: { fontSize: "48px" },
+  successText: { fontSize: "15px", color: "var(--text-secondary)", lineHeight: "1.7", margin: 0, maxWidth: "420px" },
   glassTitle: { fontWeight: 900, color: "var(--text-primary)", fontSize: "16px" },
   glassSub: { fontSize: "14px", color: "var(--text-secondary)", marginTop: "3px" },
 };
