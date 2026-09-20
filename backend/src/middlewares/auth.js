@@ -25,4 +25,8 @@ const roleMiddleware = (roles) => {
   };
 };
 
-module.exports = { authMiddleware, roleMiddleware };
+// Alias de roleMiddleware(['admin']) — mismo chequeo, nombre explícito para
+// las rutas de /api/admin. No hay lógica nueva que mantener duplicada.
+const isAdmin = roleMiddleware(['admin']);
+
+module.exports = { authMiddleware, roleMiddleware, isAdmin };

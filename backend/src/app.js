@@ -15,6 +15,7 @@ const aplicacionRoutes  = require('./routes/aplicaciones');
 const turnosRoutes      = require('./routes/turnos');
 const statsRoutes       = require('./routes/stats');
 const messagesRoutes    = require('./routes/messages');
+const adminRoutes       = require('./routes/admin');
 
 const app = express();
 
@@ -50,6 +51,7 @@ app.use('/api/messages',       messagesRoutes);
 // Recursos secundarios
 app.use('/api/notifications',  notifRoutes);
 app.use('/api/reviews',        reviewRoutes);
+app.use('/api/admin',          adminRoutes);
 
 // Endpoints públicos (stats, health, activity)
 app.use('/api',                statsRoutes);

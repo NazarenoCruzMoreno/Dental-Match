@@ -5,6 +5,7 @@ import { ToastProvider } from "./context/ToastContext";
 import UserMenu   from "./components/UserMenu/UserMenu";
 import HomeButton from "./components/HomeButton/HomeButton";
 import BottomNav  from "./components/BottomNav/BottomNav";
+import AdminRoute from "./components/AdminRoute/AdminRoute";
 import { isSessionValid, profileService } from "./services/api";
 
 // ── Lazy load de todas las páginas ──────────────────────────────────────────
@@ -26,6 +27,7 @@ const AsignacionesPage = lazy(() => import("./pages/AsignacionesPage/Asignacione
 const TurnosPage       = lazy(() => import("./pages/TurnosPage/TurnosPage"));
 const ChatsListPage    = lazy(() => import("./pages/ChatPage/ChatsListPage"));
 const ChatPage         = lazy(() => import("./pages/ChatPage/ChatPage"));
+const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage/AdminDashboardPage"));
 
 // ── Fallback de carga durante navegación ────────────────────────────────────
 const PageFallback = () => (
@@ -99,6 +101,9 @@ export default function App() {
 
               {/* Privada — sesión + perfil completo */}
               <Route path="/home" element={<RequireProfile><HomePage /></RequireProfile>} />
+
+              {/* Admin — sesión + role === "admin", sin pasar por RequireProfile */}
+              <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
 
               {/* Catch-all */}
               <Route path="*" element={<Navigate to="/" replace />} />
