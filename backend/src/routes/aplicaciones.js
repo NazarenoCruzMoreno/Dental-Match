@@ -1,6 +1,7 @@
 const express = require('express');
 const { supabase } = require('../config/supabase');
 const { authMiddleware, roleMiddleware } = require('../middlewares/auth');
+const { notificar } = require('../utils/notificar');
 
 const router = express.Router();
 
@@ -104,8 +105,7 @@ router.post('/:id/match/:estudianteId', authMiddleware, roleMiddleware(['pacient
     const { data: est } = await supabase
       .from('estudiantes').select('user_id').eq('id', estudianteId).maybeSingle();
     if (est) {
-      await supabase.from('notifications').insert({
-        user_id: est.user_id,
+      await notificar(est.user_id, {
         type:    'match',
         title:   '🎉 ¡Nuevo match!',
         message: 'Un paciente aceptó tu aplicación. Revisá tus casos asignados.',

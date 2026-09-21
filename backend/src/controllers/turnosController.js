@@ -1,5 +1,6 @@
 const { supabase } = require('../config/supabase');
 const { turnoSchema, turnoUpdateSchema } = require('../models/validaciones');
+const { notificar } = require('../utils/notificar');
 
 // ── BE-14: POST /api/turnos — Reservar un turno ───────────────────────────────
 // Solo el paciente dueño del caso puede crear el turno
@@ -59,8 +60,7 @@ const reservarTurno = async (req, res) => {
       .from('estudiantes').select('user_id, nombre').eq('id', caso.estudiante_id).maybeSingle();
     if (est) {
       const fechaStr = new Date(data.fecha + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'long' });
-      await supabase.from('notifications').insert({
-        user_id: est.user_id,
+      await notificar(est.user_id, {
         type:    'turno',
         title:   '📅 Nuevo turno agendado',
         message: `Tu paciente agendó un turno para el ${fechaStr} a las ${data.hora} hs — "${caso.titulo}". Confirmalo desde tus turnos.`,
@@ -254,8 +254,7 @@ async function notificarCambioEstado(turnoId, turno, nuevoEstado, userId, role) 
     }
 
     if (targetUserId) {
-      await supabase.from('notifications').insert({
-        user_id: targetUserId,
+      await notificar(targetUserId, {
         type:    'turno',
         title:   notif.title,
         message: notif.msg,
@@ -320,8 +319,7 @@ const proponerTurno = async (req, res) => {
       .from('pacientes').select('user_id').eq('id', caso.paciente_id).maybeSingle();
     if (pac) {
       const fechaStr = new Date(data.fecha + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'long' });
-      await supabase.from('notifications').insert({
-        user_id: pac.user_id,
+      await notificar(pac.user_id, {
         type:    'turno_propuesto',
         title:   '📅 Tu estudiante propuso un turno',
         message: `${est.nombre} propuso un turno para el ${fechaStr} a las ${data.hora}hs. Aceptalo o pedile otro horario desde "Mis turnos".`,

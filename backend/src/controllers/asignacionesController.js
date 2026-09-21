@@ -1,4 +1,5 @@
 const { supabase } = require('../config/supabase');
+const { notificar } = require('../utils/notificar');
 
 // ── (Legacy) Crear asignación directa ────────────────────────────────────────
 const crearAsignacion = async (req, res) => {
@@ -74,8 +75,7 @@ const asignacionManual = async (req, res) => {
     });
 
     // Notificar al estudiante
-    await supabase.from('notifications').insert({
-      user_id: est.user_id,
+    await notificar(est.user_id, {
       type:    'asignacion',
       title:   '📋 Nuevo caso asignado',
       message: `Un paciente te asignó directamente a su caso. Revisá tus casos.`,

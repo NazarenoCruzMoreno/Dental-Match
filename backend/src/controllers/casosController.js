@@ -1,5 +1,6 @@
 const { supabase } = require('../config/supabase');
 const { casoSchema, casoUpdateSchema, finalizarCasoSchema } = require('../models/validaciones');
+const { notificar } = require('../utils/notificar');
 
 // ── BE-9: POST /api/casos ─────────────────────────────────────────────────────
 // Solo pacientes pueden crear casos. Se asocia automáticamente al paciente logueado.
@@ -293,8 +294,7 @@ const finalizarCaso = async (req, res) => {
     // 5) Notificar al paciente
     const { data: pac } = await supabase.from('pacientes').select('user_id').eq('id', caso.paciente_id).maybeSingle();
     if (pac?.user_id) {
-      await supabase.from('notifications').insert({
-        user_id: pac.user_id,
+      await notificar(pac.user_id, {
         type:    'caso_completado',
         title:   '✅ Tu tratamiento se completó',
         message: `Tu estudiante finalizó el caso "${caso.titulo ?? 'tu caso'}". Calificalo si querés.`,
