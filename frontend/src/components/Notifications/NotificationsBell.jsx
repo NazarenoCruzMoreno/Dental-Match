@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { notificationService } from "../../services/api";
+import PushToggle from "../PushToggle/PushToggle";
 
 const IconBell = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -84,6 +85,8 @@ export default function NotificationsBell() {
               ))}
             </div>
           )}
+
+          <PushToggle />
         </div>
       )}
     </div>

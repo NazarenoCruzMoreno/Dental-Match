@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { getUser, clearAuth, profileService, statsService } from "../../services/api";
+import { getUser, profileService, statsService } from "../../services/api";
+import { logout } from "../../utils/logout";
 import { useTheme } from "../../context/ThemeContext";
 import NotificationsBell from "../../components/Notifications/NotificationsBell";
 import OnboardingTour from "../../components/OnboardingTour/OnboardingTour";
@@ -156,7 +157,7 @@ export default function HomePage() {
             {/* Controles — FUERA del clip, con position relative y zIndex alto */}
             <div style={s.headerControls}>
               <NotificationsBell />
-              <button style={s.logoutBtn} onClick={() => { clearAuth(); navigate("/login"); }}>
+              <button style={s.logoutBtn} onClick={async () => { await logout(); navigate("/login"); }}>
                 <IconLogout /> Salir
               </button>
             </div>

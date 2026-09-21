@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getUser, clearAuth, isSessionValid, profileService } from "../../services/api";
+import { getUser, isSessionValid, profileService } from "../../services/api";
+import { logout } from "../../utils/logout";
 import { useTheme } from "../../context/ThemeContext";
 
 // Rutas públicas donde NO se muestra el menú
@@ -55,13 +56,13 @@ export default function UserMenu() {
 
   const go = (path) => { setOpen(false); navigate(path); };
 
-  const cerrarSesion = () => {
-    clearAuth();
+  const cerrarSesion = async () => {
+    await logout();
     navigate("/login");
   };
 
-  const cambiarCuenta = () => {
-    clearAuth();
+  const cambiarCuenta = async () => {
+    await logout();
     navigate("/"); // vuelve a la selección para entrar con otra cuenta
   };
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { profileService, getUser, clearAuth } from "../../services/api";
+import { profileService, getUser } from "../../services/api";
+import { logout } from "../../utils/logout";
 import { Skeleton } from "../../components/Skeleton/Skeleton";
 
 // ── Iconos ────────────────────────────────────────────────────────────────────
@@ -104,7 +105,7 @@ export default function ProfilePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleLogout = () => { clearAuth(); navigate("/login"); };
+  const handleLogout = async () => { await logout(); navigate("/login"); };
 
   if (loading) return (
     <div style={styles.page}>

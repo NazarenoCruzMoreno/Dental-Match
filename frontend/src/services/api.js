@@ -68,10 +68,11 @@ const put = (path, body) =>
     body: JSON.stringify(body),
   }).then(handleResponse);
 
-const del = (path) =>
+const del = (path, body) =>
   fetch(`${BASE_URL}${path}`, {
     method: 'DELETE',
     headers: authHeaders(),
+    ...(body ? { body: JSON.stringify(body) } : {}),
   }).then(handleResponse);
 
 // Para subir archivos como multipart/form-data
@@ -182,6 +183,12 @@ export const chatService = {
 export const notificationService = {
   getAll:    () => get('/notifications'),
   markRead:  () => put('/notifications/read', {}),
+};
+
+// ── Push nativo (Web Push) ───────────────────────────────────────────────────
+export const pushService = {
+  subscribe:   (subscription) => post('/notifications/subscribe', subscription),
+  unsubscribe: (endpoint)     => del('/notifications/subscribe', { endpoint }),
 };
 
 // ── Reviews ──────────────────────────────────────────────────────────────────
