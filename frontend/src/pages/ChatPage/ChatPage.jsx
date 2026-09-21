@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { chatService, getUser, casosService, turnosService } from "../../services/api";
 import { useToast } from "../../context/ToastContext";
 import AgendarTurnoModal from "../../components/AgendarTurnoModal/AgendarTurnoModal";
+import { generarLinkGoogleCalendar, combinarFechaHora } from "../../utils/calendar";
 
 export default function ChatPage() {
   const { casoId }   = useParams();
@@ -14,6 +15,7 @@ export default function ChatPage() {
   const [caso,     setCaso]     = useState(null);
   const [sending,  setSending]  = useState(false);
   const [showProponerTurno, setShowProponerTurno] = useState(false);
+  const [proximoTurno, setProximoTurno] = useState(null);
   const endRef = useRef(null);
 
   // Agrega un mensaje evitando duplicados por id. Hace falta tanto acá como
@@ -37,6 +39,22 @@ export default function ChatPage() {
   useEffect(() => {
     casosService.obtener(casoId).then(setCaso).catch(() => {});
     cargar();
+  }, [casoId]);
+
+  // Próximo turno CONFIRMADO de este caso (el del "Agendar en Calendar"). La
+  // API no filtra por caso, así que se filtra acá; ya viene ordenada por fecha.
+  useEffect(() => {
+    turnosService.listar({ estado: "confirmado" })
+      .then((turnos) => {
+        const ahora = new Date();
+        const proximo = (turnos ?? [])
+          .filter((t) => t.caso_id === casoId)
+          .map((t) => ({ ...t, inicio: combinarFechaHora(t.fecha, t.hora) }))
+          .filter((t) => t.inicio >= ahora)
+          .sort((a, b) => a.inicio - b.inicio)[0];
+        setProximoTurno(proximo ?? null);
+      })
+      .catch(() => {});
   }, [casoId]);
 
   // Chat en tiempo real vía SSE — reemplaza el polling de 4s. El navegador
@@ -74,6 +92,16 @@ export default function ChatPage() {
   const otroNombre = otro?.nombre ?? "Usuario";
   const otroInicial = otroNombre.charAt(0).toUpperCase();
 
+  // Solo si el caso ya está asignado (hay estudiante) y hay un turno confirmado por venir
+  const linkCalendar = proximoTurno && caso?.estudiante_id
+    ? generarLinkGoogleCalendar(
+        `Turno dental — ${caso.titulo}`,
+        `Turno con ${otroNombre} (Dental Match)\nCaso: ${caso.titulo}`,
+        proximoTurno.inicio,
+        (proximoTurno.duracion_minutos ?? 60) / 60,
+      )
+    : null;
+
   return (
     <div style={s.page}>
       {/* Header */}
@@ -91,6 +119,16 @@ export default function ChatPage() {
           </div>
         </div>
       </header>
+
+      {/* Próximo turno confirmado → guardarlo en el Google Calendar propio */}
+      {linkCalendar && (
+        <div style={s.turnoBar}>
+          <span style={s.turnoText}>📅 Próximo turno: <strong>{formatTurno(proximoTurno.inicio)}</strong></span>
+          <a href={linkCalendar} target="_blank" rel="noopener noreferrer" style={s.calBtn}>
+            Agendar Turno en Calendar
+          </a>
+        </div>
+      )}
 
       {/* Mensajes */}
       <main style={s.messages}>
@@ -169,6 +207,10 @@ function formatTime(date) {
   return d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
 }
 
+function formatTurno(date) {
+  return date.toLocaleString("es-AR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
 const s = {
   page:        { minHeight: "100vh", background: "var(--bg-page)", display: "flex", flexDirection: "column" },
   header:      { display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px", background: "var(--bg-card)", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: 10 },
@@ -177,6 +219,10 @@ const s = {
   avatar:      { width: "40px", height: "40px", borderRadius: "50%", background: "var(--color-primary)", color: "var(--color-primary-text)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "16px", overflow: "hidden", flexShrink: 0 },
   headerName:  { fontSize: "14px", fontWeight: 800, color: "var(--text-primary)" },
   headerSub:   { fontSize: "12px", color: "var(--text-tertiary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "200px" },
+
+  turnoBar:    { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "8px", padding: "10px 16px", background: "var(--color-success-bg)", borderBottom: "1px solid var(--border)" },
+  turnoText:   { fontSize: "13px", color: "var(--text-primary)" },
+  calBtn:      { fontSize: "12px", fontWeight: 700, padding: "6px 12px", borderRadius: "var(--radius-full)", background: "var(--color-primary)", color: "var(--color-primary-text)", textDecoration: "none", whiteSpace: "nowrap" },
 
   messages:    { flex: 1, overflowY: "auto", padding: "16px 12px", display: "flex", flexDirection: "column", gap: "8px" },
   empty:       { textAlign: "center", padding: "60px 20px", color: "var(--text-tertiary)" },
