@@ -37,7 +37,7 @@ function TurnoCard({ turno, role, onAccion }) {
       <div style={tc.dateCol}>
         <div style={tc.dia}>{new Date(turno.fecha + "T12:00:00").getDate()}</div>
         <div style={tc.mes}>{MESES[new Date(turno.fecha + "T12:00:00").getMonth()].slice(0,3).toUpperCase()}</div>
-        <div style={tc.hora}>{turno.hora}</div>
+        <div style={tc.hora}>{turno.hora.slice(0, 5)}</div>
       </div>
 
       {/* Info */}

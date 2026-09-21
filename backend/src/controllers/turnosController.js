@@ -32,17 +32,7 @@ const reservarTurno = async (req, res) => {
     }
 
     // Validar disponibilidad: el estudiante no debe tener otro turno en ese horario
-    const horaFin = calcularHoraFin(data.hora, data.duracion_minutos ?? 60);
-    const { data: conflicto } = await supabase
-      .from('turnos')
-      .select('id, hora')
-      .eq('estudiante_id', caso.estudiante_id)
-      .eq('fecha', data.fecha)
-      .neq('estado', 'cancelado')
-      .lte('hora', data.hora)
-      .gt('hora', calcularHoraFin(data.hora, -(data.duracion_minutos ?? 60)));
-
-    if (conflicto && conflicto.length > 0) {
+    if (await estudianteOcupado(caso.estudiante_id, data.fecha, data.hora, data.duracion_minutos ?? 60)) {
       return res.status(409).json({ error: 'El estudiante ya tiene un turno en ese horario. Elegí otro.' });
     }
 
@@ -156,9 +146,12 @@ const actualizarTurno = async (req, res) => {
       if (!pac || pac.id !== turno.paciente_id) {
         return res.status(403).json({ error: 'No tenés permiso sobre este turno' });
       }
-      // Paciente solo puede cancelar
-      if (data.estado && data.estado !== 'cancelado') {
-        return res.status(403).json({ error: 'Los pacientes solo pueden cancelar turnos' });
+      // Paciente: cancela turnos propios, y responde (acepta/rechaza) las
+      // propuestas del estudiante — TurnosPage le ofrece justo esos botones.
+      const respondePropuesta =
+        turno.estado === 'propuesto' && ['confirmado', 'rechazado'].includes(data.estado);
+      if (data.estado && data.estado !== 'cancelado' && !respondePropuesta) {
+        return res.status(403).json({ error: 'Los pacientes solo pueden cancelar turnos o responder propuestas' });
       }
     }
 
@@ -191,19 +184,13 @@ const obtenerDisponibilidad = async (req, res) => {
       return res.status(400).json({ error: 'estudiante_id y fecha son requeridos' });
     }
 
-    // Turnos ocupados ese día
-    const { data: ocupados } = await supabase
-      .from('turnos')
-      .select('hora, duracion_minutos')
-      .eq('estudiante_id', estudiante_id)
-      .eq('fecha', fecha)
-      .neq('estado', 'cancelado');
+    const ocupados = await turnosOcupados(estudiante_id, fecha);
 
     // Generar slots de 9:00 a 18:00 cada 60 minutos
     const slots = [];
     for (let h = 9; h < 18; h++) {
       const horaStr = `${String(h).padStart(2, '0')}:00`;
-      const libre = !(ocupados ?? []).some(t => t.hora === horaStr);
+      const libre = !ocupados.some(t => seSolapan(h * 60, 60, aMinutos(t.hora), t.duracion_minutos));
       slots.push({ hora: horaStr, disponible: libre });
     }
 
@@ -214,16 +201,40 @@ const obtenerDisponibilidad = async (req, res) => {
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function calcularHoraFin(hora, minutos) {
+// Ojo con los formatos: Postgres devuelve un TIME como "10:00:00", pero el
+// cliente manda "10:00" — por eso se compara en minutos, nunca como strings.
+const aMinutos = (hora) => {
   const [h, m] = hora.split(':').map(Number);
-  const total  = h * 60 + m + minutos;
-  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+  return h * 60 + m;
+};
+
+const seSolapan = (inicioA, durA, inicioB, durB) =>
+  inicioA < inicioB + durB && inicioB < inicioA + durA;
+
+// Turnos que ocupan la agenda del estudiante ese día. Los cancelados y los
+// rechazados no cuentan: una propuesta rechazada tiene que liberar el horario.
+async function turnosOcupados(estudianteId, fecha) {
+  const { data } = await supabase
+    .from('turnos')
+    .select('hora, duracion_minutos')
+    .eq('estudiante_id', estudianteId)
+    .eq('fecha', fecha)
+    .not('estado', 'in', '(cancelado,rechazado)');
+  return data ?? [];
+}
+
+async function estudianteOcupado(estudianteId, fecha, hora, duracionMin) {
+  const ocupados = await turnosOcupados(estudianteId, fecha);
+  return ocupados.some(t => seSolapan(aMinutos(hora), duracionMin, aMinutos(t.hora), t.duracion_minutos));
 }
 
 async function notificarCambioEstado(turnoId, turno, nuevoEstado, userId, role) {
   try {
     const mensajes = {
-      confirmado: { title: '✅ Turno confirmado',  msg: 'Tu turno fue confirmado por el estudiante.' },
+      confirmado: role === 'paciente'
+        ? { title: '✅ Turno aceptado',    msg: 'Tu paciente aceptó el turno que propusiste.' }
+        : { title: '✅ Turno confirmado',  msg: 'Tu turno fue confirmado por el estudiante.' },
+      rechazado:  { title: '❌ Propuesta rechazada', msg: 'Tu paciente rechazó el turno que propusiste. Podés proponer otro horario.' },
       cancelado:  { title: '❌ Turno cancelado',   msg: 'Un turno fue cancelado.' },
       completado: { title: '🎉 Turno completado',  msg: 'El turno fue marcado como completado.' },
     };
@@ -277,6 +288,12 @@ const proponerTurno = async (req, res) => {
     if (!caso) return res.status(404).json({ error: 'Caso no encontrado o no estás asignado' });
     if (caso.estado === 'completado' || caso.estado === 'cancelado') {
       return res.status(400).json({ error: `No podés proponer turnos en un caso ${caso.estado}` });
+    }
+
+    // Antes de esto no se chequeaba nada: se podía proponer (y aceptar) dos
+    // turnos en el mismo horario.
+    if (await estudianteOcupado(est.id, data.fecha, data.hora, data.duracion_minutos ?? 60)) {
+      return res.status(409).json({ error: 'Ya tenés un turno en ese horario. Elegí otro.' });
     }
 
     // Crear turno con estado propuesto
