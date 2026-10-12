@@ -13,10 +13,11 @@ const IconCalendar= () => (<svg width="16" height="16" viewBox="0 0 24 24" fill=
 const IconHome    = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>);
 const IconSwitch  = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>);
 const IconLogout  = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>);
+const IconChevronDown = ({ open }) => (<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform .2s ease", transform: open ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>);
 const IconMoon    = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>);
 const IconSun     = () => (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>);
 
-export default function UserMenu() {
+export default function UserMenu({ inline = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const ref      = useRef(null);
@@ -48,11 +49,13 @@ export default function UserMenu() {
   }, [open]);
 
   // No mostrar en rutas públicas ni sin sesión
+  // En /home el avatar vive dentro del header de la página (variante inline), no flotando
+  if (!inline && location.pathname === "/home") return null;
   if (PUBLIC_PATHS.includes(location.pathname) || !isSessionValid() || !user) return null;
 
   const nombre  = perfil?.nombre ?? user.email?.split("@")[0] ?? "Usuario";
   const inicial = nombre.charAt(0).toUpperCase();
-  const roleLabel = user.role === "estudiante" ? "🎓 Estudiante" : "👤 Paciente";
+  const roleLabel = user.role === "estudiante" ? "Estudiante" : "Paciente";
 
   const go = (path) => { setOpen(false); navigate(path); };
 
@@ -67,18 +70,33 @@ export default function UserMenu() {
   };
 
   return (
-    <div ref={ref} style={s.wrapper}>
+    <div ref={ref} style={inline ? s.wrapperInline : s.wrapper}>
       {/* Avatar flotante */}
-      <button style={s.avatarBtn} onClick={() => setOpen(o => !o)} aria-label="Menú de cuenta">
-        {perfil?.imagen_url
-          ? <img src={perfil.imagen_url} alt="avatar" style={s.avatarImg} />
-          : <span style={s.avatarInitial}>{inicial}</span>}
-        <span style={s.onlineDot} />
-      </button>
+      {inline ? (
+        <button className="dm-user-pill" style={s.pillBtn} onClick={() => setOpen(o => !o)} aria-label="Menú de cuenta" aria-expanded={open} aria-haspopup="menu">
+          <span style={s.pillAvatarWrap}>
+            <span style={s.pillAvatar}>
+              {perfil?.imagen_url
+                ? <img src={perfil.imagen_url} alt="" style={s.avatarImg} />
+                : <span style={s.pillInitial}>{inicial}</span>}
+            </span>
+            <span style={s.pillDot} title="En línea" />
+          </span>
+          <span data-header-name style={s.pillName}>{nombre}</span>
+          <span style={s.pillChevron}><IconChevronDown open={open} /></span>
+        </button>
+      ) : (
+        <button style={s.avatarBtn} onClick={() => setOpen(o => !o)} aria-label="Menú de cuenta">
+          {perfil?.imagen_url
+            ? <img src={perfil.imagen_url} alt="avatar" style={s.avatarImg} />
+            : <span style={s.avatarInitial}>{inicial}</span>}
+          <span style={s.onlineDot} />
+        </button>
+      )}
 
       {/* Dropdown */}
       {open && (
-        <div style={s.dropdown}>
+        <div style={inline ? { ...s.dropdown, top: "calc(100% + 8px)" } : s.dropdown}>
           {/* Cabecera con info del usuario */}
           <div style={s.header}>
             <div style={s.headerAvatar}>
@@ -131,6 +149,14 @@ export default function UserMenu() {
 
 const s = {
   wrapper:      { position: "fixed", top: "16px", right: "16px", zIndex: 8000 },
+  wrapperInline:{ position: "relative", zIndex: 20 },
+  pillBtn:      { display: "flex", alignItems: "center", gap: "8px", padding: "4px 10px 4px 4px", background: "var(--bg-card)", border: "1px solid var(--border-strong)", borderRadius: "var(--radius-full)", cursor: "pointer", minHeight: "40px", color: "var(--text-primary)" },
+  pillAvatarWrap:{ position: "relative", width: "32px", height: "32px", flexShrink: 0 },
+  pillAvatar:   { width: "100%", height: "100%", borderRadius: "var(--radius-full)", overflow: "hidden", background: "var(--color-primary)", color: "var(--color-primary-text)", display: "flex", alignItems: "center", justifyContent: "center" },
+  pillInitial:  { fontSize: "14px", fontWeight: 800 },
+  pillDot:      { position: "absolute", bottom: "-1px", right: "-1px", width: "10px", height: "10px", borderRadius: "var(--radius-full)", background: "var(--color-success)", border: "2px solid var(--bg-card)" },
+  pillName:     { fontSize: "13px", fontWeight: 600, maxWidth: "120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+  pillChevron:  { display: "flex", color: "var(--text-secondary)" },
   avatarBtn:    { position: "relative", width: "44px", height: "44px", borderRadius: "var(--radius-full)", border: "2px solid rgba(255,255,255,0.9)", background: "var(--color-primary)", color: "var(--color-primary-text)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0, overflow: "hidden", boxShadow: "var(--shadow-md)" },
   avatarImg:    { width: "100%", height: "100%", objectFit: "cover" },
   avatarInitial:{ fontSize: "18px", fontWeight: 800 },

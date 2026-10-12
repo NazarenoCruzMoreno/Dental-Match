@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Outfit:wght@400;500;600&display=swap");
+
 /* ── Scroll global — nunca bloquear scroll vertical ─────────────────── */
 html, body {
   overflow-x: hidden;
@@ -35,8 +37,9 @@ html, body {
   --bg-input:        #ffffff;
   --bg-subtle:      #f1f5f9;
   --text-primary:   #0f172a;
-  --text-secondary: #64748b;
-  --text-tertiary:  #94a3b8;
+  --text-secondary: #475569;
+  --text-tertiary:  #64748b;
+  --text-body:      #475569;
   --border:         #e2e8f0;
   --border-strong:  #cbd5e1;
 
@@ -45,6 +48,25 @@ html, body {
   --shadow-md:    0 2px 8px rgba(15,23,42,0.07);
   --shadow-lg:    0 8px 24px rgba(15,23,42,0.10);
   --shadow-focus: 0 0 0 3px rgba(37,99,235,0.15);
+  --shadow-lift:  0 12px 24px -6px rgba(15,23,42,0.08);
+  --shadow-card:  0 4px 6px -1px rgba(0,0,0,0.03), 0 2px 4px -1px rgba(0,0,0,0.02);
+
+  /* Tipografía (Home): títulos en Plus Jakarta Sans, texto en Outfit */
+  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-body:    "Outfit", "Inter", system-ui, sans-serif;
+
+  /* Aurora de fondo (toda la app) */
+  --aurora-1:     rgba(56,189,248,0.42);
+  --aurora-2:     rgba(99,102,241,0.34);
+  --aurora-3:     rgba(168,85,247,0.26);
+  --aurora-4:     rgba(45,212,191,0.26);
+  --aurora-grain: 0.05;
+  --aurora-dots:  rgba(15,23,42,0.10);
+  --grad-a:       #2563eb;
+  --grad-b:       #0891b2;
+  --hero-from:    #eef2ff;
+  --hero-border:  rgba(99,102,241,0.30);
+  --shadow-hero:  0 10px 30px -10px rgba(79,70,229,0.08);
 
   /* Radios — escala consistente */
   --radius-sm:   8px;
@@ -75,6 +97,7 @@ html, body {
   --text-primary:   #f1f5f9;
   --text-secondary: #94a3b8;
   --text-tertiary:  #64748b;
+  --text-body:      #cbd5e1;
   --border:         #232a3d;
   --border-strong:  #313a52;
 
@@ -82,6 +105,20 @@ html, body {
   --shadow-md:    0 2px 10px rgba(0,0,0,0.35);
   --shadow-lg:    0 8px 28px rgba(0,0,0,0.45);
   --shadow-focus: 0 0 0 3px rgba(59,130,246,0.3);
+  --shadow-lift:  0 12px 24px -6px rgba(0,0,0,0.5);
+  --shadow-card:  0 4px 6px -1px rgba(0,0,0,0.30), 0 2px 4px -1px rgba(0,0,0,0.25);
+
+  --aurora-1:     rgba(56,189,248,0.22);
+  --aurora-2:     rgba(99,102,241,0.34);
+  --aurora-3:     rgba(168,85,247,0.24);
+  --aurora-4:     rgba(45,212,191,0.14);
+  --aurora-grain: 0.08;
+  --aurora-dots:  rgba(255,255,255,0.10);
+  --grad-a:       #60a5fa;
+  --grad-b:       #22d3ee;
+  --hero-from:    #1a2240;
+  --hero-border:  rgba(129,140,248,0.28);
+  --shadow-hero:  0 10px 30px -10px rgba(0,0,0,0.5);
 }
 
 body {
@@ -89,6 +126,13 @@ body {
   background: var(--bg-page);
   color: var(--text-primary);
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Modo "lite" (lo activa useMotionGuard si el navegador no sostiene la animación):
+   se apagan los movimientos decorativos infinitos y quedan en su pose estática. */
+[data-motion="lite"] .dm-aurora-blob,
+[data-motion="lite"] .dm-illus * {
+  animation: none !important;
 }
 
 /* ── Animaciones globales ─────────────────────────────────────────── */
@@ -223,7 +267,7 @@ body {
     gap: 12px !important;
   }
   [data-grid="stats"] {
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 8px !important;
   }
 

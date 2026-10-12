@@ -1,0 +1,88 @@
+.ag-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+}
+.ag-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.ag-title { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 1.0625rem; font-weight: 800; letter-spacing: -0.02em; color: var(--text-primary); }
+.ag-subtitle { margin-top: 2px; font-size: 13px; color: var(--text-secondary); }
+.ag-total { flex-shrink: 0; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; background: var(--color-info-bg); color: var(--color-info); }
+.ag-loading { text-align: center; padding: 32px 0; font-size: 14px; color: var(--text-secondary); }
+
+.ag-chart { display: flex; gap: 8px; align-items: flex-end; height: 160px; padding-top: 28px; }
+
+.ag-col {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: default;
+  border-radius: 8px;
+  outline: none;
+}
+.ag-value { height: 16px; font-size: 11px; font-weight: 700; color: var(--color-info); }
+.ag-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--bg-subtle);
+  transition: background 0.2s ease;
+}
+.ag-fill {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(to top, #1d4ed8, #22d3ee);
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease;
+}
+.ag-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); }
+
+.ag-col:hover .ag-track,
+.ag-col:focus-visible .ag-track { background: var(--color-info-bg); }
+.ag-col:hover .ag-fill,
+.ag-col:focus-visible .ag-fill { filter: brightness(1.12) saturate(1.1); }
+.ag-col:focus-visible { box-shadow: var(--shadow-focus); }
+
+/* Tooltip: fondo invertido respecto del tema para que siempre contraste */
+.ag-tip {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 10;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--text-primary);
+  color: var(--bg-card);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-50%, -90%, 0);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.ag-col:hover .ag-tip,
+.ag-col:focus-visible .ag-tip { opacity: 1; transform: translate3d(-50%, -110%, 0); }
+
+/* Primera y última barra: el tooltip no se sale de la tarjeta */
+.ag-col--first .ag-tip { left: 0; transform: translate3d(0, -90%, 0); }
+.ag-col--first:hover .ag-tip,
+.ag-col--first:focus-visible .ag-tip { transform: translate3d(0, -110%, 0); }
+.ag-col--last .ag-tip { left: auto; right: 0; transform: translate3d(0, -90%, 0); }
+.ag-col--last:hover .ag-tip,
+.ag-col--last:focus-visible .ag-tip { transform: translate3d(0, -110%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ag-fill, .ag-track, .ag-tip { transition: none; }
+}

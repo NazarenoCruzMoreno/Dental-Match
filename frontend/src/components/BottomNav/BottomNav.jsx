@@ -85,7 +85,7 @@ const styles = {
   },
   tab: {
     flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "3px",
-    background: "none", border: "none", padding: "8px 4px", cursor: "pointer", color: "var(--text-tertiary)",
+    background: "none", border: "none", padding: "8px 4px", cursor: "pointer", color: "var(--text-secondary)",
     transition: "color .2s",
   },
   iconWrap: {

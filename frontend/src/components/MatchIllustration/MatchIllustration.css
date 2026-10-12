@@ -1,0 +1,16 @@
+.dm-illus { display: block; pointer-events: none; }
+.dm-illus-tooth { animation: dmFloat 6s ease-in-out infinite; }
+.dm-illus-chip--a { animation: dmFloat 5s ease-in-out infinite; animation-delay: -1.5s; }
+.dm-illus-chip--b { animation: dmFloat 7s ease-in-out infinite; animation-delay: -3s; }
+.dm-illus-arc { animation: dmDash 14s linear infinite; }
+.dm-illus-star { transform-box: fill-box; transform-origin: center; animation: dmTwinkle 3.2s ease-in-out infinite; }
+.dm-illus-star--b { animation-delay: -1s; }
+.dm-illus-star--c { animation-delay: -2s; }
+
+@keyframes dmFloat { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -8px, 0); } }
+@keyframes dmDash { to { stroke-dashoffset: -110; } }
+@keyframes dmTwinkle { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-illus-tooth, .dm-illus-chip--a, .dm-illus-chip--b, .dm-illus-arc, .dm-illus-star { animation: none; }
+}

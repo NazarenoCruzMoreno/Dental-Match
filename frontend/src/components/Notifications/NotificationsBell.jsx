@@ -95,7 +95,7 @@ export default function NotificationsBell() {
 
 const styles = {
   wrapper:     { position: "relative" },
-  bell:        { position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "40px", height: "40px", background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "var(--radius-sm)", cursor: "pointer", color: "#fff" },
+  bell:        { position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "40px", height: "40px", background: "var(--bg-card)", border: "1px solid var(--border-strong)", borderRadius: "10px", cursor: "pointer", color: "var(--text-body)" },
   badge:       { position: "absolute", top: "-6px", right: "-6px", background: "var(--color-danger)", color: "#fff", borderRadius: "var(--radius-full)", fontSize: "10px", fontWeight: 900, minWidth: "18px", height: "18px", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", border: "2px solid white" },
   dropdown:    { position: "absolute", top: "calc(100% + 12px)", right: 0, width: "320px", background: "var(--bg-card)", borderRadius: "var(--radius-lg)", boxShadow: "var(--shadow-lg)", border: "1px solid var(--border)", zIndex: 9000, overflow: "hidden" },
   dropHeader:  { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", borderBottom: "1px solid var(--border)" },
