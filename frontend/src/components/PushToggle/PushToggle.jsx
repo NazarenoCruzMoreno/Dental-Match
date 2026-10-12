@@ -7,6 +7,7 @@ export default function PushToggle() {
   const toast = useToast();
   const [estado, setEstado] = useState("cargando"); // cargando | no-soportado | bloqueado | inactivo | activo
   const [ocupado, setOcupado] = useState(false);
+  const [aviso, setAviso] = useState(null);
 
   useEffect(() => {
     if (!pushConfigurado) {
@@ -26,12 +27,14 @@ export default function PushToggle() {
 
   const activar = async () => {
     setOcupado(true);
+    setAviso(null);
     try {
       await activarPush();
       setEstado("activo");
       toast.success("¡Listo! Te vamos a avisar de turnos y matches.");
     } catch (e) {
-      toast.error(e.message || "No se pudieron activar las notificaciones");
+      if (e.persistente) setAviso(e.message);
+      toast.error(e.persistente ? "No se pudieron activar las notificaciones" : e.message || "No se pudieron activar las notificaciones");
       setEstado(await estadoPush().catch(() => "inactivo")); // p. ej. pasó a "bloqueado"
     } finally {
       setOcupado(false);
@@ -65,6 +68,7 @@ export default function PushToggle() {
           {ocupado ? "Activando..." : "🔔 Activar Notificaciones de Escritorio"}
         </button>
       )}
+      {aviso && estado === "inactivo" && <p style={{ ...s.hint, marginTop: "8px", color: "var(--color-danger)" }}>{aviso}</p>}
       {estado === "activo" && (
         <div style={s.activo}>
           <span style={s.activoTxt}>✅ Notificaciones de escritorio activadas</span>

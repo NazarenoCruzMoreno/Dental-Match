@@ -64,7 +64,20 @@ export async function activarPush() {
   }
 
   const esNueva = !sub;
-  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: clave });
+  if (!sub) {
+    try {
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: clave });
+    } catch (e) {
+      if (e.name !== "AbortError") throw e;
+      const err = new Error(
+        navigator.brave
+          ? "Brave bloquea las notificaciones por defecto. Activá \"Usar servicios de Google para mensajería push\" en brave://settings/privacy, reiniciá Brave y probá de nuevo."
+          : "El navegador no pudo conectarse al servicio de notificaciones. Revisá tu conexión (VPN, firewall) y probá de nuevo."
+      );
+      err.persistente = true;
+      throw err;
+    }
+  }
 
   try {
     await pushService.subscribe(sub.toJSON());
