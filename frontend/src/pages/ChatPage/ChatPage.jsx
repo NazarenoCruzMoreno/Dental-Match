@@ -212,7 +212,7 @@ function formatTurno(date) {
 }
 
 const s = {
-  page:        { minHeight: "100vh", background: "var(--bg-page)", display: "flex", flexDirection: "column" },
+  page:        { minHeight: "100vh", background: "transparent", display: "flex", flexDirection: "column" },
   header:      { display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px", background: "var(--bg-card)", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: 10 },
   backBtn:     { background: "none", border: "none", fontSize: "22px", color: "var(--color-primary)", cursor: "pointer", padding: "4px 8px" },
   headerInfo:  { display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 },

@@ -308,7 +308,7 @@ export default function EditProfilePage() {
 }
 
 const styles = {
-  page:         { minHeight: "100vh", background: "var(--bg-page)", padding: "40px 20px" },
+  page:         { minHeight: "100vh", background: "transparent", padding: "40px 20px" },
   container:    { maxWidth: "640px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
   center:       { height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" },
   topBar:       { display: "flex", alignItems: "center", justifyContent: "space-between" },

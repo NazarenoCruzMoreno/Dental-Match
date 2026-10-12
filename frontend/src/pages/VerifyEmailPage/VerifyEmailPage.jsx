@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import imagenInicio from "../../assets/Foto-Pagina-Inicio-DentalMatch.jpg";
 import Layout from "../../components/Layout/Layout";
 import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
@@ -30,7 +29,7 @@ export default function VerifyEmailPage() {
 
   return (
     <Layout>
-      <Card title="Confirmar" highlight="email" badge={true} badgeText="DENTAL MATCH" imageSrc={imagenInicio} imageAlt="hero">
+      <Card title="Confirmar" highlight="email" badge={true} badgeText="DENTAL MATCH">
         <div style={styles.state}>
           {status === "checking" && (
             <>

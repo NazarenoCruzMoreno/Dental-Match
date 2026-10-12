@@ -240,7 +240,7 @@ export default function CasosPage() {
 
 // ── Estilos ───────────────────────────────────────────────────────────────────
 const s = {
-  page:          { minHeight: "100vh", background: "var(--bg-page)", padding: "36px 20px 60px" },
+  page:          { minHeight: "100vh", background: "transparent", padding: "36px 20px 60px" },
   container:     { maxWidth: "820px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
 
   pageHeader:    { background: "var(--bg-card)", borderRadius: "var(--radius-lg)", padding: "28px 32px", boxShadow: "var(--shadow-sm)", border: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "16px" },
@@ -257,7 +257,7 @@ const s = {
   searchInput:   { width: "100%", height: "44px", border: "1px solid var(--border)", borderRadius: "var(--radius-md)", padding: "0 16px 0 42px", fontSize: "14px", outline: "none", boxSizing: "border-box", color: "var(--text-primary)", background: "var(--bg-input)" },
   createBtn:     { display: "flex", alignItems: "center", gap: "8px", padding: "10px 20px", background: "var(--color-primary)", color: "var(--color-primary-text)", border: "none", borderRadius: "var(--radius-md)", fontSize: "14px", fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" },
 
-  count:         { fontSize: "13px", color: "var(--text-tertiary)", fontWeight: 600 },
+  count:         { fontSize: "13px", color: "var(--text-secondary)", fontWeight: 600 },
   grid:          { display: "flex", flexDirection: "column", gap: "14px" },
 
   card:          { background: "var(--bg-card)", borderRadius: "var(--radius-lg)", padding: "24px 28px", boxShadow: "var(--shadow-sm)", cursor: "pointer", border: "1px solid var(--border)", transition: "border-color .15s ease, box-shadow .15s ease" },

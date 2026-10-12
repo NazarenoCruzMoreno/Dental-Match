@@ -265,7 +265,7 @@ export default function AsignacionesPage() {
 }
 
 const pg = {
-  page:        { minHeight: "100vh", background: "var(--bg-page)", padding: "36px 20px 60px" },
+  page:        { minHeight: "100vh", background: "transparent", padding: "36px 20px 60px" },
   container:   { maxWidth: "760px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
   header:      { background: "var(--bg-card)", borderRadius: "var(--radius-lg)", padding: "28px 32px", boxShadow: "var(--shadow-sm)", border: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "16px" },
   backBtn:     { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "var(--color-primary)", fontWeight: 600, fontSize: "14px", cursor: "pointer", width: "fit-content" },

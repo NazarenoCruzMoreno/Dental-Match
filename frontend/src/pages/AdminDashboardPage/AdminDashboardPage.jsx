@@ -70,7 +70,7 @@ export default function AdminDashboardPage() {
 }
 
 const s = {
-  page:      { minHeight: "100vh", background: "var(--bg-page)", padding: "36px 20px 60px" },
+  page:      { minHeight: "100vh", background: "transparent", padding: "36px 20px 60px" },
   container: { maxWidth: "760px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" },
   header:    { display: "flex", flexDirection: "column", gap: "4px" },
   title:     { fontSize: "26px", fontWeight: 900, color: "var(--text-primary)", margin: 0, letterSpacing: "-0.5px" },

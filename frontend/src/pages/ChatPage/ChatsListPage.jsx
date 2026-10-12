@@ -99,7 +99,7 @@ export default function ChatsListPage() {
 }
 
 const s = {
-  page:        { minHeight: "100vh", background: "var(--bg-page)", padding: "36px 20px 80px" },
+  page:        { minHeight: "100vh", background: "transparent", padding: "36px 20px 80px" },
   container:   { maxWidth: "720px", margin: "0 auto" },
   header:      { background: "var(--bg-card)", borderRadius: "var(--radius-lg)", padding: "24px 28px", boxShadow: "var(--shadow-sm)", marginBottom: "20px" },
   backBtn:     { display: "inline-block", background: "none", border: "none", color: "var(--color-primary)", fontWeight: 600, fontSize: "14px", cursor: "pointer", marginBottom: "10px", padding: 0 },

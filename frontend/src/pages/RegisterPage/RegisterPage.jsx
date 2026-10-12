@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import imagenInicio from "../../assets/Foto-Pagina-Inicio-DentalMatch.jpg";
 import Layout from "../../components/Layout/Layout";
 import Card from "../../components/Card/Card";
 import Input from "../../components/Input/Input";
@@ -72,7 +71,7 @@ export default function RegisterPage() {
 
   return (
     <Layout>
-      <Card title="Crear" highlight="cuenta" badge={true} badgeText="DENTAL MATCH" imageSrc={imagenInicio} imageAlt="hero" glassContent={glassContent}>
+      <Card title="Crear" highlight="cuenta" badge={true} badgeText="DENTAL MATCH" glassContent={glassContent}>
         {!registered ? (
           <>
             {userType && (<div style={styles.userTypeBadge}><span style={styles.userTypeIcon}>{userType === "estudiante" ? "🎓" : "👤"}</span>Registrando como <strong>{userTypeLabel}</strong></div>)}

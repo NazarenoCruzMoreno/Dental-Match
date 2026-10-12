@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ToastProvider } from "./context/ToastContext";
 import UserMenu   from "./components/UserMenu/UserMenu";
+import AuroraBackground from "./components/AuroraBackground/AuroraBackground";
 import HomeButton from "./components/HomeButton/HomeButton";
 import BottomNav  from "./components/BottomNav/BottomNav";
 import AdminRoute from "./components/AdminRoute/AdminRoute";
@@ -33,7 +34,6 @@ const AdminDashboardPage = lazy(() => import("./pages/AdminDashboardPage/AdminDa
 const PageFallback = () => (
   <div style={{
     minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-    background: "linear-gradient(135deg,#f8fafc 0%,#eff6ff 60%,#fff7ed 100%)",
   }}>
     <div style={{
       width: "44px", height: "44px",
@@ -72,6 +72,7 @@ export default function App() {
     <ThemeProvider>
       <ToastProvider>
         <BrowserRouter>
+          <AuroraBackground />
           <HomeButton />
           <UserMenu />
           <BottomNav />

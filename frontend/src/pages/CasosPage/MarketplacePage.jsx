@@ -153,7 +153,7 @@ export default function MarketplacePage() {
 }
 
 const p = {
-  root:         { minHeight: "100vh", background: "var(--bg-page)", color: "var(--text-primary)" },
+  root:         { minHeight: "100vh", background: "transparent", color: "var(--text-primary)" },
 
   header:       { background: "var(--bg-card)", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: 100, boxShadow: "var(--shadow-sm)" },
   headerInner:  { maxWidth: "1200px", margin: "0 auto", padding: "0 20px", height: "64px", display: "flex", alignItems: "center", gap: "16px" },

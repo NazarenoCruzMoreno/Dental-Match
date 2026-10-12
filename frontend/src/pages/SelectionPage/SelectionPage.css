@@ -1,0 +1,84 @@
+.dm-role {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 16px;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.35s ease, box-shadow 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+  will-change: transform;
+}
+.dm-role:hover { transition: transform 0.08s ease-out, box-shadow 0.25s ease, border-color 0.25s ease; }
+.dm-role--student { --accent: #4f46e5; --accent-shadow: rgba(79, 70, 229, 0.30); --art-from: #38bdf8; --art-to: #6366f1; }
+.dm-role--patient { --accent: #db2777; --accent-shadow: rgba(219, 39, 119, 0.28); --art-from: #f472b6; --art-to: #a78bfa; }
+[data-theme="dark"] .dm-role--student { --accent: #818cf8; --accent-shadow: rgba(129, 140, 248, 0.35); }
+[data-theme="dark"] .dm-role--patient { --accent: #f472b6; --accent-shadow: rgba(244, 114, 182, 0.32); }
+
+.dm-role:hover:not(:disabled) { border-color: var(--accent); box-shadow: 0 18px 32px -14px var(--accent-shadow); }
+.dm-role:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-shadow); border-color: var(--accent); }
+.dm-role:disabled { cursor: default; }
+.dm-role:disabled:not(.is-picked) { opacity: 0.55; }
+.dm-role.is-picked { transform: perspective(900px) scale(0.98); border-color: var(--accent); }
+
+.dm-role-art {
+  flex-shrink: 0;
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--art-from), var(--art-to));
+  box-shadow: 0 10px 22px -10px var(--accent-shadow);
+}
+.dm-role-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+.dm-role-title { font-size: 18px; font-weight: 800; letter-spacing: -0.2px; color: var(--text-primary); }
+.dm-role-desc { font-size: 13.5px; line-height: 1.45; color: var(--text-secondary); }
+
+.dm-role-go {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, color 0.2s ease;
+}
+.dm-role:hover:not(:disabled) .dm-role-go { transform: translate3d(4px, 0, 0); background: var(--accent); color: #fff; }
+
+/* Brillo que sigue al cursor */
+.dm-role-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(260px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.55), transparent 60%);
+  transition: opacity 0.25s ease;
+}
+.dm-role:hover:not(:disabled) .dm-role-glare { opacity: 0.55; }
+[data-theme="dark"] .dm-role-glare { background: radial-gradient(260px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.16), transparent 60%); }
+
+@media (max-width: 480px) {
+  .dm-role { gap: 12px; padding: 12px; }
+  .dm-role-art { width: 68px; height: 68px; border-radius: 18px; }
+  .dm-role-title { font-size: 16px; }
+  .dm-role-go { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-role, .dm-role-go, .dm-role-glare { transition: none; }
+  .dm-role { transform: none; }
+}

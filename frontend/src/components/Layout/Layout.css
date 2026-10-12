@@ -2,11 +2,22 @@
   padding: 24px;
 }
 
+/* Tarjeta semitransparente sobre el aurora; sólida donde el navegador no soporta color-mix.
+   Sin backdrop-filter: desenfocar un fondo que se mueve cuesta un re-blur por cuadro. */
+.dm-auth-card {
+  background: var(--bg-card);
+}
+@supports (background: color-mix(in srgb, red 50%, blue)) {
+  .dm-auth-card {
+    background: color-mix(in srgb, var(--bg-card) 90%, transparent);
+  }
+}
+
 @media (max-width: 860px) {
   .dm-auth-card {
     flex-direction: column;
   }
-  .dm-auth-visual-panel {
+  .dm-auth-card .dm-auth-visual-panel {
     display: none;
   }
   .dm-auth-form-panel {

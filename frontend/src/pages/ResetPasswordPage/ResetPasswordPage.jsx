@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import imagenInicio from "../../assets/Foto-Pagina-Inicio-DentalMatch.jpg";
 import Layout from "../../components/Layout/Layout";
 import Card from "../../components/Card/Card";
 import Input from "../../components/Input/Input";
@@ -48,7 +47,7 @@ export default function ResetPasswordPage() {
 
   return (
     <Layout>
-      <Card title="Elegir" highlight="nueva contraseña" badge={true} badgeText="DENTAL MATCH" imageSrc={imagenInicio} imageAlt="hero">
+      <Card title="Elegir" highlight="nueva contraseña" badge={true} badgeText="DENTAL MATCH">
         {!token ? (
           <div style={styles.errorState}>
             <div style={styles.errorIcon}>⚠️</div>

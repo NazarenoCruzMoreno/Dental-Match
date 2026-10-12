@@ -245,7 +245,7 @@ export default function CreateCasoPage() {
 }
 
 const s = {
-  page:          { minHeight: "100vh", background: "var(--bg-page)", padding: "36px 20px" },
+  page:          { minHeight: "100vh", background: "transparent", padding: "36px 20px" },
   container:     { maxWidth: "680px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "20px" },
   topBar:        { display: "flex" },
   backBtn:       { display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", color: "var(--color-primary)", fontWeight: 600, fontSize: "14px", cursor: "pointer" },

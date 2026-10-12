@@ -414,7 +414,7 @@ export default function MatchPage() {
 }
 
 const pg = {
-  root:       { minHeight: "100vh", background: "var(--bg-page)", display: "flex", flexDirection: "column" },
+  root:       { minHeight: "100vh", background: "transparent", display: "flex", flexDirection: "column" },
   header:     { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 24px", background: "var(--bg-card)", borderBottom: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" },
   backBtn:    { background: "none", border: "none", color: "var(--color-primary)", fontWeight: 600, fontSize: "14px", cursor: "pointer" },
   logoText:   { fontSize: "18px", fontWeight: 900, color: "var(--text-primary)", letterSpacing: "-0.5px" },
@@ -434,7 +434,7 @@ const pg = {
   btnRow:     { display: "flex", gap: "24px" },
   rejectBtn:  { width: "60px", height: "60px", borderRadius: "50%", background: "var(--bg-card)", border: "2px solid color-mix(in srgb, var(--color-danger) 35%, transparent)", color: "var(--color-danger)", fontSize: "22px", cursor: "pointer", boxShadow: "0 4px 16px color-mix(in srgb, var(--color-danger) 20%, transparent)", transition: "all .2s" },
   matchBtn:   { width: "60px", height: "60px", borderRadius: "50%", background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))", border: "none", color: "var(--color-primary-text)", fontSize: "22px", cursor: "pointer", boxShadow: "0 4px 16px color-mix(in srgb, var(--color-primary) 35%, transparent)", transition: "all .2s" },
-  center:     { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-page)" },
+  center:     { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "transparent" },
   emptyTitle: { fontSize: "22px", fontWeight: 900, color: "var(--text-primary)", margin: "0 0 8px" },
   emptyText:  { fontSize: "15px", color: "var(--text-secondary)", marginBottom: "24px" },
   cta:        { padding: "14px 28px", background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))", color: "var(--color-primary-text)", border: "none", borderRadius: "14px", fontSize: "15px", fontWeight: 700, cursor: "pointer" },

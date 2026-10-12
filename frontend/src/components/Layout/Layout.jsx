@@ -16,7 +16,6 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "var(--bg-page)",
   },
   card: {
     width: "100%",
@@ -24,7 +23,6 @@ const styles = {
     display: "flex",
     borderRadius: "var(--radius-lg)",
     overflow: "hidden",
-    background: "var(--bg-card)",
     border: "1px solid var(--border)",
     boxShadow: "var(--shadow-lg)",
   },

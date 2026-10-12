@@ -191,7 +191,7 @@ export default function ProfilePage() {
 
 // ── Estilos ───────────────────────────────────────────────────────────────────
 const styles = {
-  page:            { minHeight: "100vh", background: "var(--bg-page)", padding: "40px 20px" },
+  page:            { minHeight: "100vh", background: "transparent", padding: "40px 20px" },
   container:       { maxWidth: "720px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "24px" },
   center:          { height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "16px" },
 
