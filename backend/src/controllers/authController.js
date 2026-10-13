@@ -100,6 +100,9 @@ const login = async (req, res) => {
       user: { email: user.email, role: user.role },
     });
   } catch (error) {
+    if (error.name === 'ZodError') {
+      return res.status(400).json({ error: 'Datos inválidos', details: error.errors });
+    }
     res.status(500).json({ error: error.message });
   }
 };
