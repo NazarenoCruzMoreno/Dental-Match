@@ -11,6 +11,7 @@
     "dotenv": "^16.4.5"
   },
   "scripts": {
+    "test": "npm test --prefix backend && npm test --prefix frontend",
     "calidad": "node calidad/index.js",
     "calidad:detalle": "node calidad/index.js --detalle"
   }
