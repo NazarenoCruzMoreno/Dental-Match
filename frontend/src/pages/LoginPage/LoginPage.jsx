@@ -5,6 +5,7 @@ import Card from "../../components/Card/Card";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 import { validateEmail, validatePassword } from "../../utils/validation";
+import { rutaInicial } from "../../utils/rutaInicial";
 import { authService, setSessionToken, setUser } from "../../services/api";
 
 const IconCalendar = () => (<svg width="28" height="28" viewBox="0 0 24 24" style={{ color: "var(--color-primary)" }}><path fill="currentColor" d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/></svg>);
@@ -40,7 +41,7 @@ export default function LoginPage() {
       const data = await authService.login(email, password);
       setSessionToken(data.token);
       setUser(data.user);
-      navigate("/home");
+      navigate(rutaInicial(data.user));
     } catch (error) {
       setServerError(error.message);
     } finally {

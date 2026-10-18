@@ -7,7 +7,8 @@ import AuroraBackground from "./components/AuroraBackground/AuroraBackground";
 import HomeButton from "./components/HomeButton/HomeButton";
 import BottomNav  from "./components/BottomNav/BottomNav";
 import AdminRoute from "./components/AdminRoute/AdminRoute";
-import { isSessionValid, profileService } from "./services/api";
+import { isSessionValid, getUser, profileService } from "./services/api";
+import { rutaInicial } from "./utils/rutaInicial";
 
 // ── Lazy load de todas las páginas ──────────────────────────────────────────
 // Cada página se descarga solo cuando el usuario navega a ella.
@@ -45,7 +46,7 @@ const PageFallback = () => (
 
 // ── Guards ──────────────────────────────────────────────────────────────────
 function PublicRoute({ children }) {
-  return isSessionValid() ? <Navigate to="/home" replace /> : children;
+  return isSessionValid() ? <Navigate to={rutaInicial(getUser())} replace /> : children;
 }
 
 function PrivateRoute({ children }) {
@@ -56,12 +57,14 @@ function RequireProfile({ children }) {
   const [status, setStatus] = useState("checking");
   useEffect(() => {
     if (!isSessionValid()) return setStatus("no-session");
+    if (getUser()?.role === "admin") return setStatus("admin");
     profileService.get()
       .then(({ perfilCompleto }) => setStatus(perfilCompleto ? "ok" : "incomplete"))
       .catch(() => setStatus("ok"));
   }, []);
   if (status === "checking")   return null;
   if (status === "no-session") return <Navigate to="/login" replace />;
+  if (status === "admin")      return <Navigate to="/admin" replace />;
   if (status === "incomplete") return <Navigate to="/profile/edit" replace />;
   return children;
 }
