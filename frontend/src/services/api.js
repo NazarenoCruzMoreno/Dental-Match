@@ -207,6 +207,10 @@ export const statsService = {
 // ── Admin ────────────────────────────────────────────────────────────────────
 export const adminService = {
   stats: () => get('/admin/stats'),
+  usuarios: ({ rol, q } = {}) => get(`/admin/usuarios?${new URLSearchParams({ ...(rol && { rol }), ...(q && { q }) })}`),
+  casos: ({ conImagen } = {}) => get(`/admin/casos${conImagen ? '?imagen=1' : ''}`),
+  eliminarCaso: (id) => del(`/admin/casos/${id}`),
+  quitarImagen: (id) => del(`/admin/casos/${id}/imagen`),
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

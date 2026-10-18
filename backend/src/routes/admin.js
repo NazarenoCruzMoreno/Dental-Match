@@ -1,32 +1,18 @@
 const express = require('express');
-const { supabase } = require('../config/supabase');
 const { authMiddleware, isAdmin } = require('../middlewares/auth');
+const admin = require('../controllers/adminController');
 
 const router = express.Router();
 
-// ── GET /api/admin/stats — Conteos básicos para el backoffice ────────────────
-// Protegido: requiere JWT válido (authMiddleware) Y role === 'admin' (isAdmin).
+// Todo /api/admin exige JWT válido (authMiddleware) Y role === 'admin' (isAdmin).
 // No hay forma de auto-registrarse como admin (registerSchema solo permite
 // estudiante/paciente) — el rol se setea a mano en Supabase.
-router.get('/stats', authMiddleware, isAdmin, async (req, res) => {
-  try {
-    const [estudiantes, pacientes, casos] = await Promise.all([
-      supabase.from('estudiantes').select('*', { count: 'exact', head: true }),
-      supabase.from('pacientes').select('*', { count: 'exact', head: true }),
-      supabase.from('casos').select('*', { count: 'exact', head: true }),
-    ]);
+router.use(authMiddleware, isAdmin);
 
-    const err = estudiantes.error || pacientes.error || casos.error;
-    if (err) throw err;
-
-    res.json({
-      estudiantes: estudiantes.count ?? 0,
-      pacientes:   pacientes.count ?? 0,
-      casos:       casos.count ?? 0,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+router.get('/stats', admin.stats);
+router.get('/usuarios', admin.listarUsuarios);
+router.get('/casos', admin.listarCasos);
+router.delete('/casos/:id', admin.eliminarCaso);
+router.delete('/casos/:id/imagen', admin.quitarImagenDeCaso);
 
 module.exports = router;

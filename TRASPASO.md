@@ -50,6 +50,8 @@ Registrar un usuario desde el sitio y, en el SQL Editor de Supabase, ejecutar:
 update users set role = 'admin' where email = 'correo-del-administrador@ejemplo.com';
 ```
 
+El administrador entra directamente al panel `/admin`, que tiene tres secciones: **Resumen** (totales), **Usuarios** (lista con búsqueda por correo y filtro por rol) y **Casos e imágenes** (moderación: quitar una imagen inapropiada de toda la plataforma o eliminar un caso, siempre con confirmación). No incluye todavía eliminar ni bloquear usuarios.
+
 ### 3.5 Mantener la API despierta (opcional)
 El plan gratuito de Render duerme el servicio tras un rato sin visitas y la primera petición tarda cerca de un minuto. Para evitarlo, crear en UptimeRobot (o similar) un monitor HTTP que consulte `https://<tu-api>/api/health` cada 5 minutos. Con un plan de pago de Render esto no hace falta.
 
